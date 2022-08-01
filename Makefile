@@ -23,8 +23,9 @@ README: kixtart-mode.el
 	$(EMACS) --batch --quick \
 	    --load lisp-mnt \
 	    --eval "(with-temp-file \"$@\" \
+	              (setq buffer-file-coding-system 'utf-8-unix) \
 	              (insert (lm-commentary \"kixtart-mode.el\")) \
-	              (insert \"\\n\"))"
+	              (newline))"
 
 clean:
 	$(RM) README kixtart-mode-tests.elc kixtart-mode.elc
