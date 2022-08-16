@@ -378,11 +378,18 @@ found."
                    (_ 1))))))))))
 
 (defun kixtart-indent-line ()
-  "Indent the current line to match the script-block level."
-  (let ((new-indent (kixtart--new-indent)))
-    (if (= new-indent (current-indentation))
+  "Indent the current line to match the script-block level.
+When point is within the current indentation it will move to the
+new indentation column."
+  (let ((new-indent (kixtart--new-indent))
+        (cur-indent (current-indentation)))
+    (if (= new-indent cur-indent)
         'noindent
-      (indent-line-to new-indent))))
+      (let ((goto-indentation (<= (current-column) cur-indent)))
+        (save-excursion
+          (indent-line-to new-indent))
+        (if goto-indentation
+            (back-to-indentation))))))
 
 ;;;; Outline mode
 
