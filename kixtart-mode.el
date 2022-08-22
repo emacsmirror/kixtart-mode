@@ -388,8 +388,8 @@ new indentation column."
       (let ((goto-indentation (<= (current-column) cur-indent)))
         (save-excursion
           (indent-line-to new-indent))
-        (if goto-indentation
-            (back-to-indentation))))))
+        (when goto-indentation
+          (back-to-indentation))))))
 
 ;;;; Outline mode
 
