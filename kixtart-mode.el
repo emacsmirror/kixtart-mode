@@ -31,6 +31,7 @@
 ;; - beginning and end of defun
 ;; - Imenu support
 ;; - Outline mode support
+;; - Tempo templates with abbrev expansion
 
 ;; Syntax highlighting is implemented for language keywords, function names,
 ;; labels, macros, and variables.  Malformed macro names can potentially drop
@@ -84,6 +85,22 @@
 ;; the start of a line will define additional outline levels at the maximum
 ;; depth.
 
+;; Tempo templates for command defined script-blocks are available and can be
+;; inserted by using Tempo functions such as `tempo-complete-tag' or by using
+;; abbrev expansion.  The use of the major mode abbrev table is determined by
+;; the customization variable `kixtart-abbrev-table-enabled'.  Template
+;; insertion will include a final new line based on the value of customization
+;; variable `kixtart-template-insert-newline'.  Since all template insertion is
+;; done by Tempo, customization of inserted text can be achieved by modifying
+;; the Tempo configuration; if script commands should be converted to uppercase
+;; this can be achieved by adding the required function to
+;; `tempo-insert-string-functions':
+
+;; (add-hook 'kixtart-mode-hook
+;;           (lambda ()
+;;             (add-to-list (make-local-variable 'tempo-insert-string-functions)
+;;                          #'upcase)))
+
 ;; Note: Since the KiXtart language does not mandate any structured use of lines
 ;; this presents some challenges to line based parsing.  Currently both syntax
 ;; highlighting and Imenu entries for function names require the function name
@@ -92,6 +109,7 @@
 ;;; Code:
 
 (require 'imenu)
+(require 'tempo)
 (eval-when-compile
   (require 'rx))
 
@@ -104,11 +122,24 @@
   :group 'languages
   :prefix "kixtart-")
 
+(defcustom kixtart-abbrev-table-enabled nil
+  "Specifies whether KiXtart abbrev expansion is enabled.
+A non-nil value indicates that `kixtart-mode-abbrev-table' should
+be used as part of abbrev expansion."
+  :type 'boolean)
+
 (defcustom kixtart-indent-offset 4
   "Specifies the indentation offset applied by `kixtart-indent-line'.
 Lines determined to be within script-blocks are indented by this
 number of columns per script-block level."
   :type 'integer)
+
+(defcustom kixtart-template-insert-newline #'eobp
+  "Specifies whether a template includes a final newline."
+  :type `(choice (const :tag "Never" nil)
+                 (const :tag "Always" t)
+                 (const :tag "At end of buffer" ,#'eobp)
+                 (function :tag "Custom function")))
 
 ;;;; Search patterns
 
@@ -401,11 +432,147 @@ new indentation column."
       (forward-same-syntax)
       (- (current-column) 2))))
 
+;;;; Templates
+
+(defun kixtart--tempo-newline-eob ()
+  "Insert a newline if point is at end of the buffer."
+  (when (pcase kixtart-template-insert-newline
+          ((and (pred functionp) func)
+           (funcall func))
+          ((and (pred identity) do-insert)
+           do-insert))
+    (insert "\n")))
+
+(defun kixtart--tempo-insert-lookup (name template)
+  "Optionally insert prompt data for NAME using TEMPLATE.
+The template is only returned if the data lookup for NAME does
+not return the empty string.  TEMPLATE will have its `p' symbols
+removed when template insertion is interactive."
+  (let ((data (tempo-lookup-named name)))
+    (unless (string= "" data)
+      (cons 'l (if tempo-interactive
+                   (remove 'p template)
+                 template)))))
+
+(defconst kixtart-tempo-tags nil
+  "Tempo tags for KiXtart mode.")
+
+(define-abbrev-table 'kixtart-mode-abbrev-table nil
+  "Abbrev table for KiXtart mode."
+  :enable-function (lambda ()
+                     (and kixtart-abbrev-table-enabled
+                          (not (kixtart--in-comment-or-string-p)))))
+
+(defmacro kixtart--define-template (tag documentation &rest elements)
+  "Define a tempo template and add its tag to the abbrev table.
+TAG, DOCUMENTATION, and ELEMENTS are passed directly to
+`tempo-define-template'.  TAG is also used as the abbrev string
+which will be expanded to the template."
+  (let ((template (gensym)))
+    `(let ((,template (tempo-define-template (concat "kixtart-" ,tag)
+                                             (quote ,@elements)
+                                             ,tag
+                                             ,documentation
+                                             kixtart-tempo-tags)))
+       (define-abbrev kixtart-mode-abbrev-table ,tag "" (identity ,template)
+         :system t)
+       (put (identity ,template) 'no-self-insert t))))
+
+(kixtart--define-template
+ "while"
+ "Insert a KiXtart While loop"
+ ("While " (p "while-expression: " expr) > n
+  > r> n o
+  "Loop" > (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "select"
+ "Insert a KiXtart Select statement"
+ ("Select" > n
+  > "Case " (p "case-expression: " expr) > n
+  > r> n o
+  "EndSelect" > (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "ifelse"
+ "Insert a KiXtart If Else statement"
+ ("If " (p "if-expression: " expr) > n
+  > r> n o
+  "Else" > n
+  > p n
+  "EndIf" > (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "if"
+ "Insert a KiXtart If statement"
+ ("If " (p "if-expression: " expr) > n
+  > r> n o
+  "EndIf" > (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "function"
+ "Insert a KiXtart Function definition"
+ ("Function " (p "name: " name) (p "arguments: " args 'noinsert)
+  (kixtart--tempo-insert-lookup 'args '("(" (s args) p ")" )) > n
+  > r> n o
+  "EndFunction" > (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "foreach"
+ "Insert a KiXtart For Each loop"
+ ("For Each " (p "element-variable: " element) " In "
+  (p "group-expression: " group) > n
+  > r> n o
+  "Next" > (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "for"
+ "Insert a KiXtart For loop"
+ ("For $" (p "counter-variable: " counter)
+  " = "
+  (p "start-expression: " start) " To " (p "end-expression: " end)
+  (p "step-size: " step 'noinsert)
+  (kixtart--tempo-insert-lookup 'step '(" Step " (s step) p)) > n
+  > r> n o
+  "Next" > (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "else"
+ "Insert a KiXtart Else statement"
+ (& "Else" > n
+    > r> (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "do"
+ "Insert a KiXtart Do loop"
+ ("Do" > n
+  > r> n o
+  "Until " > (p "until-expression: " expr) > (kixtart--tempo-newline-eob)))
+
+(kixtart--define-template
+ "case"
+ "Insert a KiXtart Case statement"
+ (& "Case " (p "case-expression: " expr) > n
+    > r (kixtart--tempo-newline-eob)))
+
 ;;;; Keymap
 
 (defvar kixtart-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-j") 'imenu)
+    (define-key map (kbd "C-c C-t C-b") 'tempo-backward-mark)
+    (define-key map (kbd "C-c C-t C-f") 'tempo-forward-mark)
+    (define-key map (kbd "C-c C-t C-t") 'tempo-complete-tag)
+    (define-key map (kbd "C-c C-t I") 'tempo-template-kixtart-ifelse)
+    (define-key map (kbd "C-c C-t c") 'tempo-template-kixtart-case)
+    (define-key map (kbd "C-c C-t d") 'tempo-template-kixtart-do)
+    (define-key map (kbd "C-c C-t e") 'tempo-template-kixtart-foreach)
+    (define-key map (kbd "C-c C-t f") 'tempo-template-kixtart-for)
+    (define-key map (kbd "C-c C-t i") 'tempo-template-kixtart-if)
+    (define-key map (kbd "C-c C-t l") 'tempo-template-kixtart-else)
+    (define-key map (kbd "C-c C-t s") 'tempo-template-kixtart-select)
+    (define-key map (kbd "C-c C-t u") 'tempo-template-kixtart-function)
+    (define-key map (kbd "C-c C-t w") 'tempo-template-kixtart-while)
     (define-key map (kbd "C-c C-u") 'kixtart-up-script-block)
     map))
 
@@ -472,7 +639,8 @@ new indentation column."
   (setq-local outline-regexp (kixtart-rx outline))
   (setq imenu-create-index-function 'imenu-default-create-index-function)
   (setq imenu-generic-expression `((nil ,(kixtart-rx function-def) 2)
-                                   ("/Labels" ,(kixtart-rx label) 0))))
+                                   ("/Labels" ,(kixtart-rx label) 0)))
+  (tempo-use-tag-list 'kixtart-tempo-tags))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.kix\\'" . kixtart-mode))

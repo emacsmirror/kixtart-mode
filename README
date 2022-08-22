@@ -6,6 +6,7 @@ implements the following features:
 - beginning and end of defun
 - Imenu support
 - Outline mode support
+- Tempo templates with abbrev expansion
 
 Syntax highlighting is implemented for language keywords, function names,
 labels, macros, and variables.  Malformed macro names can potentially drop
@@ -58,6 +59,22 @@ character.  ";;;" represents an outline level depth of 1.  Depth is increased
 by 1 for every additional ';' character.  FUNCTION commands which appear at
 the start of a line will define additional outline levels at the maximum
 depth.
+
+Tempo templates for command defined script-blocks are available and can be
+inserted by using Tempo functions such as `tempo-complete-tag' or by using
+abbrev expansion.  The use of the major mode abbrev table is determined by
+the customization variable `kixtart-abbrev-table-enabled'.  Template
+insertion will include a final new line based on the value of customization
+variable `kixtart-template-insert-newline'.  Since all template insertion is
+done by Tempo, customization of inserted text can be achieved by modifying
+the Tempo configuration; if script commands should be converted to uppercase
+this can be achieved by adding the required function to
+`tempo-insert-string-functions':
+
+(add-hook 'kixtart-mode-hook
+          (lambda ()
+            (add-to-list (make-local-variable 'tempo-insert-string-functions)
+                         #'upcase)))
 
 Note: Since the KiXtart language does not mandate any structured use of lines
 this presents some challenges to line based parsing.  Currently both syntax
