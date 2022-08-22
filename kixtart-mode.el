@@ -448,11 +448,10 @@ new indentation column."
 The template is only returned if the data lookup for NAME does
 not return the empty string.  TEMPLATE will have its `p' symbols
 removed when template insertion is interactive."
-  (let ((data (tempo-lookup-named name)))
-    (unless (string= "" data)
-      (cons 'l (if tempo-interactive
-                   (remove 'p template)
-                 template)))))
+  (unless (string= "" (tempo-lookup-named name))
+    (cons 'l (if tempo-interactive
+                 (remove 'p template)
+               template))))
 
 (defconst kixtart-tempo-tags nil
   "Tempo tags for KiXtart mode.")
