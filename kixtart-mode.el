@@ -475,18 +475,21 @@ which will be expanded to the template."
                                              kixtart-tempo-tags)))
        (define-abbrev kixtart-mode-abbrev-table ,tag "" (identity ,template)
          :system t)
-       (put (identity ,template) 'no-self-insert t))))
+       (put (identity ,template) 'no-self-insert t)
+       (defalias (intern (concat "kixtart-template-" ,tag))
+         (identity ,template)
+         ,documentation))))
 
 (kixtart--define-template
  "while"
- "Insert a KiXtart While loop"
+ "Insert a KiXtart While loop."
  ("While " (p "while-expression: " expr) > n
   > r> n o
   "Loop" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
  "select"
- "Insert a KiXtart Select statement"
+ "Insert a KiXtart Select statement."
  ("Select" > n
   > "Case " (p "case-expression: " expr) > n
   > r> n o
@@ -494,7 +497,7 @@ which will be expanded to the template."
 
 (kixtart--define-template
  "ifelse"
- "Insert a KiXtart If Else statement"
+ "Insert a KiXtart If Else statement."
  ("If " (p "if-expression: " expr) > n
   > r> n o
   "Else" > n
@@ -503,14 +506,14 @@ which will be expanded to the template."
 
 (kixtart--define-template
  "if"
- "Insert a KiXtart If statement"
+ "Insert a KiXtart If statement."
  ("If " (p "if-expression: " expr) > n
   > r> n o
   "EndIf" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
  "function"
- "Insert a KiXtart Function definition"
+ "Insert a KiXtart Function definition."
  ("Function " (p "name: " name) (p "arguments: " args 'noinsert)
   (kixtart--tempo-insert-lookup 'args '("(" (s args) p ")" )) > n
   > r> n o
@@ -518,7 +521,7 @@ which will be expanded to the template."
 
 (kixtart--define-template
  "foreach"
- "Insert a KiXtart For Each loop"
+ "Insert a KiXtart For Each loop."
  ("For Each " (p "element-variable: " element) " In "
   (p "group-expression: " group) > n
   > r> n o
@@ -526,7 +529,7 @@ which will be expanded to the template."
 
 (kixtart--define-template
  "for"
- "Insert a KiXtart For loop"
+ "Insert a KiXtart For loop."
  ("For $" (p "counter-variable: " counter)
   " = "
   (p "start-expression: " start) " To " (p "end-expression: " end)
@@ -537,20 +540,20 @@ which will be expanded to the template."
 
 (kixtart--define-template
  "else"
- "Insert a KiXtart Else statement"
+ "Insert a KiXtart Else statement."
  (& "Else" > n
     > r> (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
  "do"
- "Insert a KiXtart Do loop"
+ "Insert a KiXtart Do loop."
  ("Do" > n
   > r> n o
   "Until " > (p "until-expression: " expr) > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
  "case"
- "Insert a KiXtart Case statement"
+ "Insert a KiXtart Case statement."
  (& "Case " (p "case-expression: " expr) > n
     > r (kixtart--tempo-newline-eob)))
 
@@ -562,16 +565,16 @@ which will be expanded to the template."
     (define-key map (kbd "C-c C-t C-b") 'tempo-backward-mark)
     (define-key map (kbd "C-c C-t C-f") 'tempo-forward-mark)
     (define-key map (kbd "C-c C-t C-t") 'tempo-complete-tag)
-    (define-key map (kbd "C-c C-t I") 'tempo-template-kixtart-ifelse)
-    (define-key map (kbd "C-c C-t c") 'tempo-template-kixtart-case)
-    (define-key map (kbd "C-c C-t d") 'tempo-template-kixtart-do)
-    (define-key map (kbd "C-c C-t e") 'tempo-template-kixtart-foreach)
-    (define-key map (kbd "C-c C-t f") 'tempo-template-kixtart-for)
-    (define-key map (kbd "C-c C-t i") 'tempo-template-kixtart-if)
-    (define-key map (kbd "C-c C-t l") 'tempo-template-kixtart-else)
-    (define-key map (kbd "C-c C-t s") 'tempo-template-kixtart-select)
-    (define-key map (kbd "C-c C-t u") 'tempo-template-kixtart-function)
-    (define-key map (kbd "C-c C-t w") 'tempo-template-kixtart-while)
+    (define-key map (kbd "C-c C-t I") 'kixtart-template-ifelse)
+    (define-key map (kbd "C-c C-t c") 'kixtart-template-case)
+    (define-key map (kbd "C-c C-t d") 'kixtart-template-do)
+    (define-key map (kbd "C-c C-t e") 'kixtart-template-foreach)
+    (define-key map (kbd "C-c C-t f") 'kixtart-template-for)
+    (define-key map (kbd "C-c C-t i") 'kixtart-template-if)
+    (define-key map (kbd "C-c C-t l") 'kixtart-template-else)
+    (define-key map (kbd "C-c C-t s") 'kixtart-template-select)
+    (define-key map (kbd "C-c C-t u") 'kixtart-template-function)
+    (define-key map (kbd "C-c C-t w") 'kixtart-template-while)
     (define-key map (kbd "C-c C-u") 'kixtart-up-script-block)
     map))
 
