@@ -1,82 +1,378 @@
-kixtart-mode is a major mode for editing KiXtart script files which
-implements the following features:
+* Overview
 
-- syntax highlighting
-- indentation
-- beginning and end of defun
-- Imenu support
-- Outline mode support
-- Tempo templates with abbrev expansion
+KiXtart Mode is an Emacs major mode for creating and editing KiXtart script
+files.  The following features are implemented:
 
-Syntax highlighting is implemented for language keywords, function names,
-labels, macros, and variables.  Malformed macro names can potentially drop
-trailing syntax or always evaluate to 0, in such cases the relevant portion
-of macro names will be highlighted as a warning.
+- Syntax highlighting for commands, functions, labels, and macros
+- Indentation based on the usage of commands and parentheses
+- Motion around and selection of defined functions
+- Imenu support for function and label names
+- Outline Mode support
+- Predefined Tempo templates with optional abbrev expansion
 
-Indentation will be applied by determining the number of script-blocks which
-are open around the current buffer position, where parentheses or the
-following commands are deemed to open a new or close an existing
-script-block:
+** Installation
 
-| Open       | Close          |
-|------------+----------------|
-| DO         | UNTIL          |
-| CASE       | CASE ENDSELECT |
-| ELSE       | ENDIF          |
-| FOR        | NEXT           |
-| FUNCTION   | ENDFUNCTION    |
-| IF         | ELSE ENDIF     |
-| SELECT     | ENDSELECT      |
-| WHILE      | LOOP           |
+Clone this repository to a local sub-directory:
+
+  git clone https://github.com/morganwillcock/kixtart-mode.git
+
+Within the Emacs configuration, add the path of the cloned directory to the
+value of `load-path'.  The following example assumes that the repository was
+cloned within a directory named "manual-packages" within the user's
+".emacs.d" directory:
+
+  (add-to-list 'load-path "~/.emacs.d/manual-packages/kixtart-mode")
+
+** Example configuration
+
+Assuming that the KiXtart Mode package is currently not loaded, the following
+example demonstrates how to load the package, configure some basic settings,
+and enable some optional features:
+
+  ;; Load the package by searching in paths listed in `load-path'.
+  (require 'kixtart-mode)
+
+  ;; Set indentation and fill preferences.
+  (add-hook 'kixtart-mode-hook
+            (lambda ()
+              (indent-tabs-mode 1)
+              (setq tab-width 4)
+              (setq fill-column 80)))
+
+  ;; Set template insertion to use interactive prompts.
+  (setq tempo-interactive t)
+
+  ;; Enable `abbrev-mode' by default.
+  (add-hook 'kixtart-mode-hook #'abbrev-mode)
+  ;; Enable automatic abbrev expansion with the KiXtart Mode abbrev
+  ;; table when outside of comments and strings.
+  (setq kixtart-abbrev-table-enabled t)
+
+* Syntax highlighting
+
+Syntax highlighting is implemented for all KiXtart language keywords using
+the following font-lock faces:
+
+Keyword type    Face
+-------------------------------------------------
+Command name    `font-lock-keyword-face'
+Function name   `font-lock-function-name-face'
+Label name      `font-lock-constant-face'
+Macro           `font-lock-type-face'
+Variable        `font-lock-variable-name-face'
+
+Note: Syntax highlighting for function names requires the preceding
+"FUNCTION" command to appear on the same line.
+
+The additional face `font-lock-warning-face' is used to highlight portions of
+text which are likely to be scripting errors.  Currently this covers two
+potentially problematic cases related to KiXtart macros.  The first case is
+where the macro name does not match any known macro: such macros always
+evaluate to 0 and are likely the result of a spelling error.  The second case
+covers a peculiarity of the original KiXtart parser, which seems to silently
+discard a trailing portion of a macro name when the following criteria are
+met:
+
+1. The beginning of the macro name matches a valid KiXtart macro name.
+
+2. Immediately following this match, there are additional characters present
+   which are valid for use within a macro name.
+
+3. The additional characters do not extend the match to a different (longer)
+   KiXtart macro name.
+
+The trailing portion of the macro name will be highlighted as an error.
+
+* Indentation
+
+KiXtart Mode calculates the indentation level for a given line by determining
+the number of script-blocks which are open around the current buffer
+position, where parentheses or the following commands are deemed to open a
+new or close an existing script-block:
+
+Block-opening commands   Block-closing commands
+--------------------------------------------------
+DO                       UNTIL
+CASE                     CASE ENDSELECT
+ELSE                     ENDIF
+FOR                      NEXT
+FUNCTION                 ENDFUNCTION
+IF                       ELSE ENDIF
+WHILE                    LOOP
+
+Note: SELECT commands are ignored for indentation purposes, to allow the
+contained CASE commands to maintain the current indentation level.
 
 The indentation offset applied to each subsequent script-block level is
-determined by the customizable variable `kixtart-indent-offset' combined with
-the indentation level of the line which opened the current script-block.  The
-movement function `kixtart-up-script-block' uses the same rules of
-script-block definition to move point, to the buffer position which opened
-the current script-block, based on its currently determined script-block
-level.
+determined by multiplying the value of customization variable
+`kixtart-indent-offset' with the indentation level of the line which opened
+the current script-block.  For example, the default value of 4 will increase
+indentation in every script-block by 4 columns:
 
-`beginning-of-defun-function' and `end-of-defun-function' are implemented and
-should work well for function definitions which appear at the "top-level" of
-the script.  If FUNCTION commands are not positioned at the beginning of a
-line, navigation can be improved by remapping the key which would normally
-call `beginning-of-defun' to call `beginning-of-defun-raw' in its place:
+  IF $a
+      *
+  ENDIF
 
-(add-hook 'kixtart-mode-hook
-          (lambda ()
-            (local-set-key [remap beginning-of-defun]
-                           'beginning-of-defun-raw)))
+  1 + (
+      *
+  )
 
-`imenu' will list the names of all defined function as top level menu entries
-as well as a single "/Labels" sub-menu entry which lists all defined label
-names.
+Using the indentation level of the line which opened the current script-block
+allows nested script-blocks to share a line and only increase the indentation
+by a single level.  For example, to create the equivalent of an AND
+expression which will correctly short-circuit, it is likely preferable to use
+two IF commands which are on the same line:
 
-`outline-mode' settings borrow some conventions from the built-in Lisp mode
-and will determine outline levels by looking for 3 or more ';' characters
-appearing at the start of a line, followed by at least 1 whitespace
-character.  ";;;" represents an outline level depth of 1.  Depth is increased
-by 1 for every additional ';' character.  FUNCTION commands which appear at
-the start of a line will define additional outline levels at the maximum
-depth.
+  IF $a IF $b
+      *
+  ENDIF ENDIF
 
-Tempo templates for command defined script-blocks are available and can be
-inserted by using Tempo functions such as `tempo-complete-tag' or by using
-abbrev expansion.  The use of the major mode abbrev table is determined by
-the customization variable `kixtart-abbrev-table-enabled'.  Template
-insertion will include a final new line based on the value of customization
-variable `kixtart-template-insert-newline'.  Since all template insertion is
-done by Tempo, customization of inserted text can be achieved by modifying
-the Tempo configuration; if script commands should be converted to uppercase
-this can be achieved by adding the required function to
+* Motion commands
+
+KiXtart Mode assigns custom functions to `beginning-of-defun-function' and
+`end-of-defun-function' and so permits navigation around and selection of
+function definitions with commands such as `beginning-of-defun',
+`end-of-defun', and `mark-defun'.
+
+These commands should work well for function definitions which appear at the
+top-level of the script, where the FUNCTION and ENDFUNCTION commands which
+define a KiXtart function have not been indented.  If FUNCTION commands have
+been indented, operation may be improved by remapping the key-binding which
+would normally call `beginning-of-defun' to call `beginning-of-defun-raw' in
+its place:
+
+  (add-hook 'kixtart-mode-hook
+            (lambda ()
+              (local-set-key [remap beginning-of-defun]
+                             'beginning-of-defun-raw)))
+
+This will leave point at the beginning of the relevant FUNCTION command
+rather than at the beginning of the line which contained the relevant
+FUNCTION command.
+
+An additional navigation function is also provided in
+`kixtart-up-script-block'.  This function uses the same rules of script-block
+definition to move point to the buffer position which opened the current
+script-block, based on its currently determined script-block level.  When at
+the top-level of the script point is moved to the beginning of the buffer.
+
+KiXtart Mode binds `kixtart-up-script-block' to 'C-c C-u' by default.
+
+* Imenu support
+
+The `imenu' command provides code indexing and navigation options which
+allow point to jump to indexed buffer positions.  The `imenu' menu is
+presented as a list of completions which contains the names of all
+defined functions, as well as a single "/Labels" sub-menu entry which
+lists all defined label names (the "/" character is chosen as a sub-menu
+prefix because it is invalid as part of a function name).
+
+Note: Indexing of function names requires the preceding FUNCTION command to
+appear on the same line.
+
+For very large scripts scanning for index entries can potentially be slow,
+although automatic re-scanning may be preferable to manually invoking the
+"*Rescan*" option from the menu.  Consider configuring `imenu-auto-rescan'
+and `imenu-auto-rescan-maxout' to suitable values.
+
+KiXtart Mode binds `imenu' to 'C-c C-j' by default.
+
+* Outline Mode support
+
+Outline Mode is major mode intended to edit outline-format documents with
+selective display.  The same functionality is also available through
+alternate key-bindings using the minor mode version, enabled by invoking
+`outline-minor-mode'.
+
+KiXtart Mode defines Outline Mode settings by borrowing some conventions for
+headings and their associated depth from the built-in Lisp mode.  Two types
+of headings are defined:
+
+- Comments created by 3 or more ";" characters at the beginning of a line,
+  followed by at least 1 white-space character
+
+- FUNCTION commands at the beginning of a line
+
+The depth of comment-based headings is determined by subtracting 2 from the
+number of ";" characters which were used.  For example, the following
+comments define Outline Mode headings for the first 3 levels:
+
+  ;;; Level 1 heading
+  ;;;; Level 2 heading
+  ;;;;; Level 3 heading
+
+The depth of FUNCTION command-based headings is not variable: all headings of
+this type have the maximum possible value for their depth, meaning that
+selective display of function definitions cannot affect selective display of
+comment-based headings.
+
+* Templates
+
+Tempo templates for inserting command-defined script-blocks are
+predefined and can be inserted by:
+
+- Invoking Tempo template functions directly
+- Invoking KiXtart Mode aliases for Tempo template functions
+- Tempo functionality such as `tempo-complete-tag'
+- Abbrev expansion
+
+For direct use of Tempo functionality, the following key-bindings exist by
+default:
+
+'C-c C-t C-b'
+  `tempo-backward-mark'
+
+'C-c C-t C-f'
+  `tempo-forward-mark'
+
+'C-c C-t C-t'
+  `tempo-complete-tag'
+
+Note: Tempo tag completion will match a template tag even when the match is a
+prefix of a longer template tag.  For example, an input of "i" or "if" will
+expand based on the template tag "if", even though it is a prefix of the
+longer template tag "ifelse".  To expand based on the template tag "ifelse"
+the input would have to be "ife", "ifel", "ifels", or "ifelse".
+
+Note: For use of interactive prompts when inserting a template, customize the
+value of 'tempo-interactive'.
+
+Regardless of how a template has been inserted the customization variable
+`kixtart-template-insert-newline' determines whether template insertion will
+include a final newline character.  A non-nil value will cause a newline to
+be inserted.  When set to a function (as determined by `functionp') the
+result of the calling that function should determines the result by returning
+a nil or non-nil value.  The default value is `eobp' which has the effect of
+preserving the final newline when templates are inserted at the end of the
+buffer.
+
+** Abbrev expansion
+
+The KiXtart Mode abbrev table will be considered for use when the following
+conditions are true:
+
+1. `kixtart-abbrev-table-enabled' has a non-nil value
+2. Point is currently not within a comment or a string
+
+Expansion of the predefined template tags can be performed manually with
+functions such as `expand-abbrev'.  For automatic expansions, this can be
+achieved by enabling the abbrev minor-mode (`abbrev-mode') in the current
+buffer.  It is likely convenient to automatically enable `abbrev-mode' in all
+KiXtart Mode buffers:
+
+  (add-hook 'kixtart-mode-hook #'abbrev-mode)
+
+** Template case control
+
+Since all template insertion is done either directly or indirectly through
+Tempo functions, customization of inserted text can be achieved by modifying
+the Tempo configuration; if template content should be converted to
+upper-case, this can be achieved by adding the `upcase' function to
 `tempo-insert-string-functions':
 
-(add-hook 'kixtart-mode-hook
-          (lambda ()
-            (add-to-list (make-local-variable 'tempo-insert-string-functions)
-                         #'upcase)))
+  (add-hook 'kixtart-mode-hook
+            (lambda ()
+              (add-to-list (make-local-variable
+                            'tempo-insert-string-functions)
+                           #'upcase)))
 
-Note: Since the KiXtart language does not mandate any structured use of lines
-this presents some challenges to line based parsing.  Currently both syntax
-highlighting and Imenu entries for function names require the function name
-to be declared on the same line as the FUNCTION command.
+** Predefined templates
+
+KiXtart Mode defines aliases to predefined Tempo template functions which
+will insert commonly used command-defined script-blocks.
+
+Note: Template contents are written using "PascalCase" for language keywords;
+the first letter of all words within KiXtart commands are capitalized (for
+example, "EndIf" rather than "ENDIF" or "endif").  This allows the case to
+customised by optionally down-casing or up-casing the template as it is
+inserted.
+
+Function: `kixtart-template-ifelse'
+
+    If *
+
+    Else
+
+    EndIf
+
+  Expands from string "ifelse".
+  Bound to 'C-c C-t I' by default.
+
+Function: `kixtart-template-case'
+
+    Case *
+
+  Expands from string "case".
+  Bound to 'C-c C-t c' by default.
+
+Function: `kixtart-template-do'
+
+    Do
+        *
+    Until
+
+  Expands from string "do".
+  Bound to 'C-c C-t d' by default.
+
+Function: `kixtart-template-foreach'
+
+    For Each * In
+
+    Next
+
+  Expands from string "foreach".
+  Bound to 'C-c C-t e' by default.
+
+Function: `kixtart-template-for'
+
+    For $* =  To  Step
+
+    Next
+
+  Expands from string "for".
+  Bound to 'C-c C-t f' by default.
+
+Function: `kixtart-template-if'
+
+    If *
+
+    EndIf
+
+  Expands from string "if".
+  Bound to 'C-c C-t i' by default.
+
+Function: `kixtart-template-else'
+
+    Else
+        *
+
+  Expands from string "else".
+  Bound to 'C-c C-t l' by default.
+
+Function: `kixtart-template-select'
+
+    Select
+    Case *
+
+    EndSelect
+
+  Expands from string "select".
+  Bound to 'C-c C-t s' by default.
+
+Function: `kixtart-template-function'
+
+    Function *()
+
+    EndFunction
+
+  Expands from string "function".
+  Bound to 'C-c C-t u' by default.
+
+Function: `kixtart-template-while'
+
+    While *
+
+    Loop
+
+  Expands from string "while".
+  Bound to 'C-c C-t w' by default.
