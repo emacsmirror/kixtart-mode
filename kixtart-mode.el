@@ -593,26 +593,19 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
                       (null block-start))
             (forward-sexp -1)
             (cond ((looking-at (kixtart-rx script-block-open))
-                   (let ((open-token (kixtart--match-string-as-token)))
-                         ;; Try to match this current script-block opening token
-                         ;; with the most recently seen script-block closing
-                         ;; token.
-                         (unless (pcase `(,open-token ,(car block-end))
-                                   ;; No script-block close.
-                                   (`(,_ nil))
-                                   ;; Ignore "CASE" and "ELSE" since they
-                                   ;; effectively close and re-open a script-block.
-                                   (`(,(or 'kixtart-case-t 'kixtart-else-t) ,_) t)
-                                   ;; Matching token pairs.
-                                   ((or '(kixtart-do-t       kixtart-until-t)
-                                        '(kixtart-for-t      kixtart-next-t)
-                                        '(kixtart-function-t kixtart-endfunction-t)
-                                        `(kixtart-if-t       ,(or 'kixtart-else-t
-                                                                  'kixtart-endif-t))
-                                        '(kixtart-select-t   kixtart-endselect-t)
-                                        '(kixtart-while-t    kixtart-loop-t))
-                                    (pop block-end)))
-                           (setq block-start open-token))))
+                   (pcase `(,(kixtart--match-string-as-token) ,(car block-end))
+                     (`(,open-token nil)
+                      (setq block-start open-token))
+                     ;; Matching token pairs.  Ignore opening "CASE" and "ELSE"
+                     ;; since they effectively close and re-open a script-block.
+                     ((or '(kixtart-do-t       kixtart-until-t)
+                          '(kixtart-for-t      kixtart-next-t)
+                          '(kixtart-function-t kixtart-endfunction-t)
+                          `(kixtart-if-t       ,(or 'kixtart-else-t
+                                                    'kixtart-endif-t))
+                          '(kixtart-select-t   kixtart-endselect-t)
+                          '(kixtart-while-t    kixtart-loop-t))
+                      (pop block-end))))
                   ((looking-at (kixtart-rx script-block-close))
                    (push (kixtart--match-string-as-token) block-end))))
         (scan-error
