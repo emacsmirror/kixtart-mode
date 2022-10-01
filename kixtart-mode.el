@@ -407,6 +407,7 @@
 (require 'imenu)
 (require 'tempo)
 (eval-when-compile
+  (require 'cl-lib)
   (require 'rx))
 
 ;;;; Customization
@@ -569,6 +570,62 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
                        (downcase (match-string-no-properties 0))
                        "-t")))
 
+;;;; Block parser
+
+(cl-defstruct (kixtart-block-state (:constructor kixtart-make-block-state)
+                                   (:copier nil))
+  string
+  token
+  position)
+
+(defun kixtart--parse-block-state ()
+  "Scan backwards and return the current block state."
+  ;; Move out of strings and comments.
+  (save-excursion
+    (while (kixtart--in-comment-or-string-p)
+      (backward-up-list nil t t))
+    ;; Search backwards matching pairs of script-block defining keyword tokens.
+    (let ((parse-sexp-ignore-comments t)
+          block-end
+          block-start)
+      (condition-case nil
+          (while (and (not (bobp))
+                      (null block-start))
+            (forward-sexp -1)
+            (cond ((looking-at (kixtart-rx script-block-open))
+                   (let ((open-token (kixtart--match-string-as-token)))
+                         ;; Try to match this current script-block opening token
+                         ;; with the most recently seen script-block closing
+                         ;; token.
+                         (unless (pcase `(,open-token ,(car block-end))
+                                   ;; No script-block close.
+                                   (`(,_ nil))
+                                   ;; Ignore "CASE" and "ELSE" since they
+                                   ;; effectively close and re-open a script-block.
+                                   (`(,(or 'kixtart-case-t 'kixtart-else-t) ,_) t)
+                                   ;; Matching token pairs.
+                                   ((or '(kixtart-do-t       kixtart-until-t)
+                                        '(kixtart-for-t      kixtart-next-t)
+                                        '(kixtart-function-t kixtart-endfunction-t)
+                                        `(kixtart-if-t       ,(or 'kixtart-else-t
+                                                                  'kixtart-endif-t))
+                                        '(kixtart-select-t   kixtart-endselect-t)
+                                        '(kixtart-while-t    kixtart-loop-t))
+                                    (pop block-end)))
+                           (setq block-start open-token))))
+                  ((looking-at (kixtart-rx script-block-close))
+                   (push (kixtart--match-string-as-token) block-end))))
+        (scan-error
+         (backward-up-list nil t t)))
+      (kixtart-make-block-state
+       :position (point)
+       :token block-start
+       :string (and block-start
+                    (buffer-substring-no-properties (point)
+                                                    (progn
+                                                      (forward-sexp)
+                                                      (point))))))))
+
 ;;;; Motion
 
 (defun kixtart-beginning-of-defun (&optional arg)
@@ -612,47 +669,9 @@ return nil."
     (not (null match-pos))))
 
 (defun kixtart-up-script-block ()
-  "Move point to the opening of the current script-block.
-Returns the symbol representing the command which opened the
-script-block or nil if no script-block opening command was
-found."
+  "Move point to the opening of the current script-block."
   (interactive)
-  ;; Move out of strings and comments.
-  (while (kixtart--in-comment-or-string-p)
-    (backward-up-list nil t t))
-  ;; Search backwards matching pairs of script-block defining keyword tokens.
-  (let ((parse-sexp-ignore-comments t)
-        (block-end nil)
-        (block-start nil))
-    (condition-case nil
-        (while (and (not (bobp))
-                    (null block-start))
-          (forward-sexp -1)
-          (cond ((looking-at (kixtart-rx script-block-open))
-                 (let ((open-token (kixtart--match-string-as-token)))
-                   ;; Try to match this current script-block opening token with
-                   ;; the most recently seen script-block closing token.
-                   (unless (pcase `(,open-token ,(car block-end))
-                             ;; No script-block close.
-                             (`(,_ nil))
-                             ;; Ignore "CASE" and "ELSE" since they effectively
-                             ;; close and re-open a script-block.
-                             (`(,(or 'kixtart-case-t 'kixtart-else-t) ,_) t)
-                             ;; Matching token pairs.
-                             ((or '(kixtart-do-t       kixtart-until-t)
-                                  '(kixtart-for-t      kixtart-next-t)
-                                  '(kixtart-function-t kixtart-endfunction-t)
-                                  `(kixtart-if-t       ,(or 'kixtart-else-t
-                                                            'kixtart-endif-t))
-                                  '(kixtart-select-t   kixtart-endselect-t)
-                                  '(kixtart-while-t    kixtart-loop-t))
-                              (pop block-end)))
-                     (setq block-start open-token))))
-                ((looking-at (kixtart-rx script-block-close))
-                 (push (kixtart--match-string-as-token) block-end))))
-      (scan-error
-       (backward-up-list nil t t)))
-    block-start))
+  (goto-char (kixtart-block-state-position (kixtart--parse-block-state))))
 
 ;;;; Indentation
 
@@ -667,9 +686,9 @@ found."
               (paren-close (looking-at-p "\\s)"))
               (line-token (and (looking-at (kixtart-rx script-block-close))
                                (kixtart--match-string-as-token)))
-              ;; Move to the position where the current script-block was opened
-              ;; and get the token which opened it.
-              (open-with (kixtart-up-script-block)))
+              (block-state (kixtart--parse-block-state)))
+          ;; Move to the position where the current script-block was opened
+          (goto-char (kixtart-block-state-position block-state))
           (+ (current-indentation)
              (* kixtart-indent-offset
                 (+
@@ -679,7 +698,8 @@ found."
                  ;; Add indentation based on parentheses.
                  (max 0 (if paren-close (1- paren-depth) paren-depth))
                  ;; Add indentation based on matching script-block tokens.
-                 (pcase `(,open-with ,line-token)
+                 (pcase `(,(kixtart-block-state-token block-state)
+                          ,line-token)
                    ;; Avoid further pattern matches where there is no
                    ;; script-block open.
                    (`(nil ,_) 0)
