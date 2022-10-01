@@ -731,6 +731,40 @@ new indentation column."
         (when goto-indentation
           (back-to-indentation))))))
 
+;;;; Block closing
+
+(defvar kixtart--close-command-strings nil
+  "The list of strings which can close the currently open block.")
+
+(defun kixtart--syntax-case-function (token)
+  "Return the case function which best matches the string TOKEN."
+  (cond ((string= (upcase token) token) #'upcase)
+        ((string= (downcase token) token) #'downcase)))
+
+(defun kixtart-close-command-block ()
+  "Insert the command to close the currently open block."
+  (interactive)
+  (if (and kixtart--close-command-strings
+           (eq real-last-command #'kixtart-close-command-block))
+      (backward-delete-char (length (pop kixtart--close-command-strings)))
+    (let ((block-state (kixtart--parse-block-state)))
+      (setq kixtart--close-command-strings
+            (mapcar (or (pcase (kixtart-block-state-string block-state)
+                          ((and (pred stringp) string)
+                           (kixtart--syntax-case-function string)))
+                        #'identity)
+                    (pcase (kixtart-block-state-token block-state)
+                      ('kixtart-case-t     (list "Case" "EndSelect"))
+                      ('kixtart-do-t       (list "Until"))
+                      ('kixtart-else-t     (list "EndIf"))
+                      ('kixtart-function-t (list "EndFunction"))
+                      ('kixtart-if-t       (list "Else" "EndIf"))
+                      ('kixtart-select-t   (list "EndSelect"))
+                      ('kixtart-while-t    (list "Loop")))))))
+  (pcase (car kixtart--close-command-strings)
+    ((and (pred stringp) string)
+     (insert string))))
+
 ;;;; Outline mode
 
 (defun kixtart-outline-level ()
@@ -870,6 +904,7 @@ which will be expanded to the template."
 
 (defvar kixtart-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-c") #'kixtart-close-command-block)
     (define-key map (kbd "C-c C-j") #'imenu)
     (define-key map (kbd "C-c C-t C-b") #'tempo-backward-mark)
     (define-key map (kbd "C-c C-t C-f") #'tempo-forward-mark)
