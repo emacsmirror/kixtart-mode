@@ -540,11 +540,11 @@ number of columns per script-block level."
                             "maxpwage" "mdayno" "mhz" "month" "monthno" "msecs"
                             "onwow64" "pid" "primarygroup" "priv" "productsuite"
                             "producttype" "programfilesx86" "pwage" "ras"
-                            "result" "rserver" "scriptdir" "scriptexe"
-                            "scriptname" "serror" "sid" "site" "startdir"
-                            "syslang" "ticks" "time" "tssession" "userid"
-                            "userlang" "wdayno" "wksta" "wuserid" "ydayno"
-                            "year")))
+                            "releaseid" "releasename" "result" "rserver"
+                            "scriptdir" "scriptexe" "scriptname" "serror" "sid"
+                            "site" "startdir" "syslang" "ticks" "time"
+                            "tssession" "userid" "userlang" "wdayno" "wksta"
+                            "wuserid" "ydayno" "year")))
                   (group
                    (0+ user-chars))))
             (macro-format
