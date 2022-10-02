@@ -23,7 +23,8 @@
 
 ;;; Commentary:
 
-;; * Overview
+;; Overview
+;; ========
 
 ;; KiXtart Mode is an Emacs major mode for creating and editing KiXtart script
 ;; files.  The following features are implemented:
@@ -35,7 +36,8 @@
 ;; - Outline Mode support
 ;; - Predefined Tempo templates with optional abbrev expansion
 
-;; ** Installation
+;; Installation
+;; ------------
 
 ;; Clone this repository to a local sub-directory:
 
@@ -48,7 +50,8 @@
 
 ;;   (add-to-list 'load-path "~/.emacs.d/manual-packages/kixtart-mode")
 
-;; ** Example configuration
+;; Example configuration
+;; ---------------------
 
 ;; Assuming that the KiXtart Mode package is currently not loaded, the following
 ;; example demonstrates how to load the package, configure some basic settings,
@@ -73,7 +76,8 @@
 ;;   ;; table when outside of comments and strings.
 ;;   (setq kixtart-abbrev-table-enabled t)
 
-;; * Syntax highlighting
+;; Syntax highlighting
+;; ===================
 
 ;; Syntax highlighting is implemented for all KiXtart language keywords using
 ;; the following font-lock faces:
@@ -108,7 +112,8 @@
 
 ;; The trailing portion of the macro name will be highlighted as an error.
 
-;; * Indentation
+;; Indentation
+;; ===========
 
 ;; KiXtart Mode calculates the indentation level for a given line by determining
 ;; the number of script-blocks which are open around the current buffer
@@ -152,7 +157,8 @@
 ;;       *
 ;;   ENDIF ENDIF
 
-;; * Motion commands
+;; Motion commands
+;; ===============
 
 ;; KiXtart Mode assigns custom functions to `beginning-of-defun-function' and
 ;; `end-of-defun-function' and so permits navigation around and selection of
@@ -183,7 +189,8 @@
 
 ;; KiXtart Mode binds `kixtart-up-script-block' to 'C-c C-u' by default.
 
-;; * Imenu support
+;; Imenu support
+;; =============
 
 ;; The `imenu' command provides code indexing and navigation options which
 ;; allow point to jump to indexed buffer positions.  The `imenu' menu is
@@ -202,7 +209,8 @@
 
 ;; KiXtart Mode binds `imenu' to 'C-c C-j' by default.
 
-;; * Outline Mode support
+;; Outline Mode support
+;; ====================
 
 ;; Outline Mode is major mode intended to edit outline-format documents with
 ;; selective display.  The same functionality is also available through
@@ -231,7 +239,8 @@
 ;; selective display of function definitions cannot affect selective display of
 ;; comment-based headings.
 
-;; * Templates
+;; Templates
+;; =========
 
 ;; Tempo templates for inserting command-defined script-blocks are
 ;; predefined and can be inserted by:
@@ -271,7 +280,8 @@
 ;; preserving the final newline when templates are inserted at the end of the
 ;; buffer.
 
-;; ** Abbrev expansion
+;; Abbrev expansion
+;; ----------------
 
 ;; The KiXtart Mode abbrev table will be considered for use when the following
 ;; conditions are true:
@@ -287,7 +297,8 @@
 
 ;;   (add-hook 'kixtart-mode-hook #'abbrev-mode)
 
-;; ** Template case control
+;; Template case control
+;; ---------------------
 
 ;; Since all template insertion is done either directly or indirectly through
 ;; Tempo functions, customization of inserted text can be achieved by modifying
@@ -301,7 +312,8 @@
 ;;                             'tempo-insert-string-functions)
 ;;                            #'upcase)))
 
-;; ** Predefined templates
+;; Predefined templates
+;; --------------------
 
 ;; KiXtart Mode defines aliases to predefined Tempo template functions which
 ;; will insert commonly used command-defined script-blocks.
@@ -401,6 +413,23 @@
 
 ;;   Expands from string "while".
 ;;   Bound to 'C-c C-t w' by default.
+
+;; Closing open blocks
+;; ===================
+
+;; As an alternative to inserting fully templated code into the buffer, the
+;; command `kixtart-close-command-block' will insert a KiXtart command which can
+;; close the currently open script block, where an open block is determined by
+;; looking backwards from point.  Repeatedly invoking the command will cycle
+;; through the possible options, with the previously inserted option being
+;; removed.  When no further options are available the previously inserted
+;; option will be removed and no new option will be inserted.
+
+;; The case of the inserted KiXtart command will be determined by the case of
+;; the block opening.  For example, "WHILE" will be closed by "LOOP", "while"
+;; will be closed "loop", and any other case-variation will be closed by "Loop".
+
+;; KiXtart Mode binds `kixtart-close-command-block' to 'C-c C-c' by default.
 
 ;;; Code:
 
