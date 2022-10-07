@@ -429,7 +429,9 @@
 ;; the block opening.  For example, "WHILE" will be closed by "LOOP", "while"
 ;; will be closed "loop", and any other case-variation will be closed by "Loop".
 
-;; KiXtart Mode binds `kixtart-close-command-block' to 'C-c C-c' by default.
+;; KiXtart Mode binds `kixtart-close-command-block' to 'C-c C-c' by default.  If
+;; `repeat-mode' is active the command may be repeated through the use of the
+;; repeat-map bindings 'C-c' and 'c'.
 
 ;;; Code:
 
@@ -795,6 +797,16 @@ new indentation column."
   (pcase (car kixtart--close-command-strings)
     ((and (pred stringp) string)
      (insert string))))
+
+(defvar kixtart-close-command-block-repeat-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c") #'kixtart-close-command-block)
+    (define-key map (kbd "c") #'kixtart-close-command-block)
+    map))
+
+(put 'kixtart-close-command-block
+     'repeat-map
+     'kixtart-close-command-block-repeat-map)
 
 ;;;; Outline mode
 

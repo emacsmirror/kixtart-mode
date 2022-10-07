@@ -404,4 +404,6 @@ The case of the inserted KiXtart command will be determined by the case of
 the block opening.  For example, "WHILE" will be closed by "LOOP", "while"
 will be closed "loop", and any other case-variation will be closed by "Loop".
 
-KiXtart Mode binds `kixtart-close-command-block' to 'C-c C-c' by default.
+KiXtart Mode binds `kixtart-close-command-block' to 'C-c C-c' by default.  If
+`repeat-mode' is active the command may be repeated through the use of the
+repeat-map bindings 'C-c' and 'c'.
