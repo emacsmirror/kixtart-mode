@@ -823,10 +823,8 @@ new indentation column."
 (defun kixtart--tempo-newline-eob ()
   "Insert a newline if point is at end of the buffer."
   (when (pcase kixtart-template-insert-newline
-          ((and (pred functionp) func)
-           (funcall func))
-          ((and (pred identity) do-insert)
-           do-insert))
+          ((and (pred functionp) func) (funcall func))
+          (do-insert do-insert))
     (insert "\n")))
 
 (defun kixtart--tempo-insert-lookup (name template)
