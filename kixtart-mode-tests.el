@@ -28,7 +28,7 @@
      (should (equal (buffer-string) ,buffer-contents))))
 
 (defmacro kixtart-mode-tests--test-block-close (buffer-contents &rest strings)
-  "Check cycling of open blocks within a temporary KiXtart mode buffer.
+  "Check closing of open blocks within a temporary KiXtart mode buffer.
 BUFFER-CONTENTS should define an open block which will be closed by cycling
 through STRINGS."
   `(kixtart-mode-tests--with-temp-buffer
