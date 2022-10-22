@@ -776,7 +776,7 @@ new indentation column."
   "Insert the command to close the currently open block."
   (interactive)
   (if (and kixtart--close-command-strings
-           (eq real-last-command #'kixtart-close-command-block))
+           (eq last-command #'kixtart-close-command-block))
       (backward-delete-char (length (pop kixtart--close-command-strings)))
     (setq kixtart--close-command-strings
           (let* ((block-state (kixtart--parse-block-state))
