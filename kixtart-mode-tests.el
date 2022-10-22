@@ -11,123 +11,225 @@
 
 ;;; Tests
 
-(ert-deftest kixtart-mode-indent-command-blocks ()
-  "Increase indentation level inside commands which open blocks."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "Do
-    $var = 1
-    $var = 2
-Until $maybe
+;;;; Helper macros
 
+(defmacro kixtart-mode-tests--test-indentation (buffer-contents)
+  "Check indentation of BUFFER-CONTENTS within a temporary KiXtart mode buffer."
+  `(with-temp-buffer
+     (kixtart-mode)
+     (insert ,buffer-contents)
+     (indent-region (point-min) (point-max))
+     (should (equal (buffer-string) ,buffer-contents))))
+
+;;;; Indentation for individual command blocks
+
+(ert-deftest kixtart-indent-command-block-do ()
+  "Increase indentation level inside do blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; Do loop.
+Do
+    $var1 = 1
+    $var2 = 2
+Until $maybe"))
+
+(ert-deftest kixtart-indent-command-block-for ()
+  "Increase indentation level inside for blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; For loop.
 For $i = 0 to 10
-    $var = $i
-Next
+    $var1 = $i
+    $var2 = $i
+Next"))
 
+(ert-deftest kixtart-indent-command-block-foreach ()
+  "Increase indentation level inside foreach blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; For Each loop.
 For Each $value in $array
-    $var = $value
-Next
+    $var1 = $value
+    $var2 = $value
+Next"))
 
-Function
-    $var = 1
-    $var = 2
-EndFunction
-
+(ert-deftest kixtart-indent-command-block-if ()
+  "Increase indentation level inside if blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; If statement.
 If $maybe
-    $var = 1
+    $var1 = 1
+    $var2 = 2
+EndIf"))
+
+(ert-deftest kixtart-indent-command-block-ifelse ()
+  "Increase indentation level inside ifelse blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; If Else statement.
+If $maybe
+    $var1 = 1
+    $var2 = 2
 Else
-    $var = 2
-EndIf
+    $var3 = 3
+    $var4 = 4
+EndIf"))
 
+(ert-deftest kixtart-indent-command-block-select ()
+  "Increase indentation level inside select blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; Select statement.
 Select
+;; Case statements.
 Case $maybe
-    $var = 1
+    $var1 = 1
+    $var2 = 2
 Case $sometimes
-    $var = 2
-EndSelect
+    $var3 = 3
+    $var4 = 4
+EndSelect"))
 
+(ert-deftest kixtart-indent-command-block-function ()
+  "Increase indentation level inside function blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; Function definition.
+Function MyFunction($x, $y)
+    $var1 = $x
+    $var2 = $y
+EndFunction"))
+
+(ert-deftest kixtart-indent-command-block-while ()
+  "Increase indentation level inside while blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; While loop.
 While $maybe
-    $var = 1
-Loop
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+    $var1 = 1
+    $var2 = 2
+Loop"))
 
-(ert-deftest kixtart-mode-indent-nested-command-blocks ()
-  "Increase indentation level inside nested commands which open blocks."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "Function
-    Do
-        $var = 1
+;;;; Indentation for nested command blocks
 
+(ert-deftest kixtart-indent-nested-command-block-do ()
+  "Increase relative indentation level inside do blocks."
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
+    If 1
+        ;; Do loop.
+        Do
+            $var1 = 1
+            $var2 = 2
+        Until $maybe
+    EndIf
+EndFunction"))
+
+(ert-deftest kixtart-indent-nested-command-block-for ()
+  "Increase relative indentation level inside for blocks."
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
+    If 1
+        ;; For loop.
         For $i = 0 to 10
-            $var = $i
-
-            For Each $value in $array
-                $var = 1
-
-                If $maybe
-                    $var = 1
-                Else
-                    Select
-                    Case $maybe
-                        $var = 1
-                    Case $sometimes
-                        While $maybe
-                            $var = 1
-                        Loop
-
-                        $var = 2
-                    EndSelect
-                EndIf
-
-                $var = $value
-            Next
+            $var1 = $i
+            $var2 = $i
         Next
+    EndIf
+EndFunction"))
 
-        $var = 2
-    Until $maybe
-EndFunction
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+(ert-deftest kixtart-indent-nested-command-block-foreach ()
+  "Increase relative indentation level inside foreach blocks."
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
+    If 1
+        ;; For Each loop.
+        For Each $value in $array
+            $var1 = $value
+            $var2 = $value
+        Next
+    EndIf
+EndFunction"))
 
-(ert-deftest kixtart-mode-indent-with-inline-command-blocks ()
+(ert-deftest kixtart-indent-nested-command-block-if ()
+  "Increase relative indentation level inside if blocks."
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
+    If 1
+        ;; If statement.
+        If $maybe
+            $var1 = 1
+            $var2 = 2
+        EndIf
+    EndIf
+EndFunction"))
+
+(ert-deftest kixtart-indent-nested-command-block-ifelse ()
+  "Increase relative indentation level inside ifelse blocks."
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
+    If 1
+        ;; If Else statement.
+        If $maybe
+            $var1 = 1
+            $var2 = 2
+        Else
+            $var3 = 3
+            $var4 = 4
+        EndIf
+    EndIf
+EndFunction"))
+
+(ert-deftest kixtart-indent-nested-command-block-select ()
+  "Increase relative indentation level inside select blocks."
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
+    If 1
+        ;; Select statement.
+        Select
+        ;; Case statements.
+        Case $maybe
+            $var1 = 1
+            $var2 = 2
+        Case $sometimes
+            $var3 = 3
+            $var4 = 4
+        EndSelect
+    EndIf
+EndFunction"))
+
+(ert-deftest kixtart-indent-nested-command-block-while ()
+  "Increase relative indentation level inside while blocks."
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
+    If 1
+        ;; While loop.
+        While $maybe
+            $var1 = 1
+            $var2 = 2
+        Loop
+    EndIf
+EndFunction"))
+
+;;;; Indentation for command blocks
+
+(ert-deftest kixtart-indent-with-inline-command-blocks ()
   "Indentation level is not affected by inline command blocks."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "If $sometimes If $maybe
+  (kixtart-mode-tests--test-indentation
+      "If $sometimes If $maybe
     $var = 1 If $always
         $var = 2
     EndIf
-EndIf EndIf
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+EndIf EndIf"))
 
-(ert-deftest kixtart-mode-indent-with-parens-inline ()
+;;;; Indentation for parenthesis level
+
+(ert-deftest kixtart-indent-with-parens-inline ()
   "Increase indentation level with parens sharing a line."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "(1
+  (kixtart-mode-tests--test-indentation
+      "(1
     2
     3 (4
         5
-        6))
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+        6))"))
 
-(ert-deftest kixtart-mode-indent-with-parens-outline ()
+(ert-deftest kixtart-indent-with-parens-outline ()
   "Increase indentation level with parens on their own line."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "(
+  (kixtart-mode-tests--test-indentation
+      "(
     1
     2
     3
@@ -136,170 +238,78 @@ EndIf EndIf
         5
         6
     )
-)
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+)"))
 
-(ert-deftest kixtart-mode-indent-with-parens-mixed ()
-  "Increase indentation level with parens in any position."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "(1
+(ert-deftest kixtart-indent-with-inline-parens ()
+  "Indentation level is not affected by inline parens."
+  (kixtart-mode-tests--test-indentation
+      "((1
     2
     3
-    (
+    ((4
         5
-        6)
-)
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+        6))))"))
 
-(ert-deftest kixtart-mode-indent-ignores-string-contents ()
+;;;; Indentation ignores strings
+
+(ert-deftest kixtart-indent-ignores-string-contents ()
   "Indentation level is not affected by string contents."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "Function
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
     If $maybe
         $var = 'If $sometimes
 If $always'
         $var = 2
     EndIf
 EndFunction"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
 
-(ert-deftest kixtart-mode-indent-only-considers-string-start ()
+(ert-deftest kixtart-indent-only-considers-string-start ()
   "Indentation level for a string only applies to its starting point."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "Function
+  (kixtart-mode-tests--test-indentation
+      "Function MyFunction
     If $maybe
+        $var1 =
         'one
 two
 three'
     EndIf
 
+    $var2 =
     'four
 five
 six'
 EndFunction"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
 
-(ert-deftest kixtart-mode-indent-ignores-single-line-comment ()
+;;;; Indentation ignores comments
+
+(ert-deftest kixtart-indent-ignores-single-line-comment ()
   "Indentation level is not affected by a single-line comments."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "If $maybe
+  (kixtart-mode-tests--test-indentation
+      "If $maybe
     ; If $sometimes
     $var = 1
-EndIf
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+EndIf"))
 
-(ert-deftest kixtart-mode-indent-ignores-multi-line-comment ()
-  "Indentation level is not affected a multi-line comment."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "If $maybe
+(ert-deftest kixtart-indent-ignores-multi-line-comment ()
+  "Indentation level is not affected by a multi-line comment."
+  (kixtart-mode-tests--test-indentation
+      "If $maybe
     /*
     If $sometimes
         $var = 2
     */
     $var = 1
-EndIf
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+EndIf"))
 
-(ert-deftest kixtart-mode-parse-with-symbol-boundaries ()
-  "Syntax parsing does not truncate names containing symbols."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "Function Function:1
+;;;; Indentation with correct syntax parsing
+
+(ert-deftest kixtart-indent-honors-symbol-boundaries ()
+  "Indentation level is not affected by symbol boundaries."
+  (kixtart-mode-tests--test-indentation
+      "Function Function:1
     $var = 1
 EndFunction
 
-$var = 2
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
-
-(ert-deftest kixtart-mode-mixed-parens-and-commands ()
-  "Syntax parsing does not truncate names containing symbols."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "(
-    Do
-        $var = 1
-    Until $maybe
-
-    (
-        If 1
-            $var = 1
-
-            Select
-            Case $maybe
-                (
-                    $var = 1
-                )
-            Case $sometimes
-                (
-                    $var = 0)
-            Case $usually
-                ($var = 0
-                )
-            Case 1
-                ($var = 0)
-            EndSelect
-        Else
-            (
-                1 +
-                2 +
-                3
-            )
-        EndIf
-    )
-
-    While (
-        $never
-    )
-        $var = 1
-    Loop
-)
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
-
-(ert-deftest kixtart-mode-select-block-no-indent ()
-  "Select blocks do not increase the indentation level."
-  (with-temp-buffer
-    (kixtart-mode)
-    (let ((text "Select
-;; Select comment.
-Case $maybe
-    ;; Maybe comment.
-    $var = 1
-Case $unless
-    ;; Unless comment.
-Case 1
-    ;; Default comment.
-    $var = 2
-EndSelect
-"))
-      (insert text)
-      (indent-region (point-min) (point-max))
-      (should (equal (buffer-string) text)))))
+$var = 2"))
 
 ;;; kixtart-mode-tests.el ends here
