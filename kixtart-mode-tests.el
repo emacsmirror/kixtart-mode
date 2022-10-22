@@ -13,13 +13,38 @@
 
 ;;;; Helper macros
 
-(defmacro kixtart-mode-tests--test-indentation (buffer-contents)
-  "Check indentation of BUFFER-CONTENTS within a temporary KiXtart mode buffer."
+(defmacro kixtart-mode-tests--with-temp-buffer (buffer-contents &rest body)
+  "Evaluate BODY in a temporary KiXtart mode buffer containing BUFFER-CONTENTS."
   `(with-temp-buffer
      (kixtart-mode)
      (insert ,buffer-contents)
+     ,@body))
+
+(defmacro kixtart-mode-tests--test-indentation (buffer-contents)
+  "Check indentation of BUFFER-CONTENTS within a temporary KiXtart mode buffer."
+  `(kixtart-mode-tests--with-temp-buffer
+       ,buffer-contents
      (indent-region (point-min) (point-max))
      (should (equal (buffer-string) ,buffer-contents))))
+
+(defmacro kixtart-mode-tests--test-block-close (buffer-contents &rest strings)
+  "Check cycling of open blocks within a temporary KiXtart mode buffer.
+BUFFER-CONTENTS should define an open block which will be closed by cycling
+through STRINGS."
+  `(kixtart-mode-tests--with-temp-buffer
+       ,buffer-contents
+     ;; Test first insert.
+     (kixtart-close-command-block)
+     (should (equal (car ',strings) (current-word t)))
+     ;; Test replacement through a repeated command.
+     (dolist (s (cdr ',strings))
+       (let ((last-command 'kixtart-close-command-block))
+         (kixtart-close-command-block))
+       (should (equal s (current-word t))))
+     ;; Test undo.
+     (let ((last-command 'kixtart-close-command-block))
+       (kixtart-close-command-block))
+     (should (null (current-word t)))))
 
 ;;;; Indentation for individual command blocks
 
@@ -311,5 +336,100 @@ EndIf"))
 EndFunction
 
 $var = 2"))
+
+;;;; Closing open command blocks
+
+(ert-deftest kixtart-close-block-case ()
+  "Insert the strings which close an open case block."
+  (kixtart-mode-tests--test-block-close
+   ";; Select statement.
+Select
+;; Case statements.
+Case $maybe
+    $var1 = 1
+    $var2 = 2
+"
+   "Case" "EndSelect"))
+
+(ert-deftest kixtart-close-block-do ()
+  "Insert the strings which close an open do block."
+  (kixtart-mode-tests--test-block-close
+   ";; Do loop.
+Do
+    $var1 = 1
+    $var2 = 2
+"
+   "Until"))
+
+(ert-deftest kixtart-close-block-for ()
+  "Insert the strings which close an open for block."
+  (kixtart-mode-tests--test-block-close
+   ";; For loop.
+For $i = 0 to 10
+    $var1 = $i
+    $var2 = $i
+"
+   "Next"))
+
+(ert-deftest kixtart-close-block-foreach ()
+  "Insert the strings which close an open foreach block."
+  (kixtart-mode-tests--test-block-close
+   ";; For Each loop.
+For Each $value in $array
+    $var1 = $value
+    $var2 = $value
+"
+   "Next"))
+
+(ert-deftest kixtart-close-block-if ()
+  "Insert the strings which close an open if block."
+  (kixtart-mode-tests--test-block-close
+   ";; If statement.
+If $maybe
+    $var1 = 1
+    $var2 = 2
+"
+   "Else" "EndIf"))
+
+(ert-deftest kixtart-close-block-ifelse ()
+  "Insert the strings which close an open ifelse block."
+  (kixtart-mode-tests--test-block-close
+   ";; If statement.
+If $maybe
+    $var1 = 1
+    $var2 = 2
+Else
+    $var3 = 3
+    $var4 = 4
+"
+   "EndIf"))
+
+(ert-deftest kixtart-close-block-select ()
+  "Insert the strings which close an open select block."
+  (kixtart-mode-tests--test-block-close
+   ";; Select statement.
+Select
+"
+   "Case"))
+
+(ert-deftest kixtart-close-block-function ()
+  "Insert the strings which close an open function block."
+  (kixtart-mode-tests--test-block-close
+   ";; Function definition.
+Function MyFunction($x, $y)
+    $var1 = $x
+    $var2 = $y
+"
+   "EndFunction"))
+
+(ert-deftest kixtart-close-block-while ()
+  "Insert the strings which close an open while block."
+  (kixtart-mode-tests--test-block-close
+   ";; While loop.
+While $maybe
+    $var1 = 1
+    $var2 = 2
+"
+   "Loop"))
 
 ;;; kixtart-mode-tests.el ends here
