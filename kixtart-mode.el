@@ -784,6 +784,7 @@ new indentation column."
                                ('kixtart-case-t     (list "Case" "EndSelect"))
                                ('kixtart-do-t       (list "Until"))
                                ('kixtart-else-t     (list "EndIf"))
+                               ('kixtart-for-t      (list "Next"))
                                ('kixtart-function-t (list "EndFunction"))
                                ('kixtart-if-t       (list "Else" "EndIf"))
                                ('kixtart-select-t   (list "EndSelect"))
