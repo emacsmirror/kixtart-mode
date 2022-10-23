@@ -852,6 +852,7 @@ removed when template insertion is interactive."
 TAG, DOCUMENTATION, and ELEMENTS are passed directly to
 `tempo-define-template'.  TAG is also used as the abbrev string
 which will be expanded to the template."
+  (declare (indent 2))
   (let ((template (gensym)))
     `(let ((,template (tempo-define-template (concat "kixtart-" ,tag)
                                              (quote ,@elements)
@@ -866,81 +867,81 @@ which will be expanded to the template."
          ,documentation))))
 
 (kixtart--define-template
- "while"
- "Insert a KiXtart While loop."
- ("While " (p "while-expression: " expr) > n
-  > r> n o
-  "Loop" > (kixtart--tempo-newline-eob)))
+    "while"
+    "Insert a KiXtart While loop."
+  ("While " (p "while-expression: " expr) > n
+   > r> n o
+   "Loop" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "select"
- "Insert a KiXtart Select statement."
- ("Select" > n
-  > "Case " (p "case-expression: " expr) > n
-  > r> n o
-  "EndSelect" > (kixtart--tempo-newline-eob)))
+    "select"
+    "Insert a KiXtart Select statement."
+  ("Select" > n
+   > "Case " (p "case-expression: " expr) > n
+   > r> n o
+   "EndSelect" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "ifelse"
- "Insert a KiXtart If Else statement."
- ("If " (p "if-expression: " expr) > n
-  > r> n o
-  "Else" > n
-  > p n
-  "EndIf" > (kixtart--tempo-newline-eob)))
+    "ifelse"
+    "Insert a KiXtart If Else statement."
+  ("If " (p "if-expression: " expr) > n
+   > r> n o
+   "Else" > n
+   > p n
+   "EndIf" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "if"
- "Insert a KiXtart If statement."
- ("If " (p "if-expression: " expr) > n
-  > r> n o
-  "EndIf" > (kixtart--tempo-newline-eob)))
+    "if"
+    "Insert a KiXtart If statement."
+  ("If " (p "if-expression: " expr) > n
+   > r> n o
+   "EndIf" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "function"
- "Insert a KiXtart Function definition."
- ("Function " (p "name: " name) (p "arguments: " args 'noinsert)
-  (kixtart--tempo-insert-lookup 'args '("(" (s args) p ")" )) > n
-  > r> n o
-  "EndFunction" > (kixtart--tempo-newline-eob)))
+    "function"
+    "Insert a KiXtart Function definition."
+  ("Function " (p "name: " name) (p "arguments: " args 'noinsert)
+   (kixtart--tempo-insert-lookup 'args '("(" (s args) p ")" )) > n
+   > r> n o
+   "EndFunction" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "foreach"
- "Insert a KiXtart For Each loop."
- ("For Each " (p "element-variable: " element) " In "
-  (p "group-expression: " group) > n
-  > r> n o
-  "Next" > (kixtart--tempo-newline-eob)))
+    "foreach"
+    "Insert a KiXtart For Each loop."
+  ("For Each " (p "element-variable: " element) " In "
+   (p "group-expression: " group) > n
+   > r> n o
+   "Next" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "for"
- "Insert a KiXtart For loop."
- ("For $" (p "counter-variable: " counter)
-  " = "
-  (p "start-expression: " start) " To " (p "end-expression: " end)
-  (p "step-size: " step 'noinsert)
-  (kixtart--tempo-insert-lookup 'step '(" Step " (s step) p)) > n
-  > r> n o
-  "Next" > (kixtart--tempo-newline-eob)))
+    "for"
+    "Insert a KiXtart For loop."
+  ("For $" (p "counter-variable: " counter)
+   " = "
+   (p "start-expression: " start) " To " (p "end-expression: " end)
+   (p "step-size: " step 'noinsert)
+   (kixtart--tempo-insert-lookup 'step '(" Step " (s step) p)) > n
+   > r> n o
+   "Next" > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "else"
- "Insert a KiXtart Else statement."
- (& "Else" > n
-    > r> (kixtart--tempo-newline-eob)))
+    "else"
+    "Insert a KiXtart Else statement."
+  (& "Else" > n
+     > r> (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "do"
- "Insert a KiXtart Do loop."
- ("Do" > n
-  > r> n o
-  "Until " > (p "until-expression: " expr) > (kixtart--tempo-newline-eob)))
+    "do"
+    "Insert a KiXtart Do loop."
+  ("Do" > n
+   > r> n o
+   "Until " > (p "until-expression: " expr) > (kixtart--tempo-newline-eob)))
 
 (kixtart--define-template
- "case"
- "Insert a KiXtart Case statement."
- (& "Case " (p "case-expression: " expr) > n
-    > r (kixtart--tempo-newline-eob)))
+    "case"
+    "Insert a KiXtart Case statement."
+  (& "Case " (p "case-expression: " expr) > n
+     > r (kixtart--tempo-newline-eob)))
 
 ;;;; Keymap
 
