@@ -75,6 +75,15 @@ For Each $value in $array
     $var2 = $value
 Next"))
 
+(ert-deftest kixtart-indent-command-block-function ()
+  "Increase indentation level inside function blocks."
+  (kixtart-mode-tests--test-indentation
+      ";; Function definition.
+Function MyFunction($x, $y)
+    $var1 = $x
+    $var2 = $y
+EndFunction"))
+
 (ert-deftest kixtart-indent-command-block-if ()
   "Increase indentation level inside if blocks."
   (kixtart-mode-tests--test-indentation
@@ -109,15 +118,6 @@ Case $sometimes
     $var3 = 3
     $var4 = 4
 EndSelect"))
-
-(ert-deftest kixtart-indent-command-block-function ()
-  "Increase indentation level inside function blocks."
-  (kixtart-mode-tests--test-indentation
-      ";; Function definition.
-Function MyFunction($x, $y)
-    $var1 = $x
-    $var2 = $y
-EndFunction"))
 
 (ert-deftest kixtart-indent-command-block-while ()
   "Increase indentation level inside while blocks."
@@ -381,6 +381,16 @@ For Each $value in $array
 "
    "Next"))
 
+(ert-deftest kixtart-close-block-function ()
+  "Insert the strings which close an open function block."
+  (kixtart-mode-tests--test-block-close
+   ";; Function definition.
+Function MyFunction($x, $y)
+    $var1 = $x
+    $var2 = $y
+"
+   "EndFunction"))
+
 (ert-deftest kixtart-close-block-if ()
   "Insert the strings which close an open if block."
   (kixtart-mode-tests--test-block-close
@@ -411,16 +421,6 @@ Else
 Select
 "
    "Case"))
-
-(ert-deftest kixtart-close-block-function ()
-  "Insert the strings which close an open function block."
-  (kixtart-mode-tests--test-block-close
-   ";; Function definition.
-Function MyFunction($x, $y)
-    $var1 = $x
-    $var2 = $y
-"
-   "EndFunction"))
 
 (ert-deftest kixtart-close-block-while ()
   "Insert the strings which close an open while block."
