@@ -337,6 +337,137 @@ EndFunction
 
 $var = 2"))
 
+;;;; Beginning of defun
+
+(ert-deftest kixtart-beginning-of-defun-backwards ()
+  (kixtart-mode-tests--with-temp-buffer
+   "
+Function Function1
+
+Function Function2
+
+Function Function:3
+    ;; Function Comment
+    /*
+Function Comment
+    */
+    $function = '
+Function String
+'
+
+Function Function4"
+   (beginning-of-defun)
+   (should (looking-at-p "^Function Function4$"))
+   (beginning-of-defun 2)
+   (should (looking-at-p "^Function Function2$"))
+   (beginning-of-defun 2)
+   (should (looking-at-p "^Function Function1$"))
+   (beginning-of-defun)
+   (should (looking-at-p "^Function Function1$"))))
+
+(ert-deftest kixtart-beginning-of-defun-forwards ()
+  (kixtart-mode-tests--with-temp-buffer
+   "
+Function Function1
+
+Function Function:2
+    ;; Function Comment
+    /*
+Function Comment
+    */
+    $function = '
+Function String
+'
+
+Function Function3
+
+Function Function4
+"
+   (goto-char (point-min))
+   (beginning-of-defun -1)
+   (should (looking-at-p "^Function Function1$"))
+   (beginning-of-defun -2)
+   (should (looking-at-p "^Function Function3$"))
+   (beginning-of-defun -2)
+   (should (looking-at-p "^Function Function4$"))
+   (beginning-of-defun -1)
+   (should (looking-at-p "^Function Function4$"))))
+
+;;;; End of defun
+
+(ert-deftest kixtart-end-of-defun-forwards ()
+  (kixtart-mode-tests--with-temp-buffer
+   "
+Function Function1
+EndFunction
+
+Function Function:2
+    ;; Function Comment
+    /*
+Function Comment
+    */
+    $function = '
+Function String
+'
+EndFunction
+
+Function Function3 EndFunction
+
+Function Function4
+EndFunction"
+   (goto-char (point-min))
+   (end-of-defun)
+   (should (save-excursion
+             (forward-line -2)
+             (looking-at-p "^Function Function1$")))
+   (end-of-defun 2)
+   (should (save-excursion
+             (forward-line -1)
+             (looking-at-p "^Function Function3 EndFunction$")))
+   (end-of-defun 2)
+   (should (save-excursion
+             (forward-line -1)
+             (beginning-of-line)
+             (looking-at-p "^Function Function4$")))
+   (end-of-defun)
+   (should (save-excursion
+             (forward-line -1)
+             (beginning-of-line)
+             (looking-at-p "^Function Function4$")))))
+
+(ert-deftest kixtart-end-of-defun-backwards ()
+  (kixtart-mode-tests--with-temp-buffer
+   "
+Function Function1
+EndFunction
+
+Function Function:2
+    ;; Function Comment
+    /*
+Function Comment
+    */
+    $function = '
+Function String
+'
+EndFunction
+
+Function Function3 EndFunction
+
+Function Function4
+EndFunction"
+   (end-of-defun -1)
+   (should (save-excursion
+             (forward-line -1)
+             (looking-at-p "^Function Function3 EndFunction$")))
+   (end-of-defun -2)
+   (should (save-excursion
+             (forward-line -2)
+             (looking-at-p "^Function Function1$")))
+   ;; Attempts to overshoot seem to be governed by the internal implementation.
+   ;; (end-of-defun -1)
+   ;; (should (looking-at-p "^Function Function1$"))
+   ))
+
 ;;;; Closing open command blocks
 
 (ert-deftest kixtart-close-block-case ()
