@@ -15,6 +15,7 @@
 
 (defmacro kixtart-mode-tests--with-temp-buffer (buffer-contents &rest body)
   "Evaluate BODY in a temporary KiXtart mode buffer containing BUFFER-CONTENTS."
+  (declare (indent 1))
   `(with-temp-buffer
      (kixtart-mode)
      (insert ,buffer-contents)
@@ -31,6 +32,7 @@
   "Check closing of open blocks within a temporary KiXtart mode buffer.
 BUFFER-CONTENTS should define an open block which will be closed by cycling
 through STRINGS."
+  (declare (indent 1))
   `(kixtart-mode-tests--with-temp-buffer
        ,buffer-contents
      ;; Test first insert.
@@ -51,7 +53,7 @@ through STRINGS."
 (ert-deftest kixtart-indent-command-block-do ()
   "Increase indentation level inside do blocks."
   (kixtart-mode-tests--test-indentation
-      ";; Do loop.
+   ";; Do loop.
 Do
     $var1 = 1
     $var2 = 2
@@ -60,7 +62,7 @@ Until $maybe"))
 (ert-deftest kixtart-indent-command-block-for ()
   "Increase indentation level inside for blocks."
   (kixtart-mode-tests--test-indentation
-      ";; For loop.
+   ";; For loop.
 For $i = 0 to 10
     $var1 = $i
     $var2 = $i
@@ -69,7 +71,7 @@ Next"))
 (ert-deftest kixtart-indent-command-block-foreach ()
   "Increase indentation level inside foreach blocks."
   (kixtart-mode-tests--test-indentation
-      ";; For Each loop.
+   ";; For Each loop.
 For Each $value in $array
     $var1 = $value
     $var2 = $value
@@ -78,7 +80,7 @@ Next"))
 (ert-deftest kixtart-indent-command-block-function ()
   "Increase indentation level inside function blocks."
   (kixtart-mode-tests--test-indentation
-      ";; Function definition.
+   ";; Function definition.
 Function MyFunction($x, $y)
     $var1 = $x
     $var2 = $y
@@ -87,7 +89,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-command-block-if ()
   "Increase indentation level inside if blocks."
   (kixtart-mode-tests--test-indentation
-      ";; If statement.
+   ";; If statement.
 If $maybe
     $var1 = 1
     $var2 = 2
@@ -96,7 +98,7 @@ EndIf"))
 (ert-deftest kixtart-indent-command-block-ifelse ()
   "Increase indentation level inside ifelse blocks."
   (kixtart-mode-tests--test-indentation
-      ";; If Else statement.
+   ";; If Else statement.
 If $maybe
     $var1 = 1
     $var2 = 2
@@ -108,7 +110,7 @@ EndIf"))
 (ert-deftest kixtart-indent-command-block-select ()
   "Increase indentation level inside select blocks."
   (kixtart-mode-tests--test-indentation
-      ";; Select statement.
+   ";; Select statement.
 Select
 ;; Case statements.
 Case $maybe
@@ -122,7 +124,7 @@ EndSelect"))
 (ert-deftest kixtart-indent-command-block-while ()
   "Increase indentation level inside while blocks."
   (kixtart-mode-tests--test-indentation
-      ";; While loop.
+   ";; While loop.
 While $maybe
     $var1 = 1
     $var2 = 2
@@ -133,7 +135,7 @@ Loop"))
 (ert-deftest kixtart-indent-nested-command-block-do ()
   "Increase relative indentation level inside do blocks."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If 1
         ;; Do loop.
         Do
@@ -146,7 +148,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-nested-command-block-for ()
   "Increase relative indentation level inside for blocks."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If 1
         ;; For loop.
         For $i = 0 to 10
@@ -159,7 +161,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-nested-command-block-foreach ()
   "Increase relative indentation level inside foreach blocks."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If 1
         ;; For Each loop.
         For Each $value in $array
@@ -172,7 +174,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-nested-command-block-if ()
   "Increase relative indentation level inside if blocks."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If 1
         ;; If statement.
         If $maybe
@@ -185,7 +187,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-nested-command-block-ifelse ()
   "Increase relative indentation level inside ifelse blocks."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If 1
         ;; If Else statement.
         If $maybe
@@ -201,7 +203,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-nested-command-block-select ()
   "Increase relative indentation level inside select blocks."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If 1
         ;; Select statement.
         Select
@@ -219,7 +221,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-nested-command-block-while ()
   "Increase relative indentation level inside while blocks."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If 1
         ;; While loop.
         While $maybe
@@ -234,7 +236,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-with-inline-command-blocks ()
   "Indentation level is not affected by inline command blocks."
   (kixtart-mode-tests--test-indentation
-      "If $sometimes If $maybe
+   "If $sometimes If $maybe
     $var = 1 If $always
         $var = 2
     EndIf
@@ -245,7 +247,7 @@ EndIf EndIf"))
 (ert-deftest kixtart-indent-with-parens-inline ()
   "Increase indentation level with parens sharing a line."
   (kixtart-mode-tests--test-indentation
-      "(1
+   "(1
     2
     3 (4
         5
@@ -254,7 +256,7 @@ EndIf EndIf"))
 (ert-deftest kixtart-indent-with-parens-outline ()
   "Increase indentation level with parens on their own line."
   (kixtart-mode-tests--test-indentation
-      "(
+   "(
     1
     2
     3
@@ -268,7 +270,7 @@ EndIf EndIf"))
 (ert-deftest kixtart-indent-with-inline-parens ()
   "Indentation level is not affected by inline parens."
   (kixtart-mode-tests--test-indentation
-      "((1
+   "((1
     2
     3
     ((4
@@ -280,7 +282,7 @@ EndIf EndIf"))
 (ert-deftest kixtart-indent-ignores-string-contents ()
   "Indentation level is not affected by string contents."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If $maybe
         $var = 'If $sometimes
 If $always'
@@ -291,7 +293,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-only-considers-string-start ()
   "Indentation level for a string only applies to its starting point."
   (kixtart-mode-tests--test-indentation
-      "Function MyFunction
+   "Function MyFunction
     If $maybe
         $var1 =
         'one
@@ -310,7 +312,7 @@ EndFunction"))
 (ert-deftest kixtart-indent-ignores-single-line-comment ()
   "Indentation level is not affected by a single-line comments."
   (kixtart-mode-tests--test-indentation
-      "If $maybe
+   "If $maybe
     ; If $sometimes
     $var = 1
 EndIf"))
@@ -318,7 +320,7 @@ EndIf"))
 (ert-deftest kixtart-indent-ignores-multi-line-comment ()
   "Indentation level is not affected by a multi-line comment."
   (kixtart-mode-tests--test-indentation
-      "If $maybe
+   "If $maybe
     /*
     If $sometimes
         $var = 2
@@ -331,7 +333,7 @@ EndIf"))
 (ert-deftest kixtart-indent-honors-symbol-boundaries ()
   "Indentation level is not affected by symbol boundaries."
   (kixtart-mode-tests--test-indentation
-      "Function Function:1
+   "Function Function:1
     $var = 1
 EndFunction
 
@@ -341,7 +343,7 @@ $var = 2"))
 
 (ert-deftest kixtart-beginning-of-defun-backwards ()
   (kixtart-mode-tests--with-temp-buffer
-   "
+      "
 Function Function1
 
 Function Function2
@@ -356,18 +358,18 @@ Function String
 '
 
 Function Function4"
-   (beginning-of-defun)
-   (should (looking-at-p "^Function Function4$"))
-   (beginning-of-defun 2)
-   (should (looking-at-p "^Function Function2$"))
-   (beginning-of-defun 2)
-   (should (looking-at-p "^Function Function1$"))
-   (beginning-of-defun)
-   (should (looking-at-p "^Function Function1$"))))
+    (beginning-of-defun)
+    (should (looking-at-p "^Function Function4$"))
+    (beginning-of-defun 2)
+    (should (looking-at-p "^Function Function2$"))
+    (beginning-of-defun 2)
+    (should (looking-at-p "^Function Function1$"))
+    (beginning-of-defun)
+    (should (looking-at-p "^Function Function1$"))))
 
 (ert-deftest kixtart-beginning-of-defun-forwards ()
   (kixtart-mode-tests--with-temp-buffer
-   "
+      "
 Function Function1
 
 Function Function:2
@@ -383,21 +385,21 @@ Function Function3
 
 Function Function4
 "
-   (goto-char (point-min))
-   (beginning-of-defun -1)
-   (should (looking-at-p "^Function Function1$"))
-   (beginning-of-defun -2)
-   (should (looking-at-p "^Function Function3$"))
-   (beginning-of-defun -2)
-   (should (looking-at-p "^Function Function4$"))
-   (beginning-of-defun -1)
-   (should (looking-at-p "^Function Function4$"))))
+    (goto-char (point-min))
+    (beginning-of-defun -1)
+    (should (looking-at-p "^Function Function1$"))
+    (beginning-of-defun -2)
+    (should (looking-at-p "^Function Function3$"))
+    (beginning-of-defun -2)
+    (should (looking-at-p "^Function Function4$"))
+    (beginning-of-defun -1)
+    (should (looking-at-p "^Function Function4$"))))
 
 ;;;; End of defun
 
 (ert-deftest kixtart-end-of-defun-forwards ()
   (kixtart-mode-tests--with-temp-buffer
-   "
+      "
 Function Function1
 EndFunction
 
@@ -415,29 +417,29 @@ Function Function3 EndFunction
 
 Function Function4
 EndFunction"
-   (goto-char (point-min))
-   (end-of-defun)
-   (should (save-excursion
-             (forward-line -2)
-             (looking-at-p "^Function Function1$")))
-   (end-of-defun 2)
-   (should (save-excursion
-             (forward-line -1)
-             (looking-at-p "^Function Function3 EndFunction$")))
-   (end-of-defun 2)
-   (should (save-excursion
-             (forward-line -1)
-             (beginning-of-line)
-             (looking-at-p "^Function Function4$")))
-   (end-of-defun)
-   (should (save-excursion
-             (forward-line -1)
-             (beginning-of-line)
-             (looking-at-p "^Function Function4$")))))
+    (goto-char (point-min))
+    (end-of-defun)
+    (should (save-excursion
+              (forward-line -2)
+              (looking-at-p "^Function Function1$")))
+    (end-of-defun 2)
+    (should (save-excursion
+              (forward-line -1)
+              (looking-at-p "^Function Function3 EndFunction$")))
+    (end-of-defun 2)
+    (should (save-excursion
+              (forward-line -1)
+              (beginning-of-line)
+              (looking-at-p "^Function Function4$")))
+    (end-of-defun)
+    (should (save-excursion
+              (forward-line -1)
+              (beginning-of-line)
+              (looking-at-p "^Function Function4$")))))
 
 (ert-deftest kixtart-end-of-defun-backwards ()
   (kixtart-mode-tests--with-temp-buffer
-   "
+      "
 Function Function1
 EndFunction
 
@@ -455,87 +457,87 @@ Function Function3 EndFunction
 
 Function Function4
 EndFunction"
-   (end-of-defun -1)
-   (should (save-excursion
-             (forward-line -1)
-             (looking-at-p "^Function Function3 EndFunction$")))
-   (end-of-defun -2)
-   (should (save-excursion
-             (forward-line -2)
-             (looking-at-p "^Function Function1$")))
-   ;; Attempts to overshoot seem to be governed by the internal implementation.
-   ;; (end-of-defun -1)
-   ;; (should (looking-at-p "^Function Function1$"))
-   ))
+    (end-of-defun -1)
+    (should (save-excursion
+              (forward-line -1)
+              (looking-at-p "^Function Function3 EndFunction$")))
+    (end-of-defun -2)
+    (should (save-excursion
+              (forward-line -2)
+              (looking-at-p "^Function Function1$")))
+    ;; Attempts to overshoot seem to be governed by the internal implementation.
+    ;; (end-of-defun -1)
+    ;; (should (looking-at-p "^Function Function1$"))
+    ))
 
 ;;;; Closing open command blocks
 
 (ert-deftest kixtart-close-block-case ()
   "Insert the strings which close an open case block."
   (kixtart-mode-tests--test-block-close
-   ";; Select statement.
+      ";; Select statement.
 Select
 ;; Case statements.
 Case $maybe
     $var1 = 1
     $var2 = 2
 "
-   "Case" "EndSelect"))
+    "Case" "EndSelect"))
 
 (ert-deftest kixtart-close-block-do ()
   "Insert the strings which close an open do block."
   (kixtart-mode-tests--test-block-close
-   ";; Do loop.
+      ";; Do loop.
 Do
     $var1 = 1
     $var2 = 2
 "
-   "Until"))
+    "Until"))
 
 (ert-deftest kixtart-close-block-for ()
   "Insert the strings which close an open for block."
   (kixtart-mode-tests--test-block-close
-   ";; For loop.
+      ";; For loop.
 For $i = 0 to 10
     $var1 = $i
     $var2 = $i
 "
-   "Next"))
+    "Next"))
 
 (ert-deftest kixtart-close-block-foreach ()
   "Insert the strings which close an open foreach block."
   (kixtart-mode-tests--test-block-close
-   ";; For Each loop.
+      ";; For Each loop.
 For Each $value in $array
     $var1 = $value
     $var2 = $value
 "
-   "Next"))
+    "Next"))
 
 (ert-deftest kixtart-close-block-function ()
   "Insert the strings which close an open function block."
   (kixtart-mode-tests--test-block-close
-   ";; Function definition.
+      ";; Function definition.
 Function MyFunction($x, $y)
     $var1 = $x
     $var2 = $y
 "
-   "EndFunction"))
+    "EndFunction"))
 
 (ert-deftest kixtart-close-block-if ()
   "Insert the strings which close an open if block."
   (kixtart-mode-tests--test-block-close
-   ";; If statement.
+      ";; If statement.
 If $maybe
     $var1 = 1
     $var2 = 2
 "
-   "Else" "EndIf"))
+    "Else" "EndIf"))
 
 (ert-deftest kixtart-close-block-ifelse ()
   "Insert the strings which close an open ifelse block."
   (kixtart-mode-tests--test-block-close
-   ";; If statement.
+      ";; If statement.
 If $maybe
     $var1 = 1
     $var2 = 2
@@ -543,24 +545,24 @@ Else
     $var3 = 3
     $var4 = 4
 "
-   "EndIf"))
+    "EndIf"))
 
 (ert-deftest kixtart-close-block-select ()
   "Insert the strings which close an open select block."
   (kixtart-mode-tests--test-block-close
-   ";; Select statement.
+      ";; Select statement.
 Select
 "
-   "Case"))
+    "Case"))
 
 (ert-deftest kixtart-close-block-while ()
   "Insert the strings which close an open while block."
   (kixtart-mode-tests--test-block-close
-   ";; While loop.
+      ";; While loop.
 While $maybe
     $var1 = 1
     $var2 = 2
 "
-   "Loop"))
+    "Loop"))
 
 ;;; kixtart-mode-tests.el ends here
