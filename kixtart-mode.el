@@ -764,7 +764,7 @@ new indentation column."
 
 ;;;; Block closing
 
-(defvar kixtart--close-command-strings nil
+(defvar-local kixtart--close-command-strings nil
   "The list of strings which can close the currently open block.")
 
 (defun kixtart--syntax-case-function (token)
