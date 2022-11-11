@@ -838,7 +838,7 @@ removed when template insertion is interactive."
                  (remove 'p template)
                template))))
 
-(defconst kixtart-tempo-tags nil
+(defvar kixtart-tempo-tags nil
   "Tempo tags for KiXtart Mode.")
 
 (define-abbrev-table 'kixtart-mode-abbrev-table nil
@@ -853,18 +853,17 @@ TAG, DOCUMENTATION, and ELEMENTS are passed directly to
 `tempo-define-template'.  TAG is also used as the abbrev string
 which will be expanded to the template."
   (declare (indent 2))
-  (let ((template (gensym)))
-    `(let ((,template (tempo-define-template (concat "kixtart-" ,tag)
-                                             (quote ,@elements)
-                                             ,tag
-                                             ,documentation
-                                             kixtart-tempo-tags)))
-       (define-abbrev kixtart-mode-abbrev-table ,tag "" (identity ,template)
+  (let ((funname (intern (concat "kixtart-template-" tag))))
+    `(progn
+       (defalias ',funname
+         (tempo-define-template (concat "kixtart-" ,tag)
+                                (quote ,@elements)
+                                ,tag
+                                ,documentation
+                                'kixtart-tempo-tags))
+       (define-abbrev kixtart-mode-abbrev-table ,tag "" #',funname
          :system t)
-       (put (identity ,template) 'no-self-insert t)
-       (defalias (intern (concat "kixtart-template-" ,tag))
-         (identity ,template)
-         ,documentation))))
+       (put ',funname 'no-self-insert t))))
 
 (kixtart--define-template
     "while"
@@ -952,16 +951,16 @@ which will be expanded to the template."
     (define-key map (kbd "C-c C-t C-b") #'tempo-backward-mark)
     (define-key map (kbd "C-c C-t C-f") #'tempo-forward-mark)
     (define-key map (kbd "C-c C-t C-t") #'tempo-complete-tag)
-    (define-key map (kbd "C-c C-t I") 'kixtart-template-ifelse)
-    (define-key map (kbd "C-c C-t c") 'kixtart-template-case)
-    (define-key map (kbd "C-c C-t d") 'kixtart-template-do)
-    (define-key map (kbd "C-c C-t e") 'kixtart-template-foreach)
-    (define-key map (kbd "C-c C-t f") 'kixtart-template-for)
-    (define-key map (kbd "C-c C-t i") 'kixtart-template-if)
-    (define-key map (kbd "C-c C-t l") 'kixtart-template-else)
-    (define-key map (kbd "C-c C-t s") 'kixtart-template-select)
-    (define-key map (kbd "C-c C-t u") 'kixtart-template-function)
-    (define-key map (kbd "C-c C-t w") 'kixtart-template-while)
+    (define-key map (kbd "C-c C-t I") #'kixtart-template-ifelse)
+    (define-key map (kbd "C-c C-t c") #'kixtart-template-case)
+    (define-key map (kbd "C-c C-t d") #'kixtart-template-do)
+    (define-key map (kbd "C-c C-t e") #'kixtart-template-foreach)
+    (define-key map (kbd "C-c C-t f") #'kixtart-template-for)
+    (define-key map (kbd "C-c C-t i") #'kixtart-template-if)
+    (define-key map (kbd "C-c C-t l") #'kixtart-template-else)
+    (define-key map (kbd "C-c C-t s") #'kixtart-template-select)
+    (define-key map (kbd "C-c C-t u") #'kixtart-template-function)
+    (define-key map (kbd "C-c C-t w") #'kixtart-template-while)
     (define-key map (kbd "C-c C-u") #'kixtart-up-script-block)
     map))
 
