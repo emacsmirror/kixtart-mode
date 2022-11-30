@@ -339,6 +339,88 @@ EndFunction
 
 $var = 2"))
 
+;;;; Indentation for multiline expressions
+
+(ert-deftest kixtart-multiline-separators ()
+  "Indentation level is increased for trailing separators."
+  (kixtart-mode-tests--test-indentation
+   ";; Declare array.
+$x = 1, 2,
+    3,
+    4, 5
+$y = 6"))
+
+(ert-deftest kixtart-multiline-separators-with-comments ()
+  "Indentation level is increased for trailing separators."
+  (kixtart-mode-tests--test-indentation
+   ";; Declare array.
+$x = 1, 2,
+    ;; Third.
+    3,
+    ;; Fourth and fifth.
+    4, 5
+$y = 6"))
+
+(ert-deftest kixtart-multiline-separators-in-list ()
+  "Indentation is increased by a single level in a separated list."
+  (kixtart-mode-tests--test-indentation
+   ";; Function call or definition.
+Function:1($a,
+    $b, $c,
+    $x,
+    $y, $z
+)"))
+
+(ert-deftest kixtart-multiline-separators-in-list-with-comments ()
+  "Indentation is increased by a single level in a separated list."
+  (kixtart-mode-tests--test-indentation
+   ";; Function call or definition.
+Function:1($a,
+    ;; Second and third.
+    $b, $c,
+    ;; Forth.
+    $x,
+    ;; Fifth and sixth.
+    $y, $z
+)"))
+
+(ert-deftest kixtart-multiline-indicator ()
+  "Indentation is increased by the special multiline comment."
+  (kixtart-mode-tests--test-indentation
+   ";; A multiline command.
+Copy ;\\
+    $source ;\\
+    $desintation ;\\
+    /c /h /r /s
+Quit"))
+
+(ert-deftest kixtart-multiline-indicator-with-comments ()
+  "Indentation is increased by the special multiline comment.
+Comments persist the indentation level."
+  (kixtart-mode-tests--test-indentation
+   ";; A multiline command.
+Copy ;\\
+    ;; The source directory.
+    $source ;\\
+    ;; The destination directory.
+    $desintation ;\\
+    ;; Flags.
+    /c /h /r /s
+Quit"))
+
+(ert-deftest kixtart-multiline-indicator-script-line-only ()
+  "Indentation is increased by the special multiline comment.
+The special multiline comment is only valid and persisted from
+the end of most recent line which contains uncommented KiXtart
+syntax."
+  (kixtart-mode-tests--test-indentation
+   "$a ;\\ Not special.
+;\\
+$b ;; Not special. \\
+$c ;; Special. ;\\
+    $d
+$e"))
+
 ;;;; Beginning of defun
 
 (ert-deftest kixtart-beginning-of-defun-backwards ()

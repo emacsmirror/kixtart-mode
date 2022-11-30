@@ -554,6 +554,10 @@ number of columns per script-block level."
              ;; macro will evaluate to 0 so a late match against this pattern
              ;; allows the full macro syntax to be fontified as a warning.
              (seq ?@ (1+ user-chars)))
+            (multiline-indicator
+             ;; Special comment to indicate that the current command or
+             ;; expression is unterminated and will continue on a later line.
+             (seq ?\; ?\\ line-end))
             (outline
              (or command-function
                  (seq (>= 3 (syntax \<)) (1+ whitespace))))
@@ -585,6 +589,30 @@ number of columns per script-block level."
 
 ;;;; Utility
 
+(defun kixtart--follows-eol-multiline-separator-p ()
+  "Return a non-nil value when the current line begins mid-list.
+Being within a list is determined by the previous script line
+ending in a \",\" character, ignoring any trailing whitespace or
+comments."
+  (save-excursion
+    (beginning-of-line)
+    (forward-comment (- (point)))
+    (eq (char-before) ?,)))
+
+(defun kixtart--follows-eol-multiline-indicator-p ()
+  "Return a non-nil value when following a mutliline indicator.
+Being within a multiline expression is indicated by the previous
+script line ending with the special comment \";\\\"."
+  (save-excursion
+    (beginning-of-line)
+    (and (> (point)
+            (progn
+              (forward-comment (- (point)))
+              (point)))
+         (re-search-forward (kixtart-rx multiline-indicator)
+                            (line-end-position)
+                            t))))
+
 (defun kixtart--in-comment-or-string-p (&optional ppss)
   "Return a non-nil value when inside a comment or string.
 Prefer existing parser state PPSS over calling `syntax-ppss'"
@@ -605,6 +633,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
 
 (cl-defstruct (kixtart-block-state (:constructor kixtart-make-block-state)
                                    (:copier nil))
+  in-list
   string
   token
   position)
@@ -642,6 +671,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
         (scan-error
          (backward-up-list nil t t)))
       (kixtart-make-block-state
+       :in-list (not (or block-start (bobp)))
        :position (point)
        :token block-start
        :string (and block-start
@@ -708,6 +738,8 @@ return nil."
           (current-column)
         (let ((paren-depth (kixtart--paren-depth ppss))
               (paren-close (looking-at-p "\\s)"))
+              (multiline-indicator (kixtart--follows-eol-multiline-indicator-p))
+              (multiline-separator (kixtart--follows-eol-multiline-separator-p))
               (line-token (and (looking-at (kixtart-rx script-block-close))
                                (kixtart--match-string-as-token)))
               (block-state (kixtart--parse-block-state)))
@@ -719,6 +751,14 @@ return nil."
                  ;; Remove indentation which was already applied to the buffer
                  ;; position by opening parenthesis.
                  (- (kixtart--paren-depth))
+                 ;; Add indentation where the current line continues the
+                 ;; previous line, avoiding a cumulative effect for comma
+                 ;; separated values in parens (e.g. function parameters).
+                 (if (or multiline-indicator
+                         (and multiline-separator
+                              (not (kixtart-block-state-in-list block-state))))
+                     1
+                   0)
                  ;; Add indentation based on parentheses.
                  (max 0 (if paren-close (1- paren-depth) paren-depth))
                  ;; Add indentation based on matching script-block tokens.
