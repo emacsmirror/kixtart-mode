@@ -157,6 +157,28 @@
 ;;       *
 ;;   ENDIF ENDIF
 
+;; Multi-line expressions
+;; ----------------------
+
+;; Additional indentation is applied to a line where the previous script line
+;; ends in a comma.  This provides automatic indentation for KiXtart commands
+;; and expressions which expect comma-separated tokens:
+
+;;   $x = 1, 2, 3,
+;;       4, 5, 6,
+;;       *
+
+;; For tokens which are not comma-separated, it is currently not possible to
+;; manage indentation across lines automatically.  As a workaround, additional
+;; indentation is applied when a special comment indicates that the current line
+;; is ending in the middle of an expression.  The presence of the special
+;; comment ";\" appearing at the end of the previous script line will increase
+;; the indentation of the current line.
+
+;;   COPY $source ;\
+;;       $destination ;\
+;;       *
+
 ;; Motion commands
 ;; ===============
 
