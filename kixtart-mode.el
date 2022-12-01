@@ -758,57 +758,56 @@ return nil."
     (let ((ppss (syntax-ppss)))
       (if (kixtart--in-comment-or-string-p ppss)
           (current-column)
-        (let ((paren-depth (kixtart--paren-depth ppss))
-              (paren-close (looking-at-p "\\s)"))
-              (multiline-indicator (kixtart--follows-eol-multiline-indicator-p))
+        (let ((multiline-indicator (kixtart--follows-eol-multiline-indicator-p))
               (multiline-separator (kixtart--follows-eol-multiline-separator-p))
               (line-token (and (looking-at (kixtart-rx script-block-close))
                                (kixtart--match-string-as-token)))
-              (block-state (kixtart--parse-block-state)))
-          ;; Move to the position where the current script-block was opened
+              (block-state (kixtart--parse-block-state))
+              (new-level (kixtart--paren-depth ppss)))
+          ;; Remove one level of indentation when the current line begins by
+          ;; closing one parenthesis level.
+          (when (and (cl-plusp new-level)
+                     (looking-at-p "\\s)"))
+            (cl-decf new-level))
+          ;; Move to the position where the current block was opened.
           (goto-char (kixtart-block-state-position block-state))
-          (+ (current-indentation)
-             (* kixtart-indent-offset
-                (+
-                 ;; Remove indentation which was already applied to the buffer
-                 ;; position by opening parenthesis.
-                 (- (kixtart--paren-depth))
-                 ;; Add indentation where the current line continues the
-                 ;; previous line, avoiding a cumulative effect for comma
-                 ;; separated values in parens (e.g. function parameters).
-                 (if (or multiline-indicator
-                         (and multiline-separator
-                              (not (kixtart-block-state-in-list block-state))))
-                     1
-                   0)
-                 ;; Add indentation based on parentheses.
-                 (max 0 (if paren-close (1- paren-depth) paren-depth))
-                 ;; Add indentation based on matching script-block tokens.
-                 (pcase `(,(kixtart-block-state-token block-state)
-                          ,line-token)
-                   ;; Avoid further pattern matches where there is no
-                   ;; script-block open.
-                   (`(nil ,_) 0)
-                   ;; Always match an opening "SELECT" to allow anything
-                   ;; preceeding the first "CASE" block to align with the
-                   ;; "SELECT" block.
-                   (`(kixtart-select-t ,_) 0)
-                   ;; Avoid further pattern matches for a script-block open
-                   ;; without a script-block close.
-                   (`(,_ nil) 1)
-                   ;; Matching token pairs.
-                   ((or '(kixtart-do-t       kixtart-until-t)
-                        `(kixtart-case-t     ,(or 'kixtart-case-t
-                                                  'kixtart-endselect-t))
-                        '(kixtart-else-t     kixtart-endif-t)
-                        '(kixtart-for-t      kixtart-next-t)
-                        '(kixtart-function-t kixtart-endfunction-t)
-                        `(kixtart-if-t       ,(or 'kixtart-else-t
-                                                  'kixtart-endif-t))
-                        '(kixtart-while-t    kixtart-loop-t))
-                    0)
-                   ;; Default to increasing the indentation.
-                   (_ 1))))))))))
+          ;; Remove indentation which was applied to the block opening position
+          ;; by parentheses.
+          (cl-decf new-level (kixtart--paren-depth))
+          ;; Add indentation where the current line continues the previous line,
+          ;; avoiding a cumulative effect for comma separated values in
+          ;; parentheses (e.g. function parameters).
+          (when (or multiline-indicator
+                    (and multiline-separator
+                         (not (kixtart-block-state-in-list block-state))))
+            (cl-incf new-level))
+          ;; Add indentation based on matching script-block tokens.
+          (when (pcase `(,(kixtart-block-state-token block-state)
+                         ,line-token)
+                  ;; Avoid further pattern matches where there is no
+                  ;; script-block open.
+                  (`(nil ,_))
+                  ;; Always match an opening "SELECT" to allow anything
+                  ;; preceeding the first "CASE" block to align with the
+                  ;; "SELECT" block.
+                  (`(kixtart-select-t ,_))
+                  ;; Avoid further pattern matches for a script-block open
+                  ;; without a script-block close.
+                  (`(,_ nil) t)
+                  ;; Matching token pairs.
+                  ((or '(kixtart-do-t       kixtart-until-t)
+                       `(kixtart-case-t     ,(or 'kixtart-case-t
+                                                 'kixtart-endselect-t))
+                       '(kixtart-else-t     kixtart-endif-t)
+                       '(kixtart-for-t      kixtart-next-t)
+                       '(kixtart-function-t kixtart-endfunction-t)
+                       `(kixtart-if-t       ,(or 'kixtart-else-t
+                                                 'kixtart-endif-t))
+                       '(kixtart-while-t    kixtart-loop-t)))
+                  ;; Default to increasing the indentation.
+                  (_ t))
+            (cl-incf new-level))
+          (+ (current-indentation) (* new-level kixtart-indent-offset)))))))
 
 (defun kixtart-indent-line ()
   "Indent the current line to match the script-block level.
