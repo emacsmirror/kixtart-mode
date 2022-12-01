@@ -675,18 +675,19 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
                       (null block-start))
             (forward-sexp -1)
             (cond ((looking-at (kixtart-rx script-block-open))
-                   (pcase `(,(kixtart--match-string-as-token) ,(car block-end))
-                     (`(,open-token nil)
+                   (pcase (cons (kixtart--match-string-as-token)
+                                (car block-end))
+                     (`(,open-token . nil)
                       (setq block-start open-token))
                      ;; Matching token pairs.  Ignore opening "CASE" and "ELSE"
                      ;; since they effectively close and re-open a script-block.
-                     ((or '(kixtart-do-t       kixtart-until-t)
-                          '(kixtart-for-t      kixtart-next-t)
-                          '(kixtart-function-t kixtart-endfunction-t)
-                          `(kixtart-if-t       ,(or 'kixtart-else-t
-                                                    'kixtart-endif-t))
-                          '(kixtart-select-t   kixtart-endselect-t)
-                          '(kixtart-while-t    kixtart-loop-t))
+                     ((or '(kixtart-do-t       . kixtart-until-t)
+                          '(kixtart-for-t      . kixtart-next-t)
+                          '(kixtart-function-t . kixtart-endfunction-t)
+                          `(kixtart-if-t       . ,(or 'kixtart-else-t
+                                                      'kixtart-endif-t))
+                          '(kixtart-select-t   . kixtart-endselect-t)
+                          '(kixtart-while-t    . kixtart-loop-t))
                       (pop block-end))))
                   ((looking-at (kixtart-rx script-block-close))
                    (push (kixtart--match-string-as-token) block-end))))
@@ -782,28 +783,27 @@ return nil."
                          (not (kixtart-block-state-in-list block-state))))
             (cl-incf new-level))
           ;; Add indentation based on matching script-block tokens.
-          (when (pcase `(,(kixtart-block-state-token block-state)
-                         ,line-token)
+          (when (pcase (cons (kixtart-block-state-token block-state) line-token)
                   ;; Avoid further pattern matches where there is no
                   ;; script-block open.
-                  (`(nil ,_))
+                  (`(nil . ,_))
                   ;; Always match an opening "SELECT" to allow anything
                   ;; preceeding the first "CASE" block to align with the
                   ;; "SELECT" block.
-                  (`(kixtart-select-t ,_))
+                  (`(kixtart-select-t . ,_))
                   ;; Avoid further pattern matches for a script-block open
                   ;; without a script-block close.
-                  (`(,_ nil) t)
+                  (`(,_ . nil) t)
                   ;; Matching token pairs.
-                  ((or '(kixtart-do-t       kixtart-until-t)
-                       `(kixtart-case-t     ,(or 'kixtart-case-t
-                                                 'kixtart-endselect-t))
-                       '(kixtart-else-t     kixtart-endif-t)
-                       '(kixtart-for-t      kixtart-next-t)
-                       '(kixtart-function-t kixtart-endfunction-t)
-                       `(kixtart-if-t       ,(or 'kixtart-else-t
-                                                 'kixtart-endif-t))
-                       '(kixtart-while-t    kixtart-loop-t)))
+                  ((or '(kixtart-do-t       . kixtart-until-t)
+                       `(kixtart-case-t     . ,(or 'kixtart-case-t
+                                                   'kixtart-endselect-t))
+                       '(kixtart-else-t     . kixtart-endif-t)
+                       '(kixtart-for-t      . kixtart-next-t)
+                       '(kixtart-function-t . kixtart-endfunction-t)
+                       `(kixtart-if-t       . ,(or 'kixtart-else-t
+                                                   'kixtart-endif-t))
+                       '(kixtart-while-t    . kixtart-loop-t)))
                   ;; Default to increasing the indentation.
                   (_ t))
             (cl-incf new-level))
