@@ -718,7 +718,7 @@ return nil."
   (let* ((forwards (< arg 0))
          (search-fn (if forwards #'re-search-forward #'re-search-backward))
          (inc-fn (if forwards #'1+ #'1-))
-         (match-pos nil))
+         match-pos)
     (save-excursion
       ;; Ensure that searching forwards doesn't match the current position.
       (when (and forwards (looking-at-p (kixtart-rx command-function)))
@@ -735,7 +735,7 @@ return nil."
 
 (defun kixtart-end-of-defun ()
   "Move forwards to the end of a function definition."
-  (let ((match-pos nil))
+  (let (match-pos)
     (save-excursion
       (while (and (re-search-forward (kixtart-rx command-endfunction) nil t)
                   (or (kixtart--in-comment-or-string-p)
