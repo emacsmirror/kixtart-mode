@@ -715,7 +715,7 @@ beginning of the line where the search succeeded.  Otherwise,
 return nil."
   (interactive "^p")
   (unless arg (setq arg 1))
-  (let* ((forwards (< arg 0))
+  (let* ((forwards (cl-minusp arg))
          (search-fn (if forwards #'re-search-forward #'re-search-backward))
          (inc-fn (if forwards #'1+ #'1-))
          match-pos)
