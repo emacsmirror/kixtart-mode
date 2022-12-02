@@ -853,7 +853,7 @@ new indentation column."
             (pcase (kixtart-block-state-string block-state)
               ((and (pred stringp)
                     (app kixtart--syntax-case-function func)
-                    (guard func))
+                    (guard (functionp func)))
                (mapcar func close-list))
               (_ close-list)))))
   (pcase (car kixtart--close-command-strings)
