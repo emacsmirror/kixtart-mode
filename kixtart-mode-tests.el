@@ -647,4 +647,24 @@ While $maybe
 "
     "Loop"))
 
+(ert-deftest kixtart-close-block-if-downcase ()
+  "Insert the downcased strings which close an open if block."
+  (kixtart-mode-tests--test-block-close
+      ";; If statement.
+if $maybe
+    $var1 = 1
+    $var2 = 2
+"
+    "else" "endif"))
+
+(ert-deftest kixtart-close-block-if-upcase ()
+  "Insert the upcased strings which close an open if block."
+  (kixtart-mode-tests--test-block-close
+      ";; If statement.
+IF $maybe
+    $var1 = 1
+    $var2 = 2
+"
+    "ELSE" "ENDIF"))
+
 ;;; kixtart-mode-tests.el ends here
