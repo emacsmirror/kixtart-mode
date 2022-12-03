@@ -10,7 +10,7 @@ check: kixtart-mode-tests.elc
 	$(EMACS) --batch --quick \
 	    --directory . \
 	    --load kixtart-mode-tests.elc \
-	    --funcall ert-run-tests-batch
+	    --funcall ert-run-tests-batch-and-exit
 
 kixtart-mode-tests.elc: kixtart-mode.elc kixtart-mode-tests.el
 
