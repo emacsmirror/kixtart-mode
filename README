@@ -16,7 +16,7 @@ Installation
 
 Clone this repository to a local sub-directory:
 
-  git clone https://github.com/morganwillcock/kixtart-mode.git
+  git clone https://git.sr.ht/~mew/kixtart-mode
 
 Within the Emacs configuration, add the path of the cloned directory to the
 value of `load-path'.  The following example assumes that the repository was
