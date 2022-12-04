@@ -2,11 +2,12 @@
 
 ;; Copyright (C) 2022 Morgan Willcock
 
-;; Author: Morgan Willcock <morganwillcock@users.noreply.github.com>
+;; Author: Morgan Willcock <morgan@ice9.digital>
 ;; Keywords: languages
+;; Maintainer: Morgan Willcock <morgan@ice9.digital>
 ;; Package-Requires: ((emacs "27.1"))
-;; URL: https://github.com/morganwillcock/kixtart-mode
-;; Version: 0.1
+;; URL: https://git.sr.ht/~mew/kixtart-mode
+;; Version: 1.0.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
