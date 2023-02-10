@@ -1,6 +1,6 @@
 ;;; kixtart-mode.el --- Major mode for editing KiXtart files -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2022 Morgan Willcock
+;; Copyright (C) 2023 Morgan Willcock
 
 ;; Author: Morgan Willcock <morgan@ice9.digital>
 ;; Keywords: languages
