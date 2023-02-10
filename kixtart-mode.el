@@ -654,14 +654,14 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
 
 ;;;; Block parser
 
-(cl-defstruct (kixtart-block-state (:constructor kixtart-make-block-state)
-                                   (:copier nil))
+(cl-defstruct (kixtart-block (:constructor kixtart-make-block)
+                             (:copier nil))
   in-parens
   token
   token-string
   position)
 
-(defun kixtart--parse-block-state ()
+(defun kixtart--parse-block ()
   "Scan backwards and return the current block state."
   ;; Move out of strings and comments.
   (save-excursion
@@ -696,7 +696,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
                    (push (kixtart--match-string-as-token) block-end))))
         (scan-error
          (backward-up-list nil t t)))
-      (kixtart-make-block-state
+      (kixtart-make-block
        :in-parens (not (or block-start (bobp)))
        :position (point)
        :token block-start
@@ -747,7 +747,7 @@ return nil."
 (defun kixtart-up-script-block ()
   "Move point to the opening of the current script-block."
   (interactive)
-  (goto-char (kixtart-block-state-position (kixtart--parse-block-state))))
+  (goto-char (kixtart-block-position (kixtart--parse-block))))
 
 ;;;; Indentation
 
@@ -762,7 +762,7 @@ return nil."
               (multiline-separator (kixtart--follows-eol-multiline-separator-p))
               (line-token (and (looking-at (kixtart-rx script-block-close))
                                (kixtart--match-string-as-token)))
-              (block-state (kixtart--parse-block-state))
+              (block (kixtart--parse-block))
               (new-level (kixtart--paren-depth ppss)))
           ;; Remove one level of indentation when the current line begins by
           ;; closing one parenthesis level.
@@ -770,7 +770,7 @@ return nil."
                      (looking-at-p "\\s)"))
             (cl-decf new-level))
           ;; Move to the position where the current block was opened.
-          (goto-char (kixtart-block-state-position block-state))
+          (goto-char (kixtart-block-position block))
           ;; Remove indentation which was applied to the block opening position
           ;; by parentheses.
           (cl-decf new-level (kixtart--paren-depth))
@@ -779,10 +779,10 @@ return nil."
           ;; parentheses (e.g. function parameters).
           (when (or multiline-indicator
                     (and multiline-separator
-                         (not (kixtart-block-state-in-parens block-state))))
+                         (not (kixtart-block-in-parens block))))
             (cl-incf new-level))
           ;; Add indentation based on matching script-block tokens.
-          (when (pcase (cons (kixtart-block-state-token block-state) line-token)
+          (when (pcase (cons (kixtart-block-token block) line-token)
                   ;; Avoid further pattern matches where there is no
                   ;; script-block open.
                   (`(nil . ,_))
@@ -839,8 +839,8 @@ new indentation column."
            (eq last-command #'kixtart-close-command-block))
       (backward-delete-char (length (pop kixtart--close-command-strings)))
     (setq kixtart--close-command-strings
-          (let* ((block-state (kixtart--parse-block-state))
-                 (close-list (pcase (kixtart-block-state-token block-state)
+          (let* ((block (kixtart--parse-block))
+                 (close-list (pcase (kixtart-block-token block)
                                ('kixtart-case-t     (list "Case" "EndSelect"))
                                ('kixtart-do-t       (list "Until"))
                                ('kixtart-else-t     (list "EndIf"))
@@ -849,7 +849,7 @@ new indentation column."
                                ('kixtart-if-t       (list "Else" "EndIf"))
                                ('kixtart-select-t   (list "Case"))
                                ('kixtart-while-t    (list "Loop")))))
-            (pcase (kixtart-block-state-token-string block-state)
+            (pcase (kixtart-block-token-string block)
               ((and (pred stringp)
                     (app kixtart--syntax-case-function func)
                     (guard (functionp func)))
