@@ -657,8 +657,8 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
 (cl-defstruct (kixtart-block-state (:constructor kixtart-make-block-state)
                                    (:copier nil))
   in-parens
-  string
   token
+  token-string
   position)
 
 (defun kixtart--parse-block-state ()
@@ -670,7 +670,8 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
     ;; Search backwards matching pairs of script-block defining keyword tokens.
     (let ((parse-sexp-ignore-comments t)
           block-end
-          block-start)
+          block-start
+          token-string)
       (condition-case nil
           (while (and (not (bobp))
                       (null block-start))
@@ -679,7 +680,8 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
                    (pcase (cons (kixtart--match-string-as-token)
                                 (car block-end))
                      (`(,open-token . nil)
-                      (setq block-start open-token))
+                      (setq block-start open-token
+                            token-string (match-string-no-properties 0)))
                      ;; Matching token pairs.  Ignore opening "CASE" and "ELSE"
                      ;; since they effectively close and re-open a script-block.
                      ((or '(kixtart-do-t       . kixtart-until-t)
@@ -698,11 +700,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
        :in-parens (not (or block-start (bobp)))
        :position (point)
        :token block-start
-       :string (and block-start
-                    (buffer-substring-no-properties (point)
-                                                    (progn
-                                                      (forward-sexp)
-                                                      (point))))))))
+       :token-string token-string))))
 
 ;;;; Motion
 
@@ -851,7 +849,7 @@ new indentation column."
                                ('kixtart-if-t       (list "Else" "EndIf"))
                                ('kixtart-select-t   (list "Case"))
                                ('kixtart-while-t    (list "Loop")))))
-            (pcase (kixtart-block-state-string block-state)
+            (pcase (kixtart-block-state-token-string block-state)
               ((and (pred stringp)
                     (app kixtart--syntax-case-function func)
                     (guard (functionp func)))
