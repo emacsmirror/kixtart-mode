@@ -463,7 +463,7 @@
 (eval-when-compile
   (require 'cl-lib)
   (require 'rx))
-
+
 ;;;; Customization
 
 (defgroup kixtart nil
@@ -491,7 +491,7 @@ number of columns per script-block level."
                  (const :tag "Always" t)
                  (const :tag "At end of buffer" ,#'eobp)
                  (function :tag "Custom function")))
-
+
 ;;;; Search patterns
 
 (defmacro kixtart-rx (&rest regexps)
@@ -609,7 +609,7 @@ number of columns per script-block level."
              ;; "$$$ = 3" evaluates $ twice and then assigns it a new value of 3
              (seq ?$ (0+ user-chars))))
      (rx ,@regexps)))
-
+
 ;;;; Utility
 
 (defun kixtart--follows-eol-multiline-separator-p ()
@@ -651,7 +651,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
   (intern-soft (concat "kixtart-"
                        (downcase (match-string-no-properties 0))
                        "-t")))
-
+
 ;;;; Block parser
 
 (cl-defstruct (kixtart-block (:constructor kixtart-make-block)
@@ -701,7 +701,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
        :position (point)
        :token block-start
        :token-string token-string))))
-
+
 ;;;; Motion
 
 (defun kixtart-beginning-of-defun (&optional arg)
@@ -748,7 +748,7 @@ return nil."
   "Move point to the opening of the current script-block."
   (interactive)
   (goto-char (kixtart-block-position (kixtart--parse-block))))
-
+
 ;;;; Indentation
 
 (defun kixtart--new-indent ()
@@ -821,7 +821,7 @@ new indentation column."
           (indent-line-to new-indent))
         (when goto-indentation
           (back-to-indentation))))))
-
+
 ;;;; Block closing
 
 (defvar-local kixtart--close-command-strings nil
@@ -868,7 +868,7 @@ new indentation column."
 (put 'kixtart-close-command-block
      'repeat-map
      'kixtart-close-command-block-repeat-map)
-
+
 ;;;; Outline mode
 
 (defun kixtart-outline-level ()
@@ -878,7 +878,7 @@ new indentation column."
     (save-excursion
       (forward-same-syntax)
       (- (current-column) 2))))
-
+
 ;;;; Templates
 
 (defun kixtart--tempo-newline-eob ()
@@ -1001,7 +1001,7 @@ which will be expanded to the template."
     "Insert a KiXtart Case statement."
   (& "Case " (p "case-expression: " expr) > n
      > r (kixtart--tempo-newline-eob)))
-
+
 ;;;; Keymap
 
 (defvar kixtart-mode-map
@@ -1023,7 +1023,7 @@ which will be expanded to the template."
     (define-key map (kbd "C-c C-t w") #'kixtart-template-while)
     (define-key map (kbd "C-c C-u") #'kixtart-up-script-block)
     map))
-
+
 ;;;; Syntax table
 
 ;; Note that the ? character is left as punctuation even though it is
@@ -1061,7 +1061,7 @@ which will be expanded to the template."
     (modify-syntax-entry ?\{ "_" table)
     (modify-syntax-entry ?\} "_" table)
     table))
-
+
 ;;;; Mode
 
 ;;;###autoload
