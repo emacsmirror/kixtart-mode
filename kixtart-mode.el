@@ -656,7 +656,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
 
 (cl-defstruct (kixtart-block-state (:constructor kixtart-make-block-state)
                                    (:copier nil))
-  in-list
+  in-parens
   string
   token
   position)
@@ -695,7 +695,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
         (scan-error
          (backward-up-list nil t t)))
       (kixtart-make-block-state
-       :in-list (not (or block-start (bobp)))
+       :in-parens (not (or block-start (bobp)))
        :position (point)
        :token block-start
        :string (and block-start
@@ -781,7 +781,7 @@ return nil."
           ;; parentheses (e.g. function parameters).
           (when (or multiline-indicator
                     (and multiline-separator
-                         (not (kixtart-block-state-in-list block-state))))
+                         (not (kixtart-block-state-in-parens block-state))))
             (cl-incf new-level))
           ;; Add indentation based on matching script-block tokens.
           (when (pcase (cons (kixtart-block-state-token block-state) line-token)
