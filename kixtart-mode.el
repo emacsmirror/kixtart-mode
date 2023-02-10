@@ -610,6 +610,19 @@ number of columns per script-block level."
              (seq ?$ (0+ user-chars))))
      (rx ,@regexps)))
 
+;;;; Font lock
+
+(defvar kixtart-font-lock-keywords
+  `((,(kixtart-rx macro)
+     (1 font-lock-type-face) (2 font-lock-warning-face))
+    (,(kixtart-rx macro-format) . font-lock-warning-face)
+    (,(kixtart-rx function)     . font-lock-builtin-face)
+    (,(kixtart-rx function-def)
+     (1 font-lock-keyword-face) (2 font-lock-function-name-face))
+    (,(kixtart-rx command)      . font-lock-keyword-face)
+    (,(kixtart-rx label)        . font-lock-constant-face)
+    (,(kixtart-rx variable)     . font-lock-variable-name-face)))
+
 ;;;; Utility
 
 (defun kixtart--follows-eol-multiline-separator-p ()
@@ -1069,17 +1082,7 @@ which will be expanded to the template."
   "Major mode for editing KiXtart files."
   (setq mode-name "KiXtart")
   (setq-local comment-start ";")
-  (setq-local font-lock-defaults
-              `(((,(kixtart-rx macro)
-                  (1 font-lock-type-face) (2 font-lock-warning-face))
-                 (,(kixtart-rx macro-format) . font-lock-warning-face)
-                 (,(kixtart-rx function)     . font-lock-builtin-face)
-                 (,(kixtart-rx function-def)
-                  (1 font-lock-keyword-face) (2 font-lock-function-name-face))
-                 (,(kixtart-rx command)      . font-lock-keyword-face)
-                 (,(kixtart-rx label)        . font-lock-constant-face)
-                 (,(kixtart-rx variable)     . font-lock-variable-name-face))
-                nil t))
+  (setq-local font-lock-defaults '(kixtart-font-lock-keywords nil t))
   (setq-local beginning-of-defun-function #'kixtart-beginning-of-defun)
   (setq-local end-of-defun-function #'kixtart-end-of-defun)
   (setq-local indent-line-function #'kixtart-indent-line)
