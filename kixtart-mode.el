@@ -539,14 +539,14 @@ number of columns per script-block level."
                       "writevalue")
                   symbol-end))
             (function-def
+             (seq (group command-function)
+                  (1+ whitespace)
+                  (group function-name)))
+            (function-name
              ;; Function names cannot start with a character which wrongly
              ;; identifies the name as a label, macro, or variable.
-             (seq (group
-                   command-function)
-                  (1+ whitespace)
-                  (group
-                   (seq (1+ (intersection user-chars (not (char ?$ ?: ?@))))
-                        (0+ user-chars)))))
+             (seq (1+ (intersection user-chars (not (char ?$ ?: ?@))))
+                  (0+ user-chars)))
             (label
              (seq symbol-start ?: (1+ user-chars)))
             (macro
@@ -612,16 +612,57 @@ number of columns per script-block level."
 
 ;;;; Font lock
 
+;; Prevent the use of lexical binding for font-lock boundaries.
+(defvar font-lock-beg)
+(defvar font-lock-end)
+
+(defun kixtart--font-lock-extend-region-function-def ()
+  "Move fontification boundaries to include function keyword and name.
+It is assumed that this function is added into the
+`font-lock-extend-region-functions' list in a position where it
+will be called after the `font-lock-extend-region-wholelines'
+function."
+  (cl-flet ((after-func (from)
+              (goto-char from)
+              (forward-comment (- (point)))
+              (and (looking-back (kixtart-rx command-function) (- (point) 8))
+                   (match-beginning 0)))
+            (before-name (from)
+              (goto-char from)
+              (forward-comment (point-max))
+              (and (looking-at (kixtart-rx function-name))
+                   (match-end 0))))
+    (let (changed)
+      (when (before-name font-lock-beg)
+        (when-let ((func-beg (after-func font-lock-beg)))
+          (setq font-lock-beg func-beg)
+          (setq changed t)))
+      (when (after-func font-lock-end)
+        (when-let ((name-end (before-name font-lock-end)))
+          (setq font-lock-end name-end)
+          (setq changed t)))
+      changed)))
+
 (defvar kixtart-font-lock-keywords
   `((,(kixtart-rx macro)
      (1 font-lock-type-face) (2 font-lock-warning-face))
     (,(kixtart-rx macro-format) . font-lock-warning-face)
     (,(kixtart-rx function)     . font-lock-builtin-face)
-    (,(kixtart-rx function-def)
-     (1 font-lock-keyword-face) (2 font-lock-function-name-face))
-    (,(kixtart-rx command)      . font-lock-keyword-face)
     (,(kixtart-rx label)        . font-lock-constant-face)
-    (,(kixtart-rx variable)     . font-lock-variable-name-face)))
+    (,(kixtart-rx variable)     . font-lock-variable-name-face)
+    (,(kixtart-rx command-function) (0 font-lock-keyword-face)
+     ;; Anchored match for function name.
+     (,(kixtart-rx function-name)
+      (progn
+        (forward-comment (point-max))
+        (if (looking-at (kixtart-rx function-name))
+            (match-end 0)
+          ;; Skip highlighting anything else on this line by leaving point at
+          ;; the end of the line.
+          (end-of-line)))
+      nil
+      (0 font-lock-function-name-face)))
+    (,(kixtart-rx command)      . font-lock-keyword-face)))
 
 ;;;; Utility
 
@@ -1091,7 +1132,9 @@ which will be expanded to the template."
   (setq imenu-create-index-function #'imenu-default-create-index-function)
   (setq imenu-generic-expression `((nil ,(kixtart-rx function-def) 2)
                                    ("/Labels" ,(kixtart-rx label) 0)))
-  (tempo-use-tag-list 'kixtart-tempo-tags))
+  (tempo-use-tag-list 'kixtart-tempo-tags)
+  (add-to-list 'font-lock-extend-region-functions
+               #'kixtart--font-lock-extend-region-function-def t))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.kix\\'" . kixtart-mode))
