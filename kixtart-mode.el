@@ -512,6 +512,11 @@ number of columns per script-block level."
              (seq symbol-start "endfunction" symbol-end))
             (command-function
              (seq symbol-start "function" symbol-end))
+            (dot-property
+             ;; Assume that object properties cannot start with a number, which
+             ;; is probably true and prevents matching floating point numbers.
+             (seq ?. (1+ (intersection user-chars (not (char (?0 . ?9)))))
+                  (0+ user-chars)))
             (function
              (seq symbol-start
                   (or "abs" "addkey" "addprinterconnection" "addprogramgroup"
@@ -645,8 +650,9 @@ function."
 
 (defvar kixtart-font-lock-keywords
   `((,(kixtart-rx macro)
-     (1 font-lock-type-face) (2 font-lock-warning-face))
+     (1 font-lock-preprocessor-face) (2 font-lock-warning-face))
     (,(kixtart-rx macro-format) . font-lock-warning-face)
+    (,(kixtart-rx dot-property) . font-lock-type-face)
     (,(kixtart-rx function)     . font-lock-builtin-face)
     (,(kixtart-rx label)        . font-lock-constant-face)
     (,(kixtart-rx variable)     . font-lock-variable-name-face)
