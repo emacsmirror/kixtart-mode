@@ -1190,6 +1190,7 @@ which will be expanded to the template."
   (setq-local beginning-of-defun-function #'kixtart-beginning-of-defun)
   (setq-local end-of-defun-function #'kixtart-end-of-defun)
   (setq-local indent-line-function #'kixtart-indent-line)
+  (setq-local add-log-current-defun-function #'kixtart-current-defun)
   (setq-local outline-level #'kixtart-outline-level)
   (setq-local outline-regexp (kixtart-rx outline))
   (setq imenu-create-index-function #'kixtart--create-imenu-index)
