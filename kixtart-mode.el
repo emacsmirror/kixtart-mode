@@ -543,10 +543,6 @@ number of columns per script-block level."
                       "vartype" "vartypename" "writeline" "writeprofilestring"
                       "writevalue")
                   symbol-end))
-            (function-def
-             (seq (group command-function)
-                  (1+ whitespace)
-                  (group function-name)))
             (function-name
              ;; Function names cannot start with a character which wrongly
              ;; identifies the name as a label, macro, or variable.
@@ -929,6 +925,36 @@ new indentation column."
      'repeat-map
      'kixtart-close-command-block-repeat-map)
 
+;;;; Imenu
+
+(defun kixtart--create-imenu-index ()
+  "Build and return an index alist suitable for Imenu.
+Functions are added at the top level of the menu.  Labels are
+added into a sub-menu."
+  (save-excursion
+    (save-restriction
+      (widen)
+      (let (index)
+        ;; Match labels.
+        (let (label-index)
+          (goto-char (point-max))
+          (while (re-search-backward (kixtart-rx label) nil t)
+            (unless (kixtart--in-comment-or-string-p)
+              (push (cons (substring (match-string-no-properties 0) 1) (point))
+                    label-index)))
+          (when label-index
+            (push (cons "/Labels" label-index) index)))
+        ;; Match function definitions.
+        (goto-char (point-max))
+        (while (kixtart-beginning-of-defun)
+          (let ((pos (point)))
+            (forward-char 8)
+            (forward-comment (point-max))
+            (when (looking-at (kixtart-rx function-name))
+              (push (cons (match-string-no-properties 0) pos) index))
+            (goto-char pos)))
+        index))))
+
 ;;;; Outline mode
 
 (defun kixtart-outline-level ()
@@ -1135,9 +1161,7 @@ which will be expanded to the template."
   (setq-local indent-line-function #'kixtart-indent-line)
   (setq-local outline-level #'kixtart-outline-level)
   (setq-local outline-regexp (kixtart-rx outline))
-  (setq imenu-create-index-function #'imenu-default-create-index-function)
-  (setq imenu-generic-expression `((nil ,(kixtart-rx function-def) 2)
-                                   ("/Labels" ,(kixtart-rx label) 0)))
+  (setq imenu-create-index-function #'kixtart--create-imenu-index)
   (tempo-use-tag-list 'kixtart-tempo-tags)
   (add-to-list 'font-lock-extend-region-functions
                #'kixtart--font-lock-extend-region-function-def t))
