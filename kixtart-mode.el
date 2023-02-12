@@ -491,6 +491,15 @@ number of columns per script-block level."
                  (const :tag "Always" t)
                  (const :tag "At end of buffer" ,#'eobp)
                  (function :tag "Custom function")))
+
+(defcustom kixtart-which-function-default-name "-"
+  "Specifies the default function name provided to `which-function-mode'.
+This name is provided as the function name when point is outside
+of a function.  When the value is set to nil
+`which-function-mode' falls back to matching based on the latest
+Imenu index data."
+  :type '(choice (string :tag "Default name")
+                 (const :tag "Use Imenu index" nil)))
 
 ;;;; Search patterns
 
@@ -917,6 +926,36 @@ new indentation column."
      'repeat-map
      'kixtart-close-command-block-repeat-map)
 
+;;;; Current function.
+
+(defun kixtart-current-defun ()
+  "Return the function name which surrounds point.
+When point is not within a function return nil."
+  (save-excursion
+    (when-let ((from (point))
+               (func-beg (progn
+                           ;; Move point beyond the current word if it looks
+                           ;; like the FUNCTION command.
+                           (pcase (current-word t)
+                             ((and (pred stringp)
+                                   (pred (string-match
+                                          (kixtart-rx command-function))))
+                              (skip-syntax-forward "w")))
+                           (and (kixtart-beginning-of-defun)
+                                (point)))))
+      (pcase (and (kixtart-end-of-defun) (point))
+        ((or (pred null) (pred (< from)))
+         (goto-char (+ func-beg 8))
+         (forward-comment (point-max))
+         (and (looking-at (kixtart-rx function-name))
+              (match-string-no-properties 0)))))))
+
+(defun kixtart-which-function ()
+  "Return the function name which surrounds point.
+When point is not within a function return the value of
+`kixtart-which-function-default-name'."
+  (or (kixtart-current-defun) kixtart-which-function-default-name))
+
 ;;;; Imenu
 
 (defun kixtart--create-imenu-index ()
@@ -1155,6 +1194,7 @@ which will be expanded to the template."
   (setq-local outline-regexp (kixtart-rx outline))
   (setq imenu-create-index-function #'kixtart--create-imenu-index)
   (tempo-use-tag-list 'kixtart-tempo-tags)
+  (add-hook 'which-func-functions 'kixtart-which-function nil t)
   (add-to-list 'font-lock-extend-region-functions
                #'kixtart--font-lock-extend-region-function-def t))
 
