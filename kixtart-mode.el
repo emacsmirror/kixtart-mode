@@ -551,32 +551,21 @@ number of columns per script-block level."
             (label
              (seq symbol-start ?: (1+ user-chars)))
             (macro
-             ;; The real parser seems to silently discard the trailing part of a
-             ;; macro name if the leading part matches an actual macro name.
-             ;; Match groups are used so that the trailing part of the name can
-             ;; be fontified as a warning.
-             (seq (group
-                   (seq ?@
-                        (or "address" "build" "color" "comment" "cpu" "crlf"
-                            "csd" "curdir" "date" "day" "domain" "dos" "error"
-                            "fullname" "homedir" "homedrive" "homeshr"
-                            "hostname" "inudf" "inwin" "ipaddress0" "ipaddress1"
-                            "ipaddress2" "ipaddress3" "kix" "lanroot" "ldomain"
-                            "ldrive" "lm" "logonmode" "longhomedir" "lserver"
-                            "maxpwage" "mdayno" "mhz" "month" "monthno" "msecs"
-                            "onwow64" "pid" "primarygroup" "priv" "productsuite"
-                            "producttype" "programfilesx86" "pwage" "ras"
-                            "releaseid" "releasename" "result" "rserver"
-                            "scriptdir" "scriptexe" "scriptname" "serror" "sid"
-                            "site" "startdir" "syslang" "ticks" "time"
-                            "tssession" "userid" "userlang" "wdayno" "wksta"
-                            "wuserid" "ydayno" "year")))
-                  (group
-                   (0+ user-chars))))
+             (seq ?@
+                  (or "address" "build" "color" "comment" "cpu" "crlf" "csd"
+                      "curdir" "date" "day" "domain" "dos" "error" "fullname"
+                      "homedir" "homedrive" "homeshr" "hostname" "inudf" "inwin"
+                      "ipaddress0" "ipaddress1" "ipaddress2" "ipaddress3" "kix"
+                      "lanroot" "ldomain" "ldrive" "lm" "logonmode"
+                      "longhomedir" "lserver" "maxpwage" "mdayno" "mhz" "month"
+                      "monthno" "msecs" "onwow64" "pid" "primarygroup" "priv"
+                      "productsuite" "producttype" "programfilesx86" "pwage"
+                      "ras" "releaseid" "releasename" "result" "rserver"
+                      "scriptdir" "scriptexe" "scriptname" "serror" "sid" "site"
+                      "startdir" "syslang" "ticks" "time" "tssession" "userid"
+                      "userlang" "wdayno" "wksta" "wuserid" "ydayno" "year")))
             (macro-format
-             ;; Match anything which has the appearance of a macro.  An unknown
-             ;; macro will evaluate to 0 so a late match against this pattern
-             ;; allows the full macro syntax to be fontified as a warning.
+             ;; Match anything which has the appearance of a macro.
              (seq ?@ (1+ user-chars)))
             (multiline-indicator
              ;; Special comment to indicate that the current command or
@@ -645,8 +634,11 @@ function."
       changed)))
 
 (defvar kixtart-font-lock-keywords
-  `((,(kixtart-rx macro)
+  `((,(kixtart-rx (group macro) (group (0+ user-chars)))
+     ;; The real parser seems to silently discard the trailing part of a
+     ;; macro name if the leading part matches an actual macro name.
      (1 font-lock-preprocessor-face) (2 font-lock-warning-face))
+    ;; Unknown macros will always evaluate to 0.
     (,(kixtart-rx macro-format) . font-lock-warning-face)
     (,(kixtart-rx dot-property) . font-lock-type-face)
     (,(kixtart-rx function)     . font-lock-builtin-face)
