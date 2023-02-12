@@ -22,6 +22,39 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; News:
+
+;; Version 1.1.0 (????-??-??)
+;; ==========================
+
+;; Fontification for function names now works where the function name appears on
+;; a later line than the FUNCTION command.
+
+;; The Imenu index now includes functions where the function name appears on a
+;; later line than the FUNCTION command.
+
+;; The Imenu index entries for labels now have the ":" prefix removed.
+
+;; Macros are now fontified with the `font-lock-preprocessor-face' face.
+
+;; Font-lock rules now includes a match for object properties, fontified using
+;; the `font-lock-type-face' face.  This addition helps to reduce the chance of
+;; incorrect font-lock highlighting performed by later rules.
+
+;; The function `kixtart-current-defun' is now available to return the name of
+;; the user-defined KiXtart function which currently surrounds point.
+
+;; Support was added for `add-log' functions, which allow the current function
+;; name to be automatically added to change log entries.
+
+;; Support was added for `which-function-mode', a minor-mode which displays the
+;; current function name in the mode-line.
+
+;; Version 1.0.0 (2022-12-04)
+;; ==========================
+
+;; Initial release.
+
 ;;; Commentary:
 
 ;; Overview
@@ -34,6 +67,7 @@
 ;; - Indentation based on the usage of commands and parentheses
 ;; - Motion around and selection of defined functions
 ;; - Imenu support for function and label names
+;; - Current function name for which-function-mode and add-log functions
 ;; - Outline Mode support
 ;; - Predefined Tempo templates with optional abbrev expansion
 
@@ -88,11 +122,9 @@
 ;; Command name    `font-lock-keyword-face'
 ;; Function name   `font-lock-function-name-face'
 ;; Label name      `font-lock-constant-face'
-;; Macro           `font-lock-type-face'
+;; Macro           `font-lock-preprocessor-face'
+;; Property name   `font-lock-type-face'
 ;; Variable        `font-lock-variable-name-face'
-
-;; Note: Syntax highlighting for function names requires the preceding
-;; "FUNCTION" command to appear on the same line.
 
 ;; The additional face `font-lock-warning-face' is used to highlight portions of
 ;; text which are likely to be scripting errors.  Currently this covers two
@@ -222,15 +254,32 @@
 ;; lists all defined label names (the "/" character is chosen as a sub-menu
 ;; prefix because it is invalid as part of a function name).
 
-;; Note: Indexing of function names requires the preceding FUNCTION command to
-;; appear on the same line.
-
 ;; For very large scripts scanning for index entries can potentially be slow,
 ;; although automatic re-scanning may be preferable to manually invoking the
 ;; "*Rescan*" option from the menu.  Consider configuring `imenu-auto-rescan'
 ;; and `imenu-auto-rescan-maxout' to suitable values.
 
 ;; KiXtart Mode binds `imenu' to 'C-c C-j' by default.
+
+;; Current function name
+;; =====================
+
+;; The function `kixtart-current-defun' will return the name of the user-defined
+;; KiXtart function which currently surrounds point, or nil if point is
+;; currently outside of a function.  This function is also used internally to
+;; provide support for:
+
+;; - `add-log' functions, which allow the current function name to be
+;;   automatically added to change log entries
+
+;; - `which-function-mode', a minor-mode which displays the current function
+;;   name in the mode-line
+
+;; Note: The customization variable `kixtart-which-function-default-name' is
+;; available and can override the function name which is displayed when point is
+;; currently outside of a function.  Setting this value to nil will revert to
+;; the original `which-function-mode' behavior of displaying a name retrieved
+;; from Imenu data.
 
 ;; Outline Mode support
 ;; ====================
