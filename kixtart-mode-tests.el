@@ -48,6 +48,14 @@ through STRINGS."
        (kixtart-close-command-block))
      (should (null (current-word t)))))
 
+(defmacro kixtart-mode-tests--test-imenu-index (buffer-contents &rest alist)
+  "Check whether the buffer contents will produce an Imenu alist
+which is equal to ALIST."
+  (declare (indent 1))
+  `(kixtart-mode-tests--with-temp-buffer
+       ,buffer-contents
+     (should (equal ,@alist (kixtart--create-imenu-index)))))
+
 ;;;; Indentation for individual command blocks
 
 (ert-deftest kixtart-indent-command-block-do ()
@@ -666,5 +674,58 @@ IF $maybe
     $var2 = 2
 "
     "ELSE" "ENDIF"))
+
+;;;; Imenu index entries
+
+(ert-deftest kixtart-imenu-functions ()
+  "Function names appear at the top level of the index."
+  (kixtart-mode-tests--test-imenu-index
+      "Function MyFunc1 EndFunction
+Function MyFunc2
+EndFunction Function MyFunc3
+EndFunction
+Function
+
+	MyFunc4
+EndFunction"
+    '(("MyFunc1" . 1)
+      ("MyFunc2" . 30)
+      ("MyFunc3" . 59)
+      ("MyFunc4" . 88))))
+
+(ert-deftest kixtart-imenu-functions-ignoring-comments-and-strings ()
+  "Function names are ignored in comments and strings."
+  (kixtart-mode-tests--test-imenu-index
+      "Function MyFunc1 EndFunction
+\"Function MyFunc2\"
+EndFunction Function /*MyFunc3
+EndFunction
+Function*/
+
+	MyFunc4
+EndFunction"
+    '(("MyFunc1" . 1)
+      ("MyFunc4" . 61))))
+
+(ert-deftest kixtart-imenu-labels ()
+  "Label names appear in a sub-menu of the index with prefix removed."
+  (kixtart-mode-tests--test-imenu-index
+      ":one :two
+
+  :three
+:four"
+    '(("/Labels" . (("one"   . 1)
+                    ("two"   . 6)
+                    ("three" . 14)
+                    ("four"  . 21))))))
+
+(ert-deftest kixtart-imenu-labels-ignoring-comments-and-strings ()
+  "Labels are ignored in comments and strings."
+  (kixtart-mode-tests--test-imenu-index
+      "\":one\" :two
+/*  :three
+
+:four*/"
+    '(("/Labels" . (("two"   . 8))))))
 
 ;;; kixtart-mode-tests.el ends here
