@@ -50,6 +50,9 @@
 ;; Support was added for `which-function-mode', a minor-mode which displays the
 ;; current function name in the mode-line.
 
+;; Fixed the use of multi-line comment indicators at the beginning of the
+;; buffer and within strings.
+
 ;; Version 1.0.0 (2022-12-04)
 ;; ==========================
 
@@ -734,10 +737,10 @@ Being within a multiline expression is indicated by the previous
 script line ending with the special comment \";\\\"."
   (save-excursion
     (beginning-of-line)
-    (and (> (point)
-            (progn
-              (forward-comment (- (point)))
-              (point)))
+    (and (not (kixtart--in-comment-or-string-p))
+         (progn
+           (forward-comment (- (point)))
+           (cl-plusp (current-column)))
          (re-search-forward (kixtart-rx multiline-indicator)
                             (line-end-position)
                             t))))

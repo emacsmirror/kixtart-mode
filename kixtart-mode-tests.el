@@ -406,7 +406,7 @@ Quit"))
   "Indentation is increased by the special multiline comment.
 Comments persist the indentation level."
   (kixtart-mode-tests--test-indentation
-   ";; A multiline command.
+   ";\\
 Copy ;\\
     ;; The source directory.
     $source ;\\
@@ -422,12 +422,12 @@ The special multiline comment is only valid and persisted from
 the end of most recent line which contains uncommented KiXtart
 syntax."
   (kixtart-mode-tests--test-indentation
-   "$a ;\\ Not special.
+   ";\\
 ;\\
-$b ;; Not special. \\
-$c ;; Special. ;\\
-    $d
-$e"))
+$a ;; Not special. \\
+$b ;; Special. ;\\
+    $c
+$d"))
 
 ;;;; Beginning of defun
 
