@@ -53,6 +53,8 @@
 ;; Fixed the use of multi-line comment indicators at the beginning of the
 ;; buffer and within strings.
 
+;; Fixed the use of multi-line separators within strings.
+
 ;; Version 1.0.0 (2022-12-04)
 ;; ==========================
 
@@ -728,8 +730,10 @@ ending in a \",\" character, ignoring any trailing whitespace or
 comments."
   (save-excursion
     (beginning-of-line)
-    (forward-comment (- (point)))
-    (eq (char-before) ?,)))
+    (and (not (kixtart--in-comment-or-string-p))
+         (progn
+           (forward-comment (- (point)))
+           (eq (char-before) ?,)))))
 
 (defun kixtart--follows-eol-multiline-indicator-p ()
   "Return a non-nil value when following a mutliline indicator.
