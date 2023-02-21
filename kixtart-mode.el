@@ -1001,7 +1001,7 @@ function is called with buffer restrictions removed."
                            ;; like the FUNCTION command.
                            (pcase (current-word t)
                              ((and (pred stringp)
-                                   (pred (string-match
+                                   (pred (string-match-p
                                           (kixtart-rx command-function))))
                               (skip-syntax-forward "w")))
                            (and (kixtart-beginning-of-defun) (point)))))
