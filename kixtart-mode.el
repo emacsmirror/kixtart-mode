@@ -24,6 +24,11 @@
 
 ;;; News:
 
+;; Version 1.1.1 (????-??-??)
+;; ==========================
+
+;; Fixed retrieving the current function name when the buffer is narrowed.
+
 ;; Version 1.1.0 (2023-02-17)
 ;; ==========================
 
@@ -984,9 +989,11 @@ new indentation column."
 
 ;;;; Current function.
 
-(defun kixtart-current-defun ()
-  "Return the function name which surrounds point.
-When point is not within a function return nil."
+(defun kixtart--current-defun ()
+  "Internal implementation of `kixtart-current-defun'.
+Return the function name which surrounds point.  When point is
+not within a function return nil.  It is assumed that this
+function is called with buffer restrictions removed."
   (save-excursion
     (when-let ((from (point))
                (func-beg (progn
@@ -997,14 +1004,20 @@ When point is not within a function return nil."
                                    (pred (string-match
                                           (kixtart-rx command-function))))
                               (skip-syntax-forward "w")))
-                           (and (kixtart-beginning-of-defun)
-                                (point)))))
+                           (and (kixtart-beginning-of-defun) (point)))))
       (pcase (and (kixtart-end-of-defun) (point))
         ((or (pred null) (pred (< from)))
          (goto-char (+ func-beg 8))
          (forward-comment (point-max))
          (and (looking-at (kixtart-rx function-name))
               (match-string-no-properties 0)))))))
+
+(defun kixtart-current-defun ()
+  "Return the function name which surrounds point.
+When point is not within a function return nil."
+  (save-restriction
+    (widen)
+    (kixtart--current-defun)))
 
 (defun kixtart-which-function ()
   "Return the function name which surrounds point.
@@ -1021,26 +1034,24 @@ added into a sub-menu."
   (save-excursion
     (save-restriction
       (widen)
-      (let (index)
-        ;; Match labels.
-        (let (label-index)
-          (goto-char (point-max))
-          (while (re-search-backward (kixtart-rx label) nil t)
-            (unless (kixtart--in-comment-or-string-p)
-              (push (cons (substring (match-string-no-properties 0) 1) (point))
-                    label-index)))
-          (when label-index
-            (push (cons "/Labels" label-index) index)))
-        ;; Match function definitions.
-        (goto-char (point-max))
-        (while (kixtart-beginning-of-defun)
-          (let ((pos (point)))
-            (forward-char 8)
-            (forward-comment (point-max))
-            (when (looking-at (kixtart-rx function-name))
-              (push (cons (match-string-no-properties 0) pos) index))
-            (goto-char pos)))
+      (goto-char (point-max))
+      (let (labels index)
+        (while (re-search-backward
+                (kixtart-rx (or command-function label)) nil t)
+          (cond ((kixtart--in-comment-or-string-p))
+                ((eq (char-after) ?:)
+                 ;; Add label names.
+                 (push (cons (substring (match-string-no-properties 0) 1)
+                             (point))
+                       labels))
+                (t
+                 ;; Add function names.
+                 (when-let ((name (kixtart--current-defun)))
+                   (push (cons name (point)) index)))))
+        (when labels
+          (push (cons "/Labels" labels) index))
         index))))
+
 
 ;;;; Outline mode
 
