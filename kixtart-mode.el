@@ -29,6 +29,9 @@
 
 ;; Fixed retrieving the current function name when the buffer is narrowed.
 
+;; Fixed incorrect multi-line fontification of a symbol as a function name when
+;; the word "function" appeared within a previous comment.
+
 ;; Version 1.1.0 (2023-02-17)
 ;; ==========================
 
@@ -715,7 +718,7 @@ function."
     (,(kixtart-rx command-function) (0 font-lock-keyword-face)
      ;; Anchored match for function name.
      (,(kixtart-rx function-name)
-      (progn
+      (unless (kixtart--in-comment-or-string-p)
         (forward-comment (point-max))
         (if (looking-at (kixtart-rx function-name))
             (match-end 0)
