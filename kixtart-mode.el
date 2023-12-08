@@ -29,6 +29,14 @@
 
 ;; Fixed indentation for hanging CASE and ELSE commands.
 
+;; The function `kixtart-up-script-block' can now be repeated with the
+;; repeat-map binding 'u'.
+
+;; Unless the value of the new customization variable
+;; `kixtart-block-motion-push-mark' has been customized to nil the function
+;; `kixtart-up-script-block' now pushes the previous location to the mark ring
+;; when the value of point is modified.
+
 ;; Version 1.1.1 (2023-03-14)
 ;; ==========================
 
@@ -259,8 +267,13 @@
 ;; definition to move point to the buffer position which opened the current
 ;; script-block, based on its currently determined script-block level.  When at
 ;; the top-level of the script point is moved to the beginning of the buffer.
+;; When the value of the customization variable `kixtart-block-motion-push-mark'
+;; is non-nil the previous location will be pushed to the mark ring when the
+;; value of point is modified.
 
-;; KiXtart Mode binds `kixtart-up-script-block' to 'C-c C-u' by default.
+;; KiXtart Mode binds `kixtart-up-script-block' to 'C-c C-u' by default.  If
+;; `repeat-mode' is active the command may be repeated through the use of the
+;; repeat-map binding 'u'.
 
 ;; Imenu support
 ;; =============
@@ -544,6 +557,13 @@
   "Specifies whether KiXtart abbrev expansion is enabled.
 A non-nil value indicates that `kixtart-mode-abbrev-table' should
 be used as part of abbrev expansion."
+  :type 'boolean)
+
+(defcustom kixtart-block-motion-push-mark t
+  "Specifies whether block motion will push to the `mark-ring'.
+A non-nil value indicates that block motion commands are
+permitted to push the previous location to the `mark-ring' when
+the value of point changes."
   :type 'boolean)
 
 (defcustom kixtart-indent-offset 4
@@ -871,9 +891,26 @@ return nil."
     (not (null match-pos))))
 
 (defun kixtart-up-script-block ()
-  "Move point to the opening of the current script-block."
+  "Move point to the opening of the current script-block.
+Unless prevented by the value of `kixtart-block-motion-push-mark'
+the previous location is pushed to the `mark-ring' when the value
+of point is modified."
   (interactive)
-  (goto-char (kixtart-block-position (kixtart--parse-block))))
+  (let ((from (point)))
+    (goto-char (kixtart-block-position (kixtart--parse-block)))
+    (unless (or (null kixtart-block-motion-push-mark)
+                (and transient-mark-mode mark-active)
+                (eq from (point)))
+      (push-mark from))))
+
+(defvar kixtart-up-script-block-repeat-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "u") #'kixtart-up-script-block)
+    map))
+
+(put 'kixtart-up-script-block
+     'repeat-map
+     'kixtart-up-script-block-repeat-map)
 
 ;;;; Indentation
 

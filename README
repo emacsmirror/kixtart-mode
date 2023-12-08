@@ -182,8 +182,13 @@ An additional navigation function is also provided in
 definition to move point to the buffer position which opened the current
 script-block, based on its currently determined script-block level.  When at
 the top-level of the script point is moved to the beginning of the buffer.
+When the value of the customization variable `kixtart-block-motion-push-mark'
+is non-nil the previous location will be pushed to the mark ring when the
+value of point is modified.
 
-KiXtart Mode binds `kixtart-up-script-block' to 'C-c C-u' by default.
+KiXtart Mode binds `kixtart-up-script-block' to 'C-c C-u' by default.  If
+`repeat-mode' is active the command may be repeated through the use of the
+repeat-map binding 'u'.
 
 Imenu support
 =============
