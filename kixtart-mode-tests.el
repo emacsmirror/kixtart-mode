@@ -138,6 +138,28 @@ While $maybe
     $var2 = 2
 Loop"))
 
+;;;; Indentation for hanging commands
+
+(ert-deftest kixtart-indent-command-block-hanging-case ()
+  "Case block indentation is taken from parent select block."
+  (kixtart-mode-tests--test-indentation
+   ";; Select statement.
+Select
+;; Case statements.
+Case $maybe
+    $var1 = 1 Case $sometimes $var2 = 2 Case $always
+    $var3 = 3
+EndSelect"))
+
+(ert-deftest kixtart-indent-command-block-hanging-else ()
+  "Else block indentation is taken from parent if block."
+  (kixtart-mode-tests--test-indentation
+   ";; If statement.
+If $test
+    $var1 = 1 Else
+    $var2 = 2
+EndIf"))
+
 ;;;; Indentation for nested command blocks
 
 (ert-deftest kixtart-indent-nested-command-block-do ()

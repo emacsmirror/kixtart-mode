@@ -24,6 +24,11 @@
 
 ;;; News:
 
+;; Version 1.1.2 (????-??-??)
+;; ==========================
+
+;; Fixed indentation for hanging CASE and ELSE commands.
+
 ;; Version 1.1.1 (2023-03-14)
 ;; ==========================
 
@@ -927,6 +932,12 @@ return nil."
                   ;; Default to increasing the indentation.
                   (_ t))
             (cl-incf new-level))
+          ;; For "CASE" or "ELSE" move to the block-opening position of the
+          ;; current position, to align with the opening "SELECT" or "IF".
+          (while (memq (kixtart-block-token block)
+                       '(kixtart-case-t kixtart-else-t))
+            (setq block (kixtart--parse-block))
+            (goto-char (kixtart-block-position block)))
           (+ (current-indentation) (* new-level kixtart-indent-offset)))))))
 
 (defun kixtart-indent-line ()
