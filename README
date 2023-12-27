@@ -52,6 +52,10 @@ and enable some optional features:
   ;; table when outside of comments and strings.
   (setq kixtart-abbrev-table-enabled t)
 
+  ;; Default to using the dos coding system (ASCII character set and CRLF
+  ;; line endings) for file names with a .kix extension.
+  (add-to-list 'file-coding-system-alist (cons "\\.kix\\'" 'dos))
+
 Syntax highlighting
 ===================
 
