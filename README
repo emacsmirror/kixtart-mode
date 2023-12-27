@@ -62,16 +62,17 @@ Syntax highlighting
 Syntax highlighting is implemented for all KiXtart language keywords using
 the following font-lock faces:
 
-Keyword type    Face
--------------------------------------------------
-Command name    `font-lock-keyword-face'
-Function name   `font-lock-function-name-face'
-Label name      `font-lock-constant-face'
-Macro           `font-lock-preprocessor-face'
-Property name   `font-lock-type-face'
-Variable        `font-lock-variable-name-face'
+Keyword type            Face
+-------------------------------------------------------
+Command                 `kixtart-command-face'
+Function (built-in)     `kixtart-function-face'
+Function (definition)   `kixtart-function-name-face'
+Label                   `kixtart-label-face'
+Macro                   `kixtart-macro-face'
+Property                `kixtart-property-face'
+Variable                `kixtart-variable-face'
 
-The additional face `font-lock-warning-face' is used to highlight portions of
+The additional face `kixtart-warning-face' is used to highlight portions of
 text which are likely to be scripting errors.  Currently this covers two
 potentially problematic cases related to KiXtart macros.  The first case is
 where the macro name does not match any known macro: such macros always

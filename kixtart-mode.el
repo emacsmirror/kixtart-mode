@@ -37,6 +37,9 @@
 ;; `kixtart-up-script-block' now pushes the previous location to the mark ring
 ;; when the value of point is modified.
 
+;; Font-locking now uses custom faces which inherit from the previously used
+;; default font-lock faces.
+
 ;; Version 1.1.1 (2023-03-14)
 ;; ==========================
 
@@ -147,16 +150,17 @@
 ;; Syntax highlighting is implemented for all KiXtart language keywords using
 ;; the following font-lock faces:
 
-;; Keyword type    Face
-;; -------------------------------------------------
-;; Command name    `font-lock-keyword-face'
-;; Function name   `font-lock-function-name-face'
-;; Label name      `font-lock-constant-face'
-;; Macro           `font-lock-preprocessor-face'
-;; Property name   `font-lock-type-face'
-;; Variable        `font-lock-variable-name-face'
+;; Keyword type            Face
+;; -------------------------------------------------------
+;; Command                 `kixtart-command-face'
+;; Function (built-in)     `kixtart-function-face'
+;; Function (definition)   `kixtart-function-name-face'
+;; Label                   `kixtart-label-face'
+;; Macro                   `kixtart-macro-face'
+;; Property                `kixtart-property-face'
+;; Variable                `kixtart-variable-face'
 
-;; The additional face `font-lock-warning-face' is used to highlight portions of
+;; The additional face `kixtart-warning-face' is used to highlight portions of
 ;; text which are likely to be scripting errors.  Currently this covers two
 ;; potentially problematic cases related to KiXtart macros.  The first case is
 ;; where the macro name does not match any known macro: such macros always
@@ -592,6 +596,69 @@ Imenu index data."
   :type '(choice (string :tag "Default name")
                  (const :tag "Use Imenu index" nil)))
 
+;;;; Faces
+
+(defgroup kixtart-faces nil
+  "Faces used by KiXtart Mode."
+  :group 'kixtart
+  :prefix "kixtart-")
+
+(defface kixtart-command-face
+  '((default :inherit font-lock-keyword-face))
+  "Face to highlight a KiXtart command.")
+(defvar kixtart-command-face
+  'kixtart-command-face
+  "Face specification to highlight a KiXtart command.")
+
+(defface kixtart-function-face
+  '((default :inherit font-lock-builtin-face))
+  "Face to highlight a KiXtart function name.")
+(defvar kixtart-function-face
+  'kixtart-function-face
+  "Face specification to highlight a KiXtart function name.")
+
+(defface kixtart-function-name-face
+  '((default :inherit font-lock-function-name-face))
+  "Face to highlight a KiXtart function definition.")
+(defvar kixtart-function-name-face
+  'kixtart-function-name-face
+  "Face specification to highlight a KiXtart function definition.")
+
+(defface kixtart-label-face
+  '((default :inherit font-lock-constant-face))
+  "Face to highlight a KiXtart label name.")
+(defvar kixtart-label-face
+  'kixtart-label-face
+  "Face specification to highlight a KiXtart label name.")
+
+(defface kixtart-macro-face
+  '((default :inherit font-lock-preprocessor-face))
+  "Face to highlight a KiXtart macro.")
+(defvar kixtart-macro-face
+  'kixtart-macro-face
+  "Face specification to highlight a KiXtart macro.")
+
+(defface kixtart-property-face
+  '((default :inherit font-lock-type-face))
+  "Face to highlight a KiXtart property name.")
+(defvar kixtart-property-face
+  'kixtart-property-face
+  "Face specification to highlight a KiXtart property name.")
+
+(defface kixtart-variable-face
+  '((default :inherit font-lock-variable-name-face))
+  "Face to highlight a KiXtart variable.")
+(defvar kixtart-variable-face
+  'kixtart-variable-face
+  "Face specification to highlight a KiXtart variable.")
+
+(defface kixtart-warning-face
+  '((default :inherit font-lock-warning-face))
+  "Face to highlight a KiXtart syntax warning.")
+(defvar kixtart-warning-face
+  'kixtart-warning-face
+  "Face specification to highlight a KiXtart syntax warning.")
+
 ;;;; Search patterns
 
 (defmacro kixtart-rx (&rest regexps)
@@ -737,14 +804,14 @@ function."
   `((,(kixtart-rx (group macro) (group (0+ user-chars)))
      ;; The real parser seems to silently discard the trailing part of a
      ;; macro name if the leading part matches an actual macro name.
-     (1 font-lock-preprocessor-face) (2 font-lock-warning-face))
+     (1 kixtart-macro-face) (2 kixtart-warning-face))
     ;; Unknown macros will always evaluate to 0.
-    (,(kixtart-rx macro-format) . font-lock-warning-face)
-    (,(kixtart-rx dot-property) . font-lock-type-face)
-    (,(kixtart-rx function)     . font-lock-builtin-face)
-    (,(kixtart-rx label)        . font-lock-constant-face)
-    (,(kixtart-rx variable)     . font-lock-variable-name-face)
-    (,(kixtart-rx command-function) (0 font-lock-keyword-face)
+    (,(kixtart-rx macro-format) . kixtart-warning-face)
+    (,(kixtart-rx dot-property) . kixtart-property-face)
+    (,(kixtart-rx function)     . kixtart-function-face)
+    (,(kixtart-rx label)        . kixtart-label-face)
+    (,(kixtart-rx variable)     . kixtart-variable-face)
+    (,(kixtart-rx command-function) (0 kixtart-command-face)
      ;; Anchored match for function name.
      (,(kixtart-rx function-name)
       (unless (kixtart--in-comment-or-string-p)
@@ -755,8 +822,8 @@ function."
           ;; the end of the line.
           (end-of-line)))
       nil
-      (0 font-lock-function-name-face)))
-    (,(kixtart-rx command)      . font-lock-keyword-face)))
+      (0 kixtart-function-name-face)))
+    (,(kixtart-rx command)      . kixtart-command-face)))
 
 ;;;; Utility
 
