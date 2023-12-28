@@ -25,7 +25,8 @@
   "Check indentation of BUFFER-CONTENTS within a temporary KiXtart mode buffer."
   `(kixtart-mode-tests--with-temp-buffer
        ,buffer-contents
-     (indent-region (point-min) (point-max))
+     (let ((inhibit-message t))
+       (indent-region (point-min) (point-max)))
      (should (equal (buffer-string) ,buffer-contents))))
 
 (defmacro kixtart-mode-tests--test-block-close (buffer-contents &rest strings)
