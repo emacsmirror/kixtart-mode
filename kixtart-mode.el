@@ -40,6 +40,9 @@
 ;; Font-locking now uses custom faces which inherit from the previously used
 ;; default font-lock faces.
 
+;; The command `kixtart-close-command-block' now re-indents the current line
+;; when KiXtart commands are inserted or removed from the buffer.
+
 ;; Version 1.1.1 (2023-03-14)
 ;; ==========================
 
@@ -1075,28 +1078,31 @@ new indentation column."
 (defun kixtart-close-command-block ()
   "Insert the command to close the currently open block."
   (interactive)
-  (if (and kixtart--close-command-strings
-           (eq last-command #'kixtart-close-command-block))
-      (backward-delete-char (length (pop kixtart--close-command-strings)))
-    (setq kixtart--close-command-strings
-          (let* ((block (kixtart--parse-block))
-                 (close-list (pcase (kixtart-block-token block)
-                               ('kixtart-case-t     (list "Case" "EndSelect"))
-                               ('kixtart-do-t       (list "Until"))
-                               ('kixtart-else-t     (list "EndIf"))
-                               ('kixtart-for-t      (list "Next"))
-                               ('kixtart-function-t (list "EndFunction"))
-                               ('kixtart-if-t       (list "Else" "EndIf"))
-                               ('kixtart-select-t   (list "Case"))
-                               ('kixtart-while-t    (list "Loop")))))
-            (pcase (kixtart-block-token-string block)
-              ((and (pred stringp)
-                    (app kixtart--syntax-case-function func)
-                    (guard (functionp func)))
-               (mapcar func close-list))
-              (_ close-list)))))
-  (when-let ((close-command (car kixtart--close-command-strings)))
-    (insert close-command)))
+  (let ((tick (buffer-chars-modified-tick)))
+    (if (and kixtart--close-command-strings
+             (eq last-command #'kixtart-close-command-block))
+        (backward-delete-char (length (pop kixtart--close-command-strings)))
+      (setq kixtart--close-command-strings
+            (let* ((block (kixtart--parse-block))
+                   (close-list (pcase (kixtart-block-token block)
+                                 ('kixtart-case-t     (list "Case" "EndSelect"))
+                                 ('kixtart-do-t       (list "Until"))
+                                 ('kixtart-else-t     (list "EndIf"))
+                                 ('kixtart-for-t      (list "Next"))
+                                 ('kixtart-function-t (list "EndFunction"))
+                                 ('kixtart-if-t       (list "Else" "EndIf"))
+                                 ('kixtart-select-t   (list "Case"))
+                                 ('kixtart-while-t    (list "Loop")))))
+              (pcase (kixtart-block-token-string block)
+                ((and (pred stringp)
+                      (app kixtart--syntax-case-function func)
+                      (guard (functionp func)))
+                 (mapcar func close-list))
+                (_ close-list)))))
+    (when-let ((close-command (car kixtart--close-command-strings)))
+      (insert close-command))
+    (unless (eq tick (buffer-chars-modified-tick))
+      (funcall indent-line-function))))
 
 (defvar kixtart-close-command-block-repeat-map
   (let ((map (make-sparse-keymap)))
