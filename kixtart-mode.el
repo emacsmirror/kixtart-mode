@@ -1095,9 +1095,8 @@ new indentation column."
                     (guard (functionp func)))
                (mapcar func close-list))
               (_ close-list)))))
-  (pcase (car kixtart--close-command-strings)
-    ((and (pred stringp) close-command)
-     (insert close-command))))
+  (when-let ((close-command (car kixtart--close-command-strings)))
+    (insert close-command)))
 
 (defvar kixtart-close-command-block-repeat-map
   (let ((map (make-sparse-keymap)))
