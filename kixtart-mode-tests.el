@@ -14,7 +14,9 @@
 ;;;; Helper macros
 
 (defmacro kixtart-mode-tests--with-temp-buffer (buffer-contents &rest body)
-  "Evaluate BODY in a temporary KiXtart mode buffer containing BUFFER-CONTENTS."
+  "Evaluate BODY in a temporary KiXtart mode buffer.
+The string BUFFER-CONTENTS is inserted into the buffer before
+ evaulation."
   (declare (indent 1))
   `(with-temp-buffer
      (kixtart-mode)
@@ -33,9 +35,9 @@ contents were unaltered or are now equal to the optional RESULT."
      (should (equal (buffer-string) (or ,result ,buffer-contents)))))
 
 (defmacro kixtart-mode-tests--test-block-close (buffer-contents &rest strings)
-  "Check closing of open blocks within a temporary KiXtart mode buffer.
-BUFFER-CONTENTS should define an open block which will be closed by cycling
-through STRINGS."
+  "Test block closing within a temporary KiXtart mode buffer.
+The string BUFFER-CONTENTS should define an open block which will
+be closed by cycling through the insertion of STRINGS."
   (declare (indent 1))
   `(kixtart-mode-tests--with-temp-buffer
        ,buffer-contents
@@ -53,8 +55,9 @@ through STRINGS."
      (should (null (current-word t)))))
 
 (defmacro kixtart-mode-tests--test-imenu-index (buffer-contents &rest alist)
-  "Check whether the buffer contents will produce an Imenu alist
-which is equal to ALIST."
+  "Test Imenu index creation within a temporary KiXtart mode buffer.
+Check whether the Imenu alist which is genearted for
+BUFFER-CONTENTS is equal to ALIST."
   (declare (indent 1))
   `(kixtart-mode-tests--with-temp-buffer
        ,buffer-contents
@@ -332,7 +335,7 @@ If $always'
 EndFunction"))
 
 (ert-deftest kixtart-indent-only-considers-string-start ()
-  "Indentation level for a string only applies to its starting point."
+  "Indentation level for a string only applies to its opening."
   (kixtart-mode-tests--test-indentation
    "Function MyFunction
     If $maybe
@@ -741,7 +744,8 @@ EndFunction"
       ("MyFunc4" . 61))))
 
 (ert-deftest kixtart-imenu-labels ()
-  "Label names appear in a sub-menu of the index with prefix removed."
+  "Label names appear in a sub-menu of the index.
+The leading colon is removed from each label name."
   (kixtart-mode-tests--test-imenu-index
       ":one :two
 
