@@ -8,9 +8,7 @@
 
 (require 'ert)
 (require 'kixtart-mode)
-
-;;; Tests
-
+
 ;;;; Helper macros
 
 (defmacro kixtart-mode-tests--with-temp-buffer (buffer-contents &rest body)
@@ -62,7 +60,7 @@ BUFFER-CONTENTS is equal to ALIST."
   `(kixtart-mode-tests--with-temp-buffer
        ,buffer-contents
      (should (equal ,@alist (kixtart--create-imenu-index)))))
-
+
 ;;;; Indentation for individual command blocks
 
 (ert-deftest kixtart-indent-command-block-do ()
@@ -144,14 +142,14 @@ While $maybe
     $var1 = 1
     $var2 = 2
 Loop"))
-
+
 ;;;; Indentation for the beginning of the buffer
 
 (ert-deftest kixtart-indent-beginning-of-buffer ()
   "The first syntax line should indent to column 0."
   (kixtart-mode-tests--test-indentation
    "    If" "If"))
-
+
 ;;;; Indentation for hanging commands
 
 (ert-deftest kixtart-indent-command-block-hanging-case ()
@@ -173,7 +171,7 @@ If $test
     $var1 = 1 Else
     $var2 = 2
 EndIf"))
-
+
 ;;;; Indentation for nested command blocks
 
 (ert-deftest kixtart-indent-nested-command-block-do ()
@@ -274,7 +272,7 @@ EndFunction"))
         Loop
     EndIf
 EndFunction"))
-
+
 ;;;; Indentation for command blocks
 
 (ert-deftest kixtart-indent-with-inline-command-blocks ()
@@ -285,7 +283,7 @@ EndFunction"))
         $var = 2
     EndIf
 EndIf EndIf"))
-
+
 ;;;; Indentation for parenthesis level
 
 (ert-deftest kixtart-indent-with-parens-inline ()
@@ -320,7 +318,7 @@ EndIf EndIf"))
     ((4
         5
         6))))"))
-
+
 ;;;; Indentation ignores strings
 
 (ert-deftest kixtart-indent-ignores-string-contents ()
@@ -350,7 +348,7 @@ three'
 five
 six'
 EndFunction"))
-
+
 ;;;; Indentation ignores comments
 
 (ert-deftest kixtart-indent-ignores-single-line-comment ()
@@ -371,7 +369,7 @@ EndIf"))
     */
     $var = 1
 EndIf"))
-
+
 ;;;; Indentation with correct syntax parsing
 
 (ert-deftest kixtart-indent-honors-symbol-boundaries ()
@@ -382,7 +380,7 @@ EndIf"))
 EndFunction
 
 $var = 2"))
-
+
 ;;;; Indentation for multiline expressions
 
 (ert-deftest kixtart-multiline-separators ()
@@ -464,7 +462,7 @@ $a ;; Not special. \\
 $b ;; Special. ;\\
     $c
 $d"))
-
+
 ;;;; Beginning of defun
 
 (ert-deftest kixtart-beginning-of-defun-backwards ()
@@ -520,7 +518,7 @@ Function Function4
     (should (looking-at-p "^Function Function4$"))
     (beginning-of-defun -1)
     (should (looking-at-p "^Function Function4$"))))
-
+
 ;;;; End of defun
 
 (ert-deftest kixtart-end-of-defun-forwards ()
@@ -595,7 +593,7 @@ EndFunction"
     ;; (end-of-defun -1)
     ;; (should (looking-at-p "^Function Function1$"))
     ))
-
+
 ;;;; Closing open command blocks
 
 (ert-deftest kixtart-close-block-case ()
@@ -710,7 +708,7 @@ IF $maybe
     $var2 = 2
 "
     "ELSE" "ENDIF"))
-
+
 ;;;; Imenu index entries
 
 (ert-deftest kixtart-imenu-functions ()
