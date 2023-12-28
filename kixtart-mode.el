@@ -43,6 +43,9 @@
 ;; The command `kixtart-close-command-block' now re-indents the current line
 ;; when KiXtart commands are inserted or removed from the buffer.
 
+;; The command `kixtart-close-command-block' prints a message when point is not
+;; within an open command block.
+
 ;; Version 1.1.1 (2023-03-14)
 ;; ==========================
 
@@ -1098,7 +1101,9 @@ new indentation column."
                       (app kixtart--syntax-case-function func)
                       (guard (functionp func)))
                  (mapcar func close-list))
-                (_ close-list)))))
+                (_ close-list))))
+      (unless kixtart--close-command-strings
+        (message "No open command block to close.")))
     (when-let ((close-command (car kixtart--close-command-strings)))
       (insert close-command))
     (unless (eq tick (buffer-chars-modified-tick))
