@@ -21,13 +21,16 @@
      (insert ,buffer-contents)
      ,@body))
 
-(defmacro kixtart-mode-tests--test-indentation (buffer-contents)
-  "Check indentation of BUFFER-CONTENTS within a temporary KiXtart mode buffer."
+(defmacro kixtart-mode-tests--test-indentation (buffer-contents &optional result)
+  "Test indentation within a temporary KiXtart mode buffer.
+The string BUFFER-CONTENTS is inserted into a temporary buffer
+which will be re-indented.  The test succeeds when buffer
+contents were unaltered or are now equal to the optional RESULT."
   `(kixtart-mode-tests--with-temp-buffer
        ,buffer-contents
      (let ((inhibit-message t))
        (indent-region (point-min) (point-max)))
-     (should (equal (buffer-string) ,buffer-contents))))
+     (should (equal (buffer-string) (or ,result ,buffer-contents)))))
 
 (defmacro kixtart-mode-tests--test-block-close (buffer-contents &rest strings)
   "Check closing of open blocks within a temporary KiXtart mode buffer.
@@ -138,6 +141,13 @@ While $maybe
     $var1 = 1
     $var2 = 2
 Loop"))
+
+;;;; Indentation for the beginning of the buffer
+
+(ert-deftest kixtart-indent-beginning-of-buffer ()
+  "The first syntax line should indent to column 0."
+  (kixtart-mode-tests--test-indentation
+   "    If" "If"))
 
 ;;;; Indentation for hanging commands
 

@@ -46,6 +46,9 @@
 ;; The command `kixtart-close-command-block' prints a message when point is not
 ;; within an open command block.
 
+;; Fixed indentation not being applied to the first line of syntax in the
+;; buffer.
+
 ;; Version 1.1.1 (2023-03-14)
 ;; ==========================
 
@@ -1052,7 +1055,8 @@ of point is modified."
                        '(kixtart-case-t kixtart-else-t))
             (setq block (kixtart--parse-block))
             (goto-char (kixtart-block-position block)))
-          (+ (current-indentation) (* new-level kixtart-indent-offset)))))))
+          (+ (if (bobp) 0 (current-indentation))
+             (* new-level kixtart-indent-offset)))))))
 
 (defun kixtart-indent-line ()
   "Indent the current line to match the script-block level.
