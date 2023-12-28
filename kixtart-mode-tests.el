@@ -763,6 +763,6 @@ The leading colon is removed from each label name."
 /*  :three
 
 :four*/"
-    '(("/Labels" . (("two"   . 8))))))
+    '(("/Labels" . (("two" . 8))))))
 
 ;;; kixtart-mode-tests.el ends here
