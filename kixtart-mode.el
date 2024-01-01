@@ -1131,22 +1131,23 @@ Return the function name which surrounds point.  When point is
 not within a function return nil.  It is assumed that this
 function is called with buffer restrictions removed."
   (save-excursion
-    (when-let ((from (point))
-               (func-beg (progn
-                           ;; Move point beyond the current word if it looks
-                           ;; like the FUNCTION command.
-                           (pcase (current-word t)
-                             ((and (pred stringp)
-                                   (pred (string-match-p
-                                          (kixtart-rx command-function))))
-                              (skip-syntax-forward "w")))
-                           (and (kixtart-beginning-of-defun) (point)))))
-      (pcase (and (kixtart-end-of-defun) (point))
-        ((or (pred null) (pred (< from)))
-         (goto-char (+ func-beg 8))
-         (forward-comment (point-max))
-         (and (looking-at (kixtart-rx function-name))
-              (match-string-no-properties 0)))))))
+    (let ((from (point))
+          (func-beg (progn
+                      ;; Move point beyond the current word if it looks like the
+                      ;; FUNCTION command.
+                      (pcase (current-word t)
+                        ((and (pred stringp)
+                              (pred (string-match-p
+                                     (kixtart-rx command-function))))
+                         (skip-syntax-forward "w")))
+                      (and (kixtart-beginning-of-defun) (point)))))
+      (and func-beg
+           (pcase (and (kixtart-end-of-defun) (point))
+             ((or (pred null) (pred (< from)))
+              (goto-char (+ func-beg 8))
+              (forward-comment (point-max))
+              (and (looking-at (kixtart-rx function-name))
+                   (match-string-no-properties 0))))))))
 
 (defun kixtart-current-defun ()
   "Return the function name which surrounds point.
