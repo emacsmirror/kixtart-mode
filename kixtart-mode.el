@@ -7,7 +7,7 @@
 ;; Maintainer: Morgan Willcock <morgan@ice9.digital>
 ;; Package-Requires: ((emacs "27.1"))
 ;; URL: https://git.sr.ht/~mew/kixtart-mode
-;; Version: 1.1.1
+;; Version: 1.2.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 ;;; News:
 
-;; Version 1.1.2 (????-??-??)
+;; Version 1.2.0 (2024-01-01)
 ;; ==========================
 
 ;; Fixed indentation for hanging CASE and ELSE commands.
