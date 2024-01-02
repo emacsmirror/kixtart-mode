@@ -979,7 +979,7 @@ of point is modified."
   (let ((from (point)))
     (goto-char (kixtart-block-position (kixtart--parse-block)))
     (unless (or (null kixtart-block-motion-push-mark)
-                (and transient-mark-mode mark-active)
+                (region-active-p)
                 (eq from (point)))
       (push-mark from))))
 
