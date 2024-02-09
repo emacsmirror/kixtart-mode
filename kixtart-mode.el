@@ -1399,7 +1399,7 @@ which will be expanded to the template."
   (setq-local outline-regexp (kixtart-rx outline))
   (setq imenu-create-index-function #'kixtart--create-imenu-index)
   (tempo-use-tag-list 'kixtart-tempo-tags)
-  (add-hook 'which-func-functions 'kixtart-which-function nil t)
+  (add-hook 'which-func-functions #'kixtart-which-function nil t)
   (add-to-list 'font-lock-extend-region-functions
                #'kixtart--font-lock-extend-region-function-def t))
 
