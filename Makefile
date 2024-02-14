@@ -4,7 +4,7 @@
 EMACS = emacs
 RM = rm -f
 
-compile: README kixtart-mode.elc
+compile: README kixtart-docstrings.elc kixtart-mode.elc
 
 check: kixtart-mode-tests.elc
 	$(EMACS) --batch --quick \
@@ -12,6 +12,7 @@ check: kixtart-mode-tests.elc
 	    --load kixtart-mode-tests.elc \
 	    --funcall ert-run-tests-batch-and-exit
 
+kixtart-docstrings.elc: kixtart-mode.elc
 kixtart-mode-tests.elc: kixtart-mode.elc kixtart-mode-tests.el
 
 .el.elc:
@@ -28,4 +29,4 @@ README: kixtart-mode.el
 	              (newline))"
 
 clean:
-	$(RM) README kixtart-mode-tests.elc kixtart-mode.elc
+	$(RM) README kixtart-docstrings.elc kixtart-mode-tests.elc kixtart-mode.elc

@@ -762,5 +762,175 @@ The leading colon is removed from each label name."
 
 :four*/"
     '(("/Labels" . (("two" . 8))))))
+
+;;;; Docstring search
+
+(ert-deftest kixtart-doc-search-at-point ()
+  "Return the structure for the symbol at point."
+  (kixtart-mode-tests--with-temp-buffer
+      " COMMAND "
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-at-point))
+          (kixtart-doc-docs))
+      (kixtart-doc-register kixtart-make-doc-command
+        (COMMAND :final t))
+      (should-not (kixtart-doc-search))
+      (forward-char -1)
+      (should (kixtart-doc-search))
+      (goto-char (point-min))
+      (should-not (kixtart-doc-search))
+      (forward-char 1)
+      (should (kixtart-doc-search)))))
+
+(ert-deftest kixtart-doc-search-before-point ()
+  "Return the structure for the symbol before point."
+  (kixtart-mode-tests--with-temp-buffer
+      "OPEN
+
+COMMAND
+
+CLOSE
+"
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-before-point))
+          kixtart-doc-docs)
+      (kixtart-doc-register kixtart-make-doc-command
+        ((OPEN COMMAND CLOSE)))
+      (should (kixtart-doc-search))
+      (forward-line -2)
+      (should (kixtart-doc-search))
+      (forward-line -2)
+      (should (kixtart-doc-search)))))
+
+(ert-deftest kixtart-doc-search-before-point-final-t ()
+  "Return the structure for the symbol before point.
+Ignore all symbols as all are consider \"final\"."
+  (kixtart-mode-tests--with-temp-buffer
+      "OPEN
+
+COMMAND
+
+CLOSE
+"
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-before-point))
+          kixtart-doc-docs)
+      (kixtart-doc-register kixtart-make-doc-command
+        ((OPEN COMMAND CLOSE) :final t))
+      (should-not (kixtart-doc-search))
+      (forward-line -2)
+      (should-not (kixtart-doc-search))
+      (forward-line -2)
+      (should-not (kixtart-doc-search)))))
+
+(ert-deftest kixtart-doc-search-before-point-final-first ()
+  "Return the structure for the symbol before point.
+Ignore the first symbol which is considered \"final\"."
+  (kixtart-mode-tests--with-temp-buffer
+      "OPEN
+
+COMMAND
+
+CLOSE
+"
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-before-point))
+          kixtart-doc-docs)
+      (kixtart-doc-register kixtart-make-doc-command
+        ((OPEN COMMAND CLOSE) :final 'first))
+      (should (kixtart-doc-search))
+      (forward-line -2)
+      (should (kixtart-doc-search))
+      (forward-line -2)
+      (should-not (kixtart-doc-search)))))
+
+(ert-deftest kixtart-doc-search-before-point-final-last ()
+  "Return the structure for the symbol before point.
+Ignore the last symbol which is considered \"final\"."
+  (kixtart-mode-tests--with-temp-buffer
+      "OPEN
+
+COMMAND
+
+CLOSE
+"
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-before-point))
+          kixtart-doc-docs)
+      (kixtart-doc-register kixtart-make-doc-command
+        ((OPEN COMMAND CLOSE) :final 'last))
+      (should-not (kixtart-doc-search))
+      (forward-line -2)
+      (should (kixtart-doc-search))
+      (forward-line -2)
+      (should (kixtart-doc-search)))))
+
+(ert-deftest kixtart-doc-search-before-point-final-list ()
+  "Return the structure for the symbol before point.
+Ignore the last symbol which is considered \"final\"."
+  (kixtart-mode-tests--with-temp-buffer
+      "OPEN
+
+COMMAND
+
+CLOSE
+"
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-before-point))
+          kixtart-doc-docs)
+      (kixtart-doc-register kixtart-make-doc-command
+        ((OPEN COMMAND CLOSE) :final '(OPEN CLOSE)))
+      (should-not (kixtart-doc-search))
+      (forward-line -2)
+      (should (kixtart-doc-search))
+      (forward-line -2)
+      (should-not (kixtart-doc-search)))))
+
+(ert-deftest kixtart-doc-search-in-function-args ()
+  "Return the structure for the current function.
+Only search backwards when inside parentheses."
+  (kixtart-mode-tests--with-temp-buffer
+      "FUNCTION (
+
+)"
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-in-function-args))
+          kixtart-doc-docs)
+      (kixtart-doc-register kixtart-make-doc-function
+        (FUNCTION))
+      (should-not (kixtart-doc-search))
+      (dotimes (_ 3)
+        (forward-char -1)
+        (should (kixtart-doc-search)))
+      (forward-char -1)
+      (should-not (kixtart-doc-search)))))
+
+(ert-deftest kixtart-doc-search-command-line ()
+  "Return the structure for command on this line.
+Do not return a match when point within the current indentation."
+  (kixtart-mode-tests--with-temp-buffer
+      " COMMAND WITH ARGS "
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-command-line))
+          kixtart-doc-docs)
+      (kixtart-doc-register kixtart-make-doc-command
+        (COMMAND))
+      (should (kixtart-doc-search))
+      (goto-char (point-min))
+      (should-not (kixtart-doc-search)))))
+
+(ert-deftest kixtart-doc-search-command-line-ignore-for ()
+  "Return the structure for command on this line.
+Ignore \"FOR\" since the match is ambiguous."
+  (kixtart-mode-tests--with-temp-buffer
+      " FOR "
+    (let ((kixtart-doc-search-functions
+           (list #'kixtart-doc-search-command-line))
+          kixtart-doc-docs)
+      (kixtart-doc-register kixtart-make-doc-command
+        (FOR))
+      (should-not (kixtart-doc-search))
+      (goto-char (point-min))
+      (should-not (kixtart-doc-search)))))
 
 ;;; kixtart-mode-tests.el ends here

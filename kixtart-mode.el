@@ -30,6 +30,9 @@
 ;; Fixed parsing error when calling indentation functions with point inside a
 ;; comment.
 
+;; Added ElDoc support to display documentation for KiXtart symbols at or near
+;; point.
+
 ;; Version 1.2.0 (2024-01-01)
 ;; ==========================
 
@@ -111,6 +114,7 @@
 ;; - Indentation based on the usage of commands and parentheses
 ;; - Motion around and selection of defined functions
 ;; - Imenu support for function and label names
+;; - ElDoc support for display of documentation
 ;; - Current function name for which-function-mode and add-log functions
 ;; - Outline Mode support
 ;; - Predefined Tempo templates with optional abbrev expansion
@@ -138,6 +142,9 @@
 
 ;;   ;; Load the package by searching in paths listed in `load-path'.
 ;;   (require 'kixtart-mode)
+
+;;   ;; Load the default docstrings.
+;;   (require 'kixtart-docstrings)
 
 ;;   ;; Set indentation and fill preferences.
 ;;   (add-hook 'kixtart-mode-hook
@@ -314,6 +321,221 @@
 ;; and `imenu-auto-rescan-maxout' to suitable values.
 
 ;; KiXtart Mode binds `imenu' to 'C-c C-j' by default.
+
+;; ElDoc support
+;; =============
+
+;; ElDoc provides functions and a minor mode which can display information for
+;; language symbols, in the echo area or within a dedicated buffer.  KiXtart
+;; Mode implements ElDoc mode support by attempting to lookup documentation
+;; based on the context at point, and will be activated automatically (as part
+;; of mode initialization) after documentation has loaded.  By default, since
+;; the original KiXtart documentation is copyrighted and attempts to contact the
+;; author failed:
+
+;; - No documentation is automatically loaded by inclusion within the definition
+;;   of KiXtart Mode
+
+;; - Basic documentation which just describes KiXtart syntax and macro values is
+;;   provided within an accompanying file and can be explicitly loaded if
+;;   required
+
+;; To load the accompanying documentation, assuming that the file
+;; "kixtart-docstring.el" is in a directory listed in `load-path', require the
+;; feature `kixtart-docstrings':
+
+;;   (require 'kixtart-docstrings)
+
+;; Once documentation has been loaded, the ElDoc minor mode will automatically
+;; be enabled in all new KiXtart Mode buffers, with context sensitive
+;; documentation appearing in the echo area.  The `eldoc' function can also be
+;; used to request the documentation for the symbol at point, and KiXtart Mode
+;; binds this function to 'C-c C-d' by default.
+
+;; The majority of options for customizing the ElDoc display will be handled by
+;; setting ElDoc specific variables, although an additional customization
+;; variable `kixtart-eldoc-echo-truncate' is provided to determine how much
+;; documentation ElDoc should display when using the echo area.  By setting this
+;; variable to an integer, only the given number of characters will be
+;; displayed, otherwise the default value of `t' (or any other non-nil value)
+;; specifies to only display the first paragraph.
+
+;; Note: A paragraph is determined to end at the position where a documentation
+;; string contains two new-line characters (i.e. at the position of the
+;; substring "\n\n").
+
+;; Customizing documentation search
+;; --------------------------------
+
+;; Since KiXtart Mode operates by attempting to parse the region of the buffer
+;; which is local to point, some flexibility is required to infer which
+;; documentation is expected to be displayed.  The current implementation will
+;; move upwards (left) out of strings and comments and then begin calling the
+;; functions listed in the customization variable
+;; `kixtart-doc-search-functions'.  If any of the functions return a non-nil
+;; value, this result is used as the final return value and no further functions
+;; are called.  The default configuration will call the following functions in
+;; order:
+
+;; Function: `kixtart-doc-search-at-point'
+
+;;   Only consider the symbol at point.
+
+;; Function: `kixtart-doc-search-before-point'
+
+;;   Move point backwards through comments and white-space and then consider the
+;;   symbol at point.  The match must be a KiXtart command or function which
+;;   accepts arguments.
+
+;; Function: `kixtart-doc-search-in-function-args'
+
+;;   If point is within parentheses, move upwards (left) out of the parentheses,
+;;   move point backwards through comments and white-space, and then consider
+;;   the symbol at point.  The match must be a KiXtart function which accepts
+;;   arguments.
+
+;; Function: `kixtart-doc-search-command-line'
+
+;;   If point is not within the indentation of the current line, move to the
+;;   indentation column and consider the symbol at point.  The match must be a
+;;   KiXtart command which accepts arguments, and not be for the FOR symbol
+;;   (since the match is ambiguous without further context).
+
+;; Documentation represented as structures (as defined by `cl-defstruct') and
+;; customizing the value of `kixtart-doc-search-functions' will determine which
+;; structures are selected to be displayed.  The return value of each search
+;; function is a cons cell, with the first value being the upper-case form of
+;; the symbol which was matched, and the second value being a list of
+;; documentation structures which will be converted to text and concatenated
+;; together, separated by a single new-line character.
+
+;; Note: The requirement for dealing with multiple matches is a requirement to
+;; ensure that all matches for ambiguous KiXtart commands such as FOR and NEXT
+;; are given a chance to be displayed.
+
+;; Customizing documentation
+;; -------------------------
+
+;; At the most basic level of customization, it is possible to register
+;; additional documentation using the existing documentation structures and
+;; helper functions.  The macro `kixtart-doc-register' can be used to register
+;; multiple documentation entries for a given structure type, taking the
+;; constructor name as the first argument and processing the body as one or more
+;; documentation specifications.  Each specification is itself a list, where the
+;; first element is a symbol or list of symbols to be passed to the constructor
+;; as the keyword argument `:symbols', and all other elements are passed as
+;; additional constructor arguments.  Symbols should be registered in upper-case
+;; in order for matching to succeed.
+
+;; At a more general level, the mechanisms for finding and formatting
+;; documentation are implemented independently and may be overridden or
+;; replaced.  It is possible to use user defined structures in place of the
+;; original ones, although to remain compatible with existing documentation
+;; search functions, any new structures should:
+
+;; - Be compatible with the predicate functions `kixtart-doc-command-p',
+;;   `kixtart-doc-function-p', and `kixtart-doc-macro-p'.
+
+;; - Be compatible with the generic method `kixtart-doc-string', which returns
+;;   the structure as a string.  For macros this requires a slot named
+;;   `description' which describes the macro value, for commands and functions
+;;   this requires a slot named `syntax' which describes the syntax.
+
+;; - Implement a slot named `symbols' which contains the list of symbols to be
+;;   matched.
+
+;; - Implement a slot named `final' which determines which of the symbols in the
+;;   `symbols' slot list expect to be followed by additional syntax.
+
+;; The value of the `final' slot should be one of the following:
+
+;; - `nil', which indicates that all symbols expect to be followed by additional
+;;   syntax.
+
+;; - `t', which indicates none of the symbols expect to be followed by
+;;   additional syntax.
+
+;; - `first', which indicates that all symbols in the `symbols' slot except the
+;;   first expect to be followed by additional syntax.
+
+;; - `last', which indicates that all symbols in the `symbols' slot except the
+;;   last expect to be followed by additional syntax.
+
+;; - A list of symbols which do not expect to be followed by additional syntax.
+
+;; The most direct way to implement compatibility with existing search
+;; functions, and just customize documentation content or formatting, is to
+;; declare any new structures as inheriting from `kixtart-doc-command',
+;; `kixtart-doc-function', or `kixtart-doc-macro'.
+
+;; Customization examples
+;; ----------------------
+
+;; Prevent documentation from being displayed for symbols which are only matched
+;; by being at the beginning of the current line:
+
+;;   (setq kixtart-doc-search-functions
+;;         (delq #'kixtart-doc-search-command-line
+;;               kixtart-doc-search-functions))
+
+;; Register documentation for two KiXtart user-defined functions which takes no
+;; arguments:
+
+;;   (kixtart-doc-register kixtart-make-doc-function
+;;     (_SETUPDEBUG :syntax "_SetDebug ()" :final t)
+;;     (_SETUPGLOBALS :syntax "_SetupGlobals ()" :final t))
+
+;; Register documentation for a single KiXtart user-defined function which takes
+;; arguments:
+
+;;   (kixtart-doc-register kixtart-make-doc-function
+;;     (LOG :syntax "Log ($message, optional $level)"))
+
+;; Register extended documentation which contains additional information:
+
+;;   ;; Declare a new structure to represent a command, including the default
+;;   ;; slots, and extended with additional slots suitable for use with the
+;;   ;; official KiXtart documentation.
+;;   (cl-defstruct (kixtart-manual-command
+;;                  (:include kixtart-doc-command)
+;;                  (:constructor kixtart-make-manual-command)
+;;                  (:copier nil))
+;;     (action nil :type string)
+;;     (examples nil :type string)
+;;     (parameters nil :type string)
+;;     (remarks nil :type string))
+
+;;   ;; Require the `eieio' feature to allow convenient slot access with the
+;;   ;; `with-slots' macro.
+;;   (require 'eieio)
+
+;;   ;; Declare a method which specializes on the new structure type and returns
+;;   ;; it as a string.  Assume that the default documentation is not loaded so
+;;   ;; that the concatenating of multiple symbol matches is not relevant.
+;;   (cl-defmethod kixtart-doc-string ((doc kixtart-manual-command))
+;;     "Return DOC as a string.
+;;   DOC is a `kixtart-manual-command' structure."
+;;     (concat
+;;      ;; Get the docstring from the structure which was included.  This is a
+;;      ;; choice to re-use existing code to convert the syntax slot to a string
+;;      ;; instead of reading the slot value.
+;;      (cl-call-next-method)
+;;      ;; Build a new string based on the additional slot values.
+;;      (with-slots (action examples parameters remarks) doc
+;;        (concat
+;;         (and action (format "\n\nAction\n\n%s" action))
+;;         (and examples (format "\n\nExamples\n\n%s" examples))
+;;         (and parameters (format "\n\nParameters\n\n%s" parameters))
+;;         (and remarks (format "\n\nRemarks\n\n%s" remarks))))))
+
+;;   ;; Register new documentation with the new type.
+;;   (kixtart-doc-register kixtart-make-manual-command
+;;     (GOTO
+;;      :action "Description of the GOTO command's action."
+;;      :examples "Example of GOTO command's use."
+;;      :remarks "Remarks on GOTO command."
+;;      :syntax "GOTO expression"
+;;      :parameters "Details of the GOTO command's parameters."))
 
 ;; Current function name
 ;; =====================
@@ -561,10 +783,13 @@
 
 ;;; Code:
 
+;; `cl-lib' is required at runtime to use `cl-search' and `cl-some'.  Since
+;; `imenu' also requires `cl-lib' there is actually no change in runtime
+;; requirements.
+(require 'cl-lib)
 (require 'imenu)
 (require 'tempo)
 (eval-when-compile
-  (require 'cl-lib)
   (require 'rx))
 
 ;;;; Customization
@@ -588,6 +813,26 @@ A non-nil value indicates that block motion commands are
 permitted to push the previous location to the `mark-ring' when
 the value of point changes."
   :type 'boolean)
+
+(defcustom kixtart-doc-search-functions
+  (list #'kixtart-doc-search-at-point
+        #'kixtart-doc-search-before-point
+        #'kixtart-doc-search-in-function-args
+        #'kixtart-doc-search-command-line)
+  "Specifies the list of functions which return documentation.
+Each function is called in sequence until one returns a non-nil
+value, which should be a documentation structure compatible with the
+generic method `kixtart-doc-string'."
+  :type '(repeat function))
+
+(defcustom kixtart-eldoc-echo-truncate t
+  "Specifies how `eldoc-mode' will use the echo area.
+An integer value indicates that text should be truncated after
+the given number of characters.  Any other non-nil value
+indicates that text should be truncated at the first paragraph."
+  :type '(choice (const :tag "Never" nil)
+                 (integer :tag "After number of characters")
+                 (const :tag "At end of paragraph" t)))
 
 (defcustom kixtart-indent-offset 4
   "Specifies the indentation offset applied by `kixtart-indent-line'.
@@ -1172,6 +1417,194 @@ When point is not within a function return the value of
 `kixtart-which-function-default-name'."
   (or (kixtart-current-defun) kixtart-which-function-default-name))
 
+;;;; ElDoc
+
+(cl-defstruct (kixtart-doc-symbol
+               (:constructor nil)
+               (:copier nil))
+  (symbols nil :type list)
+  (final nil :type (or boolean list symbol)))
+
+(cl-defstruct (kixtart-doc-syntax
+               (:include kixtart-doc-symbol)
+               (:constructor nil)
+               (:copier nil))
+  (syntax nil :type string))
+
+(cl-defstruct (kixtart-doc-command
+               (:include kixtart-doc-syntax)
+               (:constructor kixtart-make-doc-command)
+               (:copier nil)))
+
+(cl-defstruct (kixtart-doc-function
+               (:include kixtart-doc-syntax)
+               (:constructor kixtart-make-doc-function)
+               (:copier nil)))
+
+(cl-defstruct (kixtart-doc-macro
+               (:include kixtart-doc-symbol)
+               (:constructor kixtart-make-doc-macro)
+               (:copier nil))
+  (description nil :type string)
+  (type nil :type (integer 0 *)))
+
+(cl-defgeneric kixtart-doc-accepts-argument-p (doc symbol)
+  "Return non-nil when DOC reference for SYMBOL expects arguments.")
+
+(cl-defmethod kixtart-doc-accepts-argument-p ((doc kixtart-doc-symbol) symbol)
+  "Return non-nil when DOC reference for SYMBOL expects arguments.
+DOC is a `kixtart-doc-symbol' structure."
+  (not (pcase (kixtart-doc-symbol-final doc)
+         ('last (eq (car (last (kixtart-doc-symbol-symbols doc))) symbol))
+         ('first (eq (car (kixtart-doc-symbol-symbols doc)) symbol))
+         ((and (pred listp) final) (memq symbol final))
+         ((and final (guard final)) t))))
+
+(defun kixtart-doc-type-name (id)
+  "Return the integer type ID as a string."
+  (pcase id
+    ((pred (<= 8192))
+     (concat (kixtart-doc-type-name (- id 8192)) "[]"))
+    (0  "Empty")
+    (1  "Null")
+    (2  "Integer")
+    (3  "Long")
+    (4  "Single")
+    (5  "Double")
+    (6  "Currency")
+    (7  "Date")
+    (8  "String")
+    (9  "Object")
+    (10 "Error")
+    (11 "Boolean")
+    (12 "Variant")
+    (13 "Object")
+    (17 "Byte")))
+
+(cl-defgeneric kixtart-doc-string (doc)
+  "Return DOC as a string.")
+
+(cl-defmethod kixtart-doc-string ((doc kixtart-doc-macro))
+  "Return DOC as a string.
+DOC is a `kixtart-doc-macro' structure."
+  (let ((description (kixtart-doc-macro-description doc))
+        (type (kixtart-doc-type-name (kixtart-doc-macro-type doc))))
+    (if type
+        (format "(%s) %s" type description)
+      description)))
+
+(cl-defmethod kixtart-doc-string ((doc kixtart-doc-syntax))
+  "Return DOC as a string.
+DOC is a `kixtart-doc-syntax' structure."
+  (kixtart-doc-syntax-syntax doc))
+
+(defmacro kixtart-doc-register (constructor &rest specs)
+  "Register documentation SPECS using CONSTRUCTOR.
+CONSTRUCTOR should be a function which returns a documentation
+structure.  Each form in SPECS should be a list, where the first
+element is a symbol or list of symbols to be passed to
+CONSTRUCTOR as keyword argument `:symbols'.  All other elements
+in SPECS are passed as additional arguments to CONSTRUCTOR."
+  (declare (indent 1))
+  `(progn
+     ,@(mapcar (pcase-lambda (`(,symbols . ,rest))
+                 (pcase-exhaustive symbols
+                   ((pred listp))
+                   ((pred symbolp)
+                    (setq symbols (list symbols))))
+                 `(push (funcall #',constructor :symbols ',symbols ,@rest)
+                        kixtart-doc-docs))
+               specs)))
+
+(defvar kixtart-doc-docs nil
+  "The list of documentation structures available to search.")
+
+(defvar kixtart-eldoc-face nil
+  "The face used to present the value of `thing' by `eldoc-mode'.")
+
+(defun kixtart-doc-search-at-point (&optional predicate)
+  "Match documentation structures using PREDICATE.
+If any matches are found, return a cons cell of the symbol at
+point and a list of documentation structures which contain the
+symbol in the symbols slot and return non-nil when PREDICATE is
+called with the structure and symbol as its arguments.  The value
+of `kixtart-eldoc-face' is updated as a side-effect."
+  (unless predicate (setq predicate #'always))
+  (and-let* ((thing (thing-at-point 'symbol))
+             (symbol (and (stringp thing) (intern (upcase thing))))
+             (docs (cl-loop for doc in kixtart-doc-docs
+                            when (memq symbol (kixtart-doc-symbol-symbols doc))
+                            when (funcall predicate doc symbol)
+                            collect doc)))
+    (setq kixtart-eldoc-face (get-text-property 0 'face thing))
+    (cons symbol docs)))
+
+(defun kixtart-doc-search-before-point ()
+  "Match documentation structures in positions before point.
+This only considers functions and commands which take arguments."
+  (save-excursion
+    ;; Move backwards through white-space.
+    (forward-comment (- (point)))
+    (kixtart-doc-search-at-point
+     ;; Results must accept arguments.
+     #'kixtart-doc-accepts-argument-p)))
+
+(defun kixtart-doc-search-in-function-args ()
+  "Match documentation structures for functions.
+This only considers functions which take arguments, and only
+when point appears to be within parentheses."
+  (save-excursion
+    ;; Move out of parens if this looks like function arguments.
+    (and (cl-plusp (kixtart--paren-depth))
+         (progn
+           (backward-up-list nil t t)
+           ;; Move backwards through white-space.
+           (forward-comment (- (point)))
+           (kixtart-doc-search-at-point
+            ;; Results must be functions that accept arguments.
+            (lambda (doc symbol)
+              (and (kixtart-doc-function-p doc)
+                   (kixtart-doc-accepts-argument-p doc symbol))))))))
+
+(defun kixtart-doc-search-command-line ()
+  "Match documentation structures at the beginning of the line.
+This only consider commands which take arguments."
+  (save-excursion
+    ;; Move to indentation.
+    (and (>= (point) (progn (back-to-indentation) (point)))
+         (kixtart-doc-search-at-point
+          ;; Results must be commands that accept arguments.  Ignore results for
+          ;; FOR since the result will be ambiguous.
+          (lambda (doc symbol)
+            (and (not (eq symbol 'FOR))
+                 (kixtart-doc-command-p doc)
+                 (kixtart-doc-accepts-argument-p doc symbol)))))))
+
+(defun kixtart-doc-search ()
+  "Search for documentation structures.
+Matches are returned as a cons cell, where the first element is
+the symbol which was matched, and the second element is the first
+non-nil result of calling the functions listed in
+`kixtart-doc-search-functions'."
+  (save-excursion
+    ;; Move out of comments and strings.
+    (when-let ((start (kixtart--start-of-comment-or-string)))
+      (goto-char start))
+    (cl-some #'funcall kixtart-doc-search-functions)))
+
+(defun kixtart-eldoc-function (callback)
+  "Call CALLBACK with a docstring relevant for point."
+  (pcase (kixtart-doc-search)
+    (`(,thing . ,docs)
+     (let ((docstring (mapconcat #'kixtart-doc-string docs "\n")))
+       (funcall callback docstring
+                :thing (symbol-name thing)
+                :face kixtart-eldoc-face
+                :echo (or (and (integerp kixtart-eldoc-echo-truncate)
+                               kixtart-eldoc-echo-truncate)
+                          (and kixtart-eldoc-echo-truncate
+                               (cl-search "\n\n" docstring))))))))
+
 ;;;; Imenu
 
 (defun kixtart--create-imenu-index ()
@@ -1338,6 +1771,7 @@ which will be expanded to the template."
 (defvar kixtart-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-c") #'kixtart-close-command-block)
+    (define-key map (kbd "C-c C-d") #'eldoc)
     (define-key map (kbd "C-c C-j") #'imenu)
     (define-key map (kbd "C-c C-t C-b") #'tempo-backward-mark)
     (define-key map (kbd "C-c C-t C-f") #'tempo-forward-mark)
@@ -1411,7 +1845,9 @@ which will be expanded to the template."
   (tempo-use-tag-list 'kixtart-tempo-tags)
   (add-hook 'which-func-functions #'kixtart-which-function nil t)
   (add-to-list 'font-lock-extend-region-functions
-               #'kixtart--font-lock-extend-region-function-def t))
+               #'kixtart--font-lock-extend-region-function-def t)
+  (when kixtart-doc-docs
+    (add-hook 'eldoc-documentation-functions #'kixtart-eldoc-function nil t)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.kix\\'" . kixtart-mode))

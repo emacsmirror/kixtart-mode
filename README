@@ -8,6 +8,7 @@ files.  The following features are implemented:
 - Indentation based on the usage of commands and parentheses
 - Motion around and selection of defined functions
 - Imenu support for function and label names
+- ElDoc support for display of documentation
 - Current function name for which-function-mode and add-log functions
 - Outline Mode support
 - Predefined Tempo templates with optional abbrev expansion
@@ -35,6 +36,9 @@ and enable some optional features:
 
   ;; Load the package by searching in paths listed in `load-path'.
   (require 'kixtart-mode)
+
+  ;; Load the default docstrings.
+  (require 'kixtart-docstrings)
 
   ;; Set indentation and fill preferences.
   (add-hook 'kixtart-mode-hook
@@ -211,6 +215,221 @@ although automatic re-scanning may be preferable to manually invoking the
 and `imenu-auto-rescan-maxout' to suitable values.
 
 KiXtart Mode binds `imenu' to 'C-c C-j' by default.
+
+ElDoc support
+=============
+
+ElDoc provides functions and a minor mode which can display information for
+language symbols, in the echo area or within a dedicated buffer.  KiXtart
+Mode implements ElDoc mode support by attempting to lookup documentation
+based on the context at point, and will be activated automatically (as part
+of mode initialization) after documentation has loaded.  By default, since
+the original KiXtart documentation is copyrighted and attempts to contact the
+author failed:
+
+- No documentation is automatically loaded by inclusion within the definition
+  of KiXtart Mode
+
+- Basic documentation which just describes KiXtart syntax and macro values is
+  provided within an accompanying file and can be explicitly loaded if
+  required
+
+To load the accompanying documentation, assuming that the file
+"kixtart-docstring.el" is in a directory listed in `load-path', require the
+feature `kixtart-docstrings':
+
+  (require 'kixtart-docstrings)
+
+Once documentation has been loaded, the ElDoc minor mode will automatically
+be enabled in all new KiXtart Mode buffers, with context sensitive
+documentation appearing in the echo area.  The `eldoc' function can also be
+used to request the documentation for the symbol at point, and KiXtart Mode
+binds this function to 'C-c C-d' by default.
+
+The majority of options for customizing the ElDoc display will be handled by
+setting ElDoc specific variables, although an additional customization
+variable `kixtart-eldoc-echo-truncate' is provided to determine how much
+documentation ElDoc should display when using the echo area.  By setting this
+variable to an integer, only the given number of characters will be
+displayed, otherwise the default value of `t' (or any other non-nil value)
+specifies to only display the first paragraph.
+
+Note: A paragraph is determined to end at the position where a documentation
+string contains two new-line characters (i.e. at the position of the
+substring "\n\n").
+
+Customizing documentation search
+--------------------------------
+
+Since KiXtart Mode operates by attempting to parse the region of the buffer
+which is local to point, some flexibility is required to infer which
+documentation is expected to be displayed.  The current implementation will
+move upwards (left) out of strings and comments and then begin calling the
+functions listed in the customization variable
+`kixtart-doc-search-functions'.  If any of the functions return a non-nil
+value, this result is used as the final return value and no further functions
+are called.  The default configuration will call the following functions in
+order:
+
+Function: `kixtart-doc-search-at-point'
+
+  Only consider the symbol at point.
+
+Function: `kixtart-doc-search-before-point'
+
+  Move point backwards through comments and white-space and then consider the
+  symbol at point.  The match must be a KiXtart command or function which
+  accepts arguments.
+
+Function: `kixtart-doc-search-in-function-args'
+
+  If point is within parentheses, move upwards (left) out of the parentheses,
+  move point backwards through comments and white-space, and then consider
+  the symbol at point.  The match must be a KiXtart function which accepts
+  arguments.
+
+Function: `kixtart-doc-search-command-line'
+
+  If point is not within the indentation of the current line, move to the
+  indentation column and consider the symbol at point.  The match must be a
+  KiXtart command which accepts arguments, and not be for the FOR symbol
+  (since the match is ambiguous without further context).
+
+Documentation represented as structures (as defined by `cl-defstruct') and
+customizing the value of `kixtart-doc-search-functions' will determine which
+structures are selected to be displayed.  The return value of each search
+function is a cons cell, with the first value being the upper-case form of
+the symbol which was matched, and the second value being a list of
+documentation structures which will be converted to text and concatenated
+together, separated by a single new-line character.
+
+Note: The requirement for dealing with multiple matches is a requirement to
+ensure that all matches for ambiguous KiXtart commands such as FOR and NEXT
+are given a chance to be displayed.
+
+Customizing documentation
+-------------------------
+
+At the most basic level of customization, it is possible to register
+additional documentation using the existing documentation structures and
+helper functions.  The macro `kixtart-doc-register' can be used to register
+multiple documentation entries for a given structure type, taking the
+constructor name as the first argument and processing the body as one or more
+documentation specifications.  Each specification is itself a list, where the
+first element is a symbol or list of symbols to be passed to the constructor
+as the keyword argument `:symbols', and all other elements are passed as
+additional constructor arguments.  Symbols should be registered in upper-case
+in order for matching to succeed.
+
+At a more general level, the mechanisms for finding and formatting
+documentation are implemented independently and may be overridden or
+replaced.  It is possible to use user defined structures in place of the
+original ones, although to remain compatible with existing documentation
+search functions, any new structures should:
+
+- Be compatible with the predicate functions `kixtart-doc-command-p',
+  `kixtart-doc-function-p', and `kixtart-doc-macro-p'.
+
+- Be compatible with the generic method `kixtart-doc-string', which returns
+  the structure as a string.  For macros this requires a slot named
+  `description' which describes the macro value, for commands and functions
+  this requires a slot named `syntax' which describes the syntax.
+
+- Implement a slot named `symbols' which contains the list of symbols to be
+  matched.
+
+- Implement a slot named `final' which determines which of the symbols in the
+  `symbols' slot list expect to be followed by additional syntax.
+
+The value of the `final' slot should be one of the following:
+
+- `nil', which indicates that all symbols expect to be followed by additional
+  syntax.
+
+- `t', which indicates none of the symbols expect to be followed by
+  additional syntax.
+
+- `first', which indicates that all symbols in the `symbols' slot except the
+  first expect to be followed by additional syntax.
+
+- `last', which indicates that all symbols in the `symbols' slot except the
+  last expect to be followed by additional syntax.
+
+- A list of symbols which do not expect to be followed by additional syntax.
+
+The most direct way to implement compatibility with existing search
+functions, and just customize documentation content or formatting, is to
+declare any new structures as inheriting from `kixtart-doc-command',
+`kixtart-doc-function', or `kixtart-doc-macro'.
+
+Customization examples
+----------------------
+
+Prevent documentation from being displayed for symbols which are only matched
+by being at the beginning of the current line:
+
+  (setq kixtart-doc-search-functions
+        (delq #'kixtart-doc-search-command-line
+              kixtart-doc-search-functions))
+
+Register documentation for two KiXtart user-defined functions which takes no
+arguments:
+
+  (kixtart-doc-register kixtart-make-doc-function
+    (_SETUPDEBUG :syntax "_SetDebug ()" :final t)
+    (_SETUPGLOBALS :syntax "_SetupGlobals ()" :final t))
+
+Register documentation for a single KiXtart user-defined function which takes
+arguments:
+
+  (kixtart-doc-register kixtart-make-doc-function
+    (LOG :syntax "Log ($message, optional $level)"))
+
+Register extended documentation which contains additional information:
+
+  ;; Declare a new structure to represent a command, including the default
+  ;; slots, and extended with additional slots suitable for use with the
+  ;; official KiXtart documentation.
+  (cl-defstruct (kixtart-manual-command
+                 (:include kixtart-doc-command)
+                 (:constructor kixtart-make-manual-command)
+                 (:copier nil))
+    (action nil :type string)
+    (examples nil :type string)
+    (parameters nil :type string)
+    (remarks nil :type string))
+
+  ;; Require the `eieio' feature to allow convenient slot access with the
+  ;; `with-slots' macro.
+  (require 'eieio)
+
+  ;; Declare a method which specializes on the new structure type and returns
+  ;; it as a string.  Assume that the default documentation is not loaded so
+  ;; that the concatenating of multiple symbol matches is not relevant.
+  (cl-defmethod kixtart-doc-string ((doc kixtart-manual-command))
+    "Return DOC as a string.
+  DOC is a `kixtart-manual-command' structure."
+    (concat
+     ;; Get the docstring from the structure which was included.  This is a
+     ;; choice to re-use existing code to convert the syntax slot to a string
+     ;; instead of reading the slot value.
+     (cl-call-next-method)
+     ;; Build a new string based on the additional slot values.
+     (with-slots (action examples parameters remarks) doc
+       (concat
+        (and action (format "\n\nAction\n\n%s" action))
+        (and examples (format "\n\nExamples\n\n%s" examples))
+        (and parameters (format "\n\nParameters\n\n%s" parameters))
+        (and remarks (format "\n\nRemarks\n\n%s" remarks))))))
+
+  ;; Register new documentation with the new type.
+  (kixtart-doc-register kixtart-make-manual-command
+    (GOTO
+     :action "Description of the GOTO command's action."
+     :examples "Example of GOTO command's use."
+     :remarks "Remarks on GOTO command."
+     :syntax "GOTO expression"
+     :parameters "Details of the GOTO command's parameters."))
 
 Current function name
 =====================
