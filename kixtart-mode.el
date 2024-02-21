@@ -24,6 +24,12 @@
 
 ;;; News:
 
+;; Version 1.2.1 (????-??-??)
+;; ==========================
+
+;; Fixed parsing error when calling indentation functions with point inside a
+;; comment.
+
 ;; Version 1.2.0 (2024-01-01)
 ;; ==========================
 
@@ -862,10 +868,14 @@ script line ending with the special comment \";\\\"."
                             (line-end-position)
                             t))))
 
-(defun kixtart--in-comment-or-string-p (&optional ppss)
-  "Return a non-nil value when inside a comment or string.
-Prefer existing parser state PPSS over calling `syntax-ppss'"
+(defun kixtart--start-of-comment-or-string (&optional ppss)
+  "Return the starting position of the comment or string at point.
+Return nil when point is outside of a comment or string.  Prefer
+existing parser state PPSS over calling `syntax-ppss'."
   (nth 8 (or ppss (syntax-ppss))))
+
+(defalias 'kixtart--in-comment-or-string-p #'kixtart--start-of-comment-or-string
+  "Return a non-nil value when inside a comment or string.")
 
 (defun kixtart--paren-depth (&optional ppss)
   "Return the current parentheses depth.
@@ -889,10 +899,10 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
 
 (defun kixtart--parse-block ()
   "Scan backwards and return the current block state."
-  ;; Move out of strings and comments.
   (save-excursion
-    (while (kixtart--in-comment-or-string-p)
-      (backward-up-list nil t t))
+    ;; Move out of strings and comments.
+    (when-let ((start (kixtart--start-of-comment-or-string)))
+      (goto-char start))
     ;; Search backwards matching pairs of script-block defining keyword tokens.
     (let ((parse-sexp-ignore-comments t)
           block-end
