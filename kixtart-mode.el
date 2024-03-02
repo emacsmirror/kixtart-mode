@@ -89,7 +89,7 @@
 ;; Support was added for `add-log' functions, which allow the current function
 ;; name to be automatically added to change log entries.
 
-;; Support was added for `which-function-mode', a minor-mode which displays the
+;; Support was added for `which-function-mode', a minor mode which displays the
 ;; current function name in the mode-line.
 
 ;; Fixed the use of multi-line comment indicators at the beginning of the
@@ -122,7 +122,7 @@
 ;; Installation
 ;; ------------
 
-;; Clone this repository to a local sub-directory:
+;; Clone this repository to a local subdirectory:
 
 ;;   git clone https://git.sr.ht/~mew/kixtart-mode
 
@@ -191,13 +191,13 @@
 ;; discard a trailing portion of a macro name when the following criteria are
 ;; met:
 
-;; 1. The beginning of the macro name matches a valid KiXtart macro name.
+;; 1. The beginning of the macro name matches a valid KiXtart macro name
 
 ;; 2. Immediately following this match, there are additional characters present
-;;    which are valid for use within a macro name.
+;;    which are valid for use within a macro name
 
 ;; 3. The additional characters do not extend the match to a different (longer)
-;;    KiXtart macro name.
+;;    KiXtart macro name
 
 ;; The trailing portion of the macro name will be highlighted as an error.
 
@@ -308,12 +308,12 @@
 ;; Imenu support
 ;; =============
 
-;; The `imenu' command provides code indexing and navigation options which
-;; allow point to jump to indexed buffer positions.  The `imenu' menu is
-;; presented as a list of completions which contains the names of all
-;; defined functions, as well as a single "/Labels" sub-menu entry which
-;; lists all defined label names (the "/" character is chosen as a sub-menu
-;; prefix because it is invalid as part of a function name).
+;; The `imenu' command provides code indexing and navigation options which allow
+;; point to jump to indexed buffer positions.  The `imenu' menu is presented as
+;; a list of completions which contains the names of all defined functions, as
+;; well as a single "/Labels" submenu entry which lists all defined label names
+;; (the "/" character is chosen as a submenu prefix because it is invalid as
+;; part of a function name).
 
 ;; For very large scripts scanning for index entries can potentially be slow,
 ;; although automatic re-scanning may be preferable to manually invoking the
@@ -331,14 +331,10 @@
 ;; based on the context at point, and will be activated automatically (as part
 ;; of mode initialization) after documentation has loaded.  By default, since
 ;; the original KiXtart documentation is copyrighted and attempts to contact the
-;; author failed:
-
-;; - No documentation is automatically loaded by inclusion within the definition
-;;   of KiXtart Mode
-
-;; - Basic documentation which just describes KiXtart syntax and macro values is
-;;   provided within an accompanying file and can be explicitly loaded if
-;;   required
+;; author failed, no documentation is automatically loaded by inclusion within
+;; the definition of KiXtart Mode.  Basic documentation which just describes
+;; KiXtart syntax and macro values is provided within an accompanying file and
+;; can be explicitly loaded if required.
 
 ;; To load the accompanying documentation, assuming that the file
 ;; "kixtart-docstring.el" is in a directory listed in `load-path', require the
@@ -434,34 +430,34 @@
 ;; search functions, any new structures should:
 
 ;; - Be compatible with the predicate functions `kixtart-doc-command-p',
-;;   `kixtart-doc-function-p', and `kixtart-doc-macro-p'.
+;;   `kixtart-doc-function-p', and `kixtart-doc-macro-p'
 
 ;; - Be compatible with the generic method `kixtart-doc-string', which returns
-;;   the structure as a string.  For macros this requires a slot named
+;;   the structure as a string (for macros this requires a slot named
 ;;   `description' which describes the macro value, for commands and functions
-;;   this requires a slot named `syntax' which describes the syntax.
+;;   this requires a slot named `syntax' which describes the syntax)
 
 ;; - Implement a slot named `symbols' which contains the list of symbols to be
-;;   matched.
+;;   matched
 
 ;; - Implement a slot named `final' which determines which of the symbols in the
-;;   `symbols' slot list expect to be followed by additional syntax.
+;;   `symbols' slot list expect to be followed by additional syntax
 
 ;; The value of the `final' slot should be one of the following:
 
 ;; - `nil', which indicates that all symbols expect to be followed by additional
-;;   syntax.
+;;   syntax
 
 ;; - `t', which indicates none of the symbols expect to be followed by
-;;   additional syntax.
+;;   additional syntax
 
 ;; - `first', which indicates that all symbols in the `symbols' slot except the
-;;   first expect to be followed by additional syntax.
+;;   first expect to be followed by additional syntax
 
 ;; - `last', which indicates that all symbols in the `symbols' slot except the
-;;   last expect to be followed by additional syntax.
+;;   last expect to be followed by additional syntax
 
-;; - A list of symbols which do not expect to be followed by additional syntax.
+;; - A list of symbols which do not expect to be followed by additional syntax
 
 ;; The most direct way to implement compatibility with existing search
 ;; functions, and just customize documentation content or formatting, is to
@@ -548,7 +544,7 @@
 ;; - `add-log' functions, which allow the current function name to be
 ;;   automatically added to change log entries
 
-;; - `which-function-mode', a minor-mode which displays the current function
+;; - `which-function-mode', a minor mode which displays the current function
 ;;   name in the mode-line
 
 ;; Note: The customization variable `kixtart-which-function-default-name' is
@@ -639,7 +635,7 @@
 
 ;; Expansion of the predefined template tags can be performed manually with
 ;; functions such as `expand-abbrev'.  For automatic expansions, this can be
-;; achieved by enabling the abbrev minor-mode (`abbrev-mode') in the current
+;; achieved by enabling the abbrev minor mode (`abbrev-mode') in the current
 ;; buffer.  It is likely convenient to automatically enable `abbrev-mode' in all
 ;; KiXtart Mode buffers:
 
@@ -765,7 +761,7 @@
 ;; Closing open blocks
 ;; ===================
 
-;; As an alternative to inserting fully templated code into the buffer, the
+;; As an alternative to inserting fully-templated code into the buffer, the
 ;; command `kixtart-close-command-block' will insert a KiXtart command which can
 ;; close the currently open script block, where an open block is determined by
 ;; looking backwards from point.  Repeatedly invoking the command will cycle
@@ -1610,7 +1606,7 @@ non-nil result of calling the functions listed in
 (defun kixtart--create-imenu-index ()
   "Build and return an index alist suitable for Imenu.
 Functions are added at the top level of the menu.  Labels are
-added into a sub-menu."
+added into a submenu."
   (save-excursion
     (save-restriction
       (widen)
