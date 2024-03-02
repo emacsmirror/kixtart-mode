@@ -14,7 +14,7 @@
 (defmacro kixtart-mode-tests--with-temp-buffer (buffer-contents &rest body)
   "Evaluate BODY in a temporary KiXtart mode buffer.
 The string BUFFER-CONTENTS is inserted into the buffer before
- evaulation."
+ evaluation."
   (declare (indent 1))
   `(with-temp-buffer
      (kixtart-mode)
@@ -54,7 +54,7 @@ be closed by cycling through the insertion of STRINGS."
 
 (defmacro kixtart-mode-tests--test-imenu-index (buffer-contents &rest alist)
   "Test Imenu index creation within a temporary KiXtart mode buffer.
-Check whether the Imenu alist which is genearted for
+Check whether the Imenu alist which is generated for
 BUFFER-CONTENTS is equal to ALIST."
   (declare (indent 1))
   `(kixtart-mode-tests--with-temp-buffer
