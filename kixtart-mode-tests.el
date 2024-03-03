@@ -50,7 +50,7 @@ be closed by cycling through the insertion of STRINGS."
      ;; Test undo.
      (let ((last-command 'kixtart-close-command-block))
        (kixtart-close-command-block))
-     (should (null (current-word t)))))
+     (should-not (current-word t))))
 
 (defmacro kixtart-mode-tests--test-imenu-index (buffer-contents &rest alist)
   "Test Imenu index creation within a temporary KiXtart mode buffer.
