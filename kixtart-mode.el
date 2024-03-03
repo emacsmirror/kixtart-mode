@@ -24,7 +24,7 @@
 
 ;;; News:
 
-;; Version 1.2.1 (????-??-??)
+;; Version 1.3.0 (????-??-??)
 ;; ==========================
 
 ;; Fixed parsing error when calling indentation functions with point inside a
@@ -32,6 +32,12 @@
 
 ;; Added ElDoc support to display documentation for KiXtart symbols at or near
 ;; point.
+
+;; The syntax classification for the "?" character is now applied dynamically
+;; based on symbol boundaries.  Discrete groups of "?" characters are now
+;; considered to be a symbol, while "?" characters which are adjacent to other
+;; symbol characters retain the previous behavior of being classification as
+;; punctuation.
 
 ;; Version 1.2.0 (2024-01-01)
 ;; ==========================
@@ -291,6 +297,15 @@
 ;; This will leave point at the beginning of the relevant FUNCTION command
 ;; rather than at the beginning of the line which contained the relevant
 ;; FUNCTION command.
+
+;; Rather than attempt to guess where a syntactically valid KiXtart expression
+;; begins and ends, movement by s-expression will typically move around symbols
+;; and words.  The exception to this is where the "?" character is adjacent to
+;; any other character classified as being symbol syntax - in this instance "?"
+;; is dynamically reclassified as punctuation to prevent the symbol name being
+;; extended.  For a more consistent editing experience, it is recommended to
+;; leave white-space between usage of the "?"  command and other language
+;; keywords.
 
 ;; An additional navigation function is also provided in
 ;; `kixtart-up-script-block'.  This function uses the same rules of script-block
@@ -1118,6 +1133,19 @@ existing parser state PPSS over calling `syntax-ppss'."
 (defalias 'kixtart--in-comment-or-string-p #'kixtart--start-of-comment-or-string
   "Return a non-nil value when inside a comment or string.")
 
+(defun kixtart--thing-at-point (thing &optional no-properties)
+  "Return the THING at point.
+Consider the ? character to be self-delimiting.  When
+NO-PROPERTIES is non-nil, strip text properties from the return
+value."
+  ;; Always try both branches because the syntax classification of ? is updated
+  ;; dynamically based on symbol boundaries.
+  (or (let ((start (or (and (eq (char-after) ??) (point))
+                       (and (eq (char-before) ??) (1- (point))))))
+        (and start (with-restriction start (1+ start)
+                     (thing-at-point thing no-properties))))
+      (thing-at-point thing no-properties)))
+
 (defun kixtart--paren-depth (&optional ppss)
   "Return the current parentheses depth.
 Prefer existing parser state PPSS over calling `syntax-ppss'."
@@ -1526,7 +1554,7 @@ symbol in the symbols slot and return non-nil when PREDICATE is
 called with the structure and symbol as its arguments.  The value
 of `kixtart-eldoc-face' is updated as a side-effect."
   (unless predicate (setq predicate #'always))
-  (and-let* ((thing (thing-at-point 'symbol))
+  (and-let* ((thing (kixtart--thing-at-point 'symbol))
              (symbol (and (stringp thing) (intern (upcase thing))))
              (docs (cl-loop for doc in kixtart-doc-docs
                             when (memq symbol (kixtart-doc-symbol-symbols doc))
@@ -1787,10 +1815,6 @@ which will be expanded to the template."
 
 ;;;; Syntax table
 
-;; Note that the ? character is left as punctuation even though it is
-;; technically a command.  This seems to best represent how the original parser
-;; works.  "?:mylabel", "?myfunction", "?command", "?$var=1" are all valid.
-
 (defconst kixtart-mode-syntax-table
   (let ((table (make-syntax-table)))
     ;; Add ' for string-quotes.
@@ -1815,6 +1839,7 @@ which will be expanded to the template."
     (modify-syntax-entry ?$ "_" table)
     (modify-syntax-entry ?% "_" table)
     (modify-syntax-entry ?: "_" table)
+    (modify-syntax-entry ?? "_" table)
     (modify-syntax-entry ?@ "_" table)
     (modify-syntax-entry ?\\ "_" table)
     (modify-syntax-entry ?_ "_" table)
@@ -1822,6 +1847,18 @@ which will be expanded to the template."
     (modify-syntax-entry ?{ "_" table)
     (modify-syntax-entry ?} "_" table)
     table))
+
+(defconst kixtart-syntax-propertize-function
+  (syntax-propertize-rules
+   ;; Since the rules are applied in a single pass, begin by matching ? against
+   ;; its own symbol boundary.  This effectively sets the logic of the next rule
+   ;; to be a match where the symbol boundary is extended by adjacent symbol
+   ;; characters.
+   ((rx symbol-start (1+ ??) symbol-end))
+   ;; Convert matches to punctuation so that sexp motion skips through ?
+   ;; characters and finds usable symbol boundaries for KiXtart keywords.
+   ((rx (1+ ??))
+    (0 "."))))
 
 ;;;; Mode
 
@@ -1837,11 +1874,14 @@ which will be expanded to the template."
   (setq-local add-log-current-defun-function #'kixtart-current-defun)
   (setq-local outline-level #'kixtart-outline-level)
   (setq-local outline-regexp (kixtart-rx outline))
+  (setq-local syntax-propertize-function kixtart-syntax-propertize-function)
   (setq imenu-create-index-function #'kixtart--create-imenu-index)
   (tempo-use-tag-list 'kixtart-tempo-tags)
   (add-hook 'which-func-functions #'kixtart-which-function nil t)
   (add-to-list 'font-lock-extend-region-functions
                #'kixtart--font-lock-extend-region-function-def t)
+  (add-to-list 'syntax-propertize-extend-region-functions
+               #'syntax-propertize-wholelines)
   (when kixtart-doc-docs
     (add-hook 'eldoc-documentation-functions #'kixtart-eldoc-function nil t)))
 

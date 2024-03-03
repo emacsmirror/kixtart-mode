@@ -186,6 +186,15 @@ This will leave point at the beginning of the relevant FUNCTION command
 rather than at the beginning of the line which contained the relevant
 FUNCTION command.
 
+Rather than attempt to guess where a syntactically valid KiXtart expression
+begins and ends, movement by s-expression will typically move around symbols
+and words.  The exception to this is where the "?" character is adjacent to
+any other character classified as being symbol syntax - in this instance "?"
+is dynamically reclassified as punctuation to prevent the symbol name being
+extended.  For a more consistent editing experience, it is recommended to
+leave white-space between usage of the "?"  command and other language
+keywords.
+
 An additional navigation function is also provided in
 `kixtart-up-script-block'.  This function uses the same rules of script-block
 definition to move point to the buffer position which opened the current
