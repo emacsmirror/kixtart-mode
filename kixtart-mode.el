@@ -1133,10 +1133,10 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
 
 (cl-defstruct (kixtart-block (:constructor kixtart-make-block)
                              (:copier nil))
-  in-parens
-  token
-  token-string
-  position)
+  (in-parens nil :type boolean)
+  (token nil :type symbol)
+  (token-string nil :type string)
+  (position nil :type (integer 0 *)))
 
 (defun kixtart--parse-block ()
   "Scan backwards and return the current block state."
