@@ -37,7 +37,16 @@
 ;; based on symbol boundaries.  Discrete groups of "?" characters are now
 ;; considered to be a symbol, while "?" characters which are adjacent to other
 ;; symbol characters retain the previous behavior of being classification as
-;; punctuation.
+;; punctuation.  Font-lock rules will now only apply syntax highlighting to "?"
+;; characters which are classified as symbols to provide a visual indicator of
+;; the classification.  To restore the previous behaviour where all "?"
+;; characters are highlighted, it is possible to add an additional font-lock
+;; rule to cover this case:
+
+;;   (font-lock-add-keywords 'kixtart-mode '(("?" . 'kixtart-command-face)) t)
+
+;; Added completion-at-point support for built-in KiXtart syntax (commands,
+;; functions, and macros).
 
 ;; Version 1.2.0 (2024-01-01)
 ;; ==========================
@@ -121,6 +130,7 @@
 ;; - Motion around and selection of defined functions
 ;; - Imenu support for function and label names
 ;; - ElDoc support for display of documentation
+;; - Completion for built-in syntax (commands, functions, and macros)
 ;; - Current function name for which-function-mode and add-log functions
 ;; - Outline Mode support
 ;; - Predefined Tempo templates with optional abbrev expansion
@@ -548,6 +558,81 @@
 ;;      :syntax "GOTO expression"
 ;;      :parameters "Details of the GOTO command's parameters."))
 
+;; Symbol completion
+;; =================
+
+;; In-buffer completion of all built-in KiXtart keywords (commands, functions,
+;; and macros) is available through the standard completion-at-point mechanism,
+;; and will present completion candidates when the `completion-at-point'
+;; function is called.
+
+;; All keywords are stored internally using "PascalCase" to allow the case of
+;; completion candidates to be customized.
+
+;; The customization variable `kixtart-completion-list-hook' is a hook which may
+;; be used to customize the completion keywords list before it is sent to the
+;; completion interface.  At the time that the hook functions are called, the
+;; dynamically bound variable `kixtart-completion-list' will have the value of
+;; the completion list, and the dynamically bound variable
+;; `kixtart-completion-input' will have a copy of the input string which is
+;; being completed.  The hook functions are free to modify theses values.  By
+;; default, the following two functions are already added to the hook:
+
+;; Function: `kixtart-completion-upcase-macros'
+
+;;   Convert all macro names in the completion list to uppercase.
+
+;; Function `kixtart-completion-add-crlf-commands'
+
+;;   If the string being completed is a sequence of two or more "?" characters
+;;   (i.e. multiple CRLF output commands which have defined a single pair of
+;;   symbol boundaries), append the string to the front of the completion list.
+
+;; The experience with the default hook functions in-place is that:
+
+;; - Completion candidates for commands and functions will be displayed and
+;;   inserted in "PascalCase"
+
+;; - Completion candidates for macros will be displayed and inserted in
+;;   uppercase
+
+;; - Attempting to complete a single symbol which is a sequence of "?"
+;;   characters will always return a single match
+
+;; The customization variable `kixtart-completion-annotation-function' can be
+;; used to modify how the completion candidates are annotated in the completions
+;; interface.  The function is expected to accept a single argument, the string
+;; of the completion candidate, and return the string to be use as the
+;; annotation.  The default value of this variable is the following function:
+
+;; Function: `kixtart-completion-annotate-macros'
+
+;;   When the completion candidate appears to be a KiXtart macro name, attempt
+;;   to find a matching documentation structure in the registered documentation
+;;   (see: ElDoc support) and return the `description' slot value of the
+;;   `kixtart-doc-macro' structure.  Otherwise return nil.
+
+;; Note: The presence of the completion-at-point implementation will replace the
+;; default behaviour of completing symbols using a TAGS file.  To reliably use
+;; both completion functions, without having to know in advance which will be
+;; the one which gets activated by matching the input, there are two options:
+
+;; 1. Invoke the TAGS completion separately by using the `complete-tag' command
+
+;; 2. Use a third party package to call both completion functions, merge the
+;;    results, and present a single list of completion candidates
+
+;; If taking the second option, the recommended solution is to install the
+;; "Cape" package and replace the completion functions with the result of
+;; calling the completion merging function `cape-capf-super':
+
+;;   (add-hook 'kixtart-mode-hook
+;;             (lambda ()
+;;               (setq-local completion-at-point-functions
+;;                           (list (cape-capf-super
+;;                                  #'tags-completion-at-point-function
+;;                                  #'kixtart-completion-at-point-function)))))
+
 ;; Current function name
 ;; =====================
 
@@ -825,6 +910,22 @@ permitted to push the previous location to the `mark-ring' when
 the value of point changes."
   :type 'boolean)
 
+(defcustom kixtart-completion-annotation-function
+  #'kixtart-completion-annotate-macros
+  "Specifies the function which creates completion annotations."
+  :type 'function)
+
+(defcustom kixtart-completion-list-hook
+  (list #'kixtart-completion-upcase-macros
+        #'kixtart-completion-add-crlf-commands)
+  "A hook which is called during symbol completion.
+At the time that the hook functions are called, the value of
+`kixtart-completion-list' contains the current list of completion
+keywords, and `kixtart-completion-input' contains a copy of the
+input string which is being completed.  Hook functions are free
+to modify both values."
+  :type 'hook)
+
 (defcustom kixtart-doc-search-functions
   (list #'kixtart-doc-search-at-point
         #'kixtart-doc-search-before-point
@@ -930,22 +1031,63 @@ Imenu index data."
   'kixtart-warning-face
   "Face specification to highlight a KiXtart syntax warning.")
 
+;;;; Keywords
+
+(eval-and-compile
+  (defvar kixtart-keyword-commands
+    '("?" "Beep" "Big" "Break" "Call" "Case" "CD" "CLS" "Color" "Cookie1" "Copy"
+      "Debug" "Del" "Dim" "Display" "Do" "Each" "Else" "EndFunction" "EndIf"
+      "EndSelect" "Exit" "FlushKB" "For" "Function" "Get" "GetS" "Global" "Go"
+      "GoSub" "Goto" "If" "Include" "Loop" "MD" "Move" "Next" "Password" "Play"
+      "Quit" "RD" "ReDim" "Return" "Run" "Select" "Set" "SetL" "SetM" "SetTime"
+      "Shell" "Sleep" "Small" "Until" "Use" "While"))
+  (defvar kixtart-keyword-functions
+    '("Abs" "AddKey" "AddPrinterConnection" "AddProgramGroup" "AddProgramItem"
+      "Asc" "AScan" "At" "BackupEventLog" "Box" "CDbl" "Chr" "CInt"
+      "ClearEventLog" "Close" "CompareFileTimes" "CreateObject" "CStr"
+      "DecToHex" "DelKey" "DelPrinterConnection" "DelProgramGroup"
+      "DelProgramItem" "DelTree" "DelValue" "Dir" "EnumGroup" "EnumIPInfo"
+      "EnumKey" "EnumLocalGroup" "EnumValue" "Execute" "Exist" "ExistKey"
+      "ExpandEnvironmentVars" "Fix" "FormatNumber" "FreeFileHandle"
+      "GetCommandLine" "GetDiskSpace" "GetFileAttr" "GetFileSize" "GetFileTime"
+      "GetFileVersion" "GetObject" "IIf" "InGroup" "InStr" "InStrRev" "Int"
+      "IsDeclared" "Join" "KBHit" "KeyExist" "LCase" "Left" "Len" "LoadHive"
+      "LoadKey" "LogEvent" "LogOff" "LTrim" "MemorySize" "MessageBox" "Open"
+      "ReadLine" "ReadProfileString" "ReadType" "ReadValue" "RedirectOutput"
+      "Replace" "Right" "Rnd" "Round" "RTrim" "SaveKey" "SendKeys" "SendMessage"
+      "SetASCII" "SetConsole" "SetDefaultPrinter" "SetFileAttr" "SetFocus"
+      "SetOption" "SetSystemState" "SetTitle" "SetWallpaper" "ShowProgramGroup"
+      "Shutdown" "SIDToName" "Split" "SRnd" "SubStr" "Trim" "UBound" "UCase"
+      "UnloadHive" "Val" "VarType" "VarTypeName" "WriteLine"
+      "WriteProfileString" "WriteValue"))
+  (defvar kixtart-keyword-macros
+    '("@Address" "@Build" "@Color" "@Comment" "@CPU" "@CRLF" "@CSD" "@CurDir"
+      "@Date" "@Day" "@Domain" "@DOS" "@Error" "@FullName" "@HomeDir"
+      "@HomeDrive" "@HomeShr" "@HostName" "@InUDF" "@InWin" "@IPAddress0"
+      "@IPAddress1" "@IPAddress2" "@IPAddress3" "@Kix" "@LanRoot" "@LDomain"
+      "@LDrive" "@LM" "@LogonMode" "@LongHomeDir" "@LServer" "@MaxPwAge"
+      "@MDayNo" "@Mhz" "@Month" "@MonthNo" "@MSecs" "@OnWOW64" "@PID"
+      "@PrimaryGroup" "@Priv" "@ProductSuite" "@ProductType" "@ProgramFilesx86"
+      "@PwAge" "@RAS" "@ReleaseID" "@ReleaseName" "@Result" "@RServer"
+      "@ScriptDir" "@ScriptExe" "@ScriptName" "@SError" "@SID" "@Site"
+      "@StartDir" "@SysLang" "@Ticks" "@Time" "@TSSession" "@UserID" "@UserLang"
+      "@WDayNo" "@WkSta" "@WUserID" "@YDayNo" "@Year")))
+
+(defvar kixtart-keywords
+  (eval-when-compile
+    (sort (append kixtart-keyword-commands
+                  kixtart-keyword-functions
+                  (copy-sequence kixtart-keyword-macros))
+          #'string-lessp)))
+
 ;;;; Search patterns
 
 (defmacro kixtart-rx (&rest regexps)
   "Extended version of `rx' for translation of form REGEXPS."
   `(rx-let ((command
-             (or ??
-                 (seq symbol-start
-                      (or "beep" "big" "break" "call" "case" "cd" "cls" "color"
-                          "cookie1" "copy" "debug" "del" "dim" "display" "do"
-                          "each" "else" "endfunction" "endif" "endselect" "exit"
-                          "flushkb" "for" "function" "get" "gets" "global" "go"
-                          "gosub" "goto" "if" "include" "loop" "md" "move"
-                          "next" "password" "play" "quit" "rd" "redim" "return"
-                          "run" "select" "set" "setl" "setm" "settime" "shell"
-                          "sleep" "small" "until" "use" "while")
-                      symbol-end)))
+             (seq symbol-start
+                  (or (1+ ??) ,@(cdr kixtart-keyword-commands))
+                  symbol-end))
             (command-endfunction
              (seq symbol-start "endfunction" symbol-end))
             (command-function
@@ -957,29 +1099,7 @@ Imenu index data."
                   (0+ user-chars)))
             (function
              (seq symbol-start
-                  (or "abs" "addkey" "addprinterconnection" "addprogramgroup"
-                      "addprogramitem" "asc" "ascan" "at" "backupeventlog" "box"
-                      "cdbl" "chr" "cint" "cleareventlog" "close"
-                      "comparefiletimes" "createobject" "cstr" "dectohex"
-                      "delkey" "delprinterconnection" "delprogramgroup"
-                      "delprogramitem" "deltree" "delvalue" "dir" "enumgroup"
-                      "enumipinfo" "enumkey" "enumlocalgroup" "enumvalue"
-                      "execute" "exist" "existkey" "expandenvironmentvars" "fix"
-                      "formatnumber" "freefilehandle" "getcommandline"
-                      "getdiskspace" "getfileattr" "getfilesize" "getfiletime"
-                      "getfileversion" "getobject" "iif" "ingroup" "instr"
-                      "instrrev" "int" "isdeclared" "join" "kbhit" "keyexist"
-                      "lcase" "left" "len" "loadhive" "loadkey" "logevent"
-                      "logoff" "ltrim" "memorysize" "messagebox" "open"
-                      "readline" "readprofilestring" "readtype" "readvalue"
-                      "redirectoutput" "replace" "right" "rnd" "round" "rtrim"
-                      "savekey" "sendkeys" "sendmessage" "setascii" "setconsole"
-                      "setdefaultprinter" "setfileattr" "setfocus" "setoption"
-                      "setsystemstate" "settitle" "setwallpaper"
-                      "showprogramgroup" "shutdown" "sidtoname" "split" "srnd"
-                      "substr" "trim" "ubound" "ucase" "unloadhive" "val"
-                      "vartype" "vartypename" "writeline" "writeprofilestring"
-                      "writevalue")
+                  (or ,@kixtart-keyword-functions)
                   symbol-end))
             (function-name
              ;; Function names cannot start with a character which wrongly
@@ -989,19 +1109,7 @@ Imenu index data."
             (label
              (seq symbol-start ?: (1+ user-chars)))
             (macro
-             (seq ?@
-                  (or "address" "build" "color" "comment" "cpu" "crlf" "csd"
-                      "curdir" "date" "day" "domain" "dos" "error" "fullname"
-                      "homedir" "homedrive" "homeshr" "hostname" "inudf" "inwin"
-                      "ipaddress0" "ipaddress1" "ipaddress2" "ipaddress3" "kix"
-                      "lanroot" "ldomain" "ldrive" "lm" "logonmode"
-                      "longhomedir" "lserver" "maxpwage" "mdayno" "mhz" "month"
-                      "monthno" "msecs" "onwow64" "pid" "primarygroup" "priv"
-                      "productsuite" "producttype" "programfilesx86" "pwage"
-                      "ras" "releaseid" "releasename" "result" "rserver"
-                      "scriptdir" "scriptexe" "scriptname" "serror" "sid" "site"
-                      "startdir" "syslang" "ticks" "time" "tssession" "userid"
-                      "userlang" "wdayno" "wksta" "wuserid" "ydayno" "year")))
+             (seq (or ,@kixtart-keyword-macros)))
             (macro-format
              ;; Match anything which has the appearance of a macro.
              (seq ?@ (1+ user-chars)))
@@ -1629,6 +1737,51 @@ non-nil result of calling the functions listed in
                           (and kixtart-eldoc-echo-truncate
                                (cl-search "\n\n" docstring))))))))
 
+;;;; Completion
+
+(defvar kixtart-completion-list nil
+  "The list of completion keywords to offer.")
+
+(defvar kixtart-completion-input nil
+  "The input string which is being completed.")
+
+(defun kixtart-completion-add-crlf-commands ()
+  "Modify the completion list to match CRLF output commands.
+When the completion input string is a sequence of 2 or more \"?\"
+characters, add it to the front of the completion list to ensure
+there is a single match."
+  (when (string-match-p (rx (>= 2 ??)) kixtart-completion-input)
+    (push kixtart-completion-input kixtart-completion-list)))
+
+(defun kixtart-completion-upcase-macros ()
+  "Convert macro names in the completion list to uppercase."
+  (setq kixtart-completion-list
+        (cl-loop for k in kixtart-completion-list
+                 collect (if (string-prefix-p "@" k) (upcase k) k))))
+
+(defun kixtart-completion-annotate-macros (string)
+  "Return the annotation for STRING when it is a macro name."
+  (and (string-prefix-p "@" string)
+       (let ((symbol (intern (upcase string))))
+         (cl-loop for doc in kixtart-doc-docs
+                  when (kixtart-doc-macro-p doc)
+                  when (memq symbol (kixtart-doc-macro-symbols doc))
+                  return (concat " " (kixtart-doc-macro-description doc))))))
+
+(defun kixtart-completion-at-point-function ()
+  "Complete the symbol at point."
+  (and (not (kixtart--in-comment-or-string-p))
+       (pcase (bounds-of-thing-at-point 'symbol)
+         (`(,beg . ,end)
+          (list beg end
+                (completion-table-dynamic
+                 (lambda (string)
+                   (let ((kixtart-completion-list kixtart-keywords)
+                         (kixtart-completion-input string))
+                     (run-hooks 'kixtart-completion-list-hook)
+                     kixtart-completion-list)))
+                :annotation-function kixtart-completion-annotation-function)))))
+
 ;;;; Imenu
 
 (defun kixtart--create-imenu-index ()
@@ -1877,6 +2030,8 @@ which will be expanded to the template."
   (setq-local syntax-propertize-function kixtart-syntax-propertize-function)
   (setq imenu-create-index-function #'kixtart--create-imenu-index)
   (tempo-use-tag-list 'kixtart-tempo-tags)
+  (add-hook 'completion-at-point-functions
+            #'kixtart-completion-at-point-function nil t)
   (add-hook 'which-func-functions #'kixtart-which-function nil t)
   (add-to-list 'font-lock-extend-region-functions
                #'kixtart--font-lock-extend-region-function-def t)

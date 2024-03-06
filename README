@@ -9,6 +9,7 @@ files.  The following features are implemented:
 - Motion around and selection of defined functions
 - Imenu support for function and label names
 - ElDoc support for display of documentation
+- Completion for built-in syntax (commands, functions, and macros)
 - Current function name for which-function-mode and add-log functions
 - Outline Mode support
 - Predefined Tempo templates with optional abbrev expansion
@@ -435,6 +436,81 @@ Register extended documentation which contains additional information:
      :remarks "Remarks on GOTO command."
      :syntax "GOTO expression"
      :parameters "Details of the GOTO command's parameters."))
+
+Symbol completion
+=================
+
+In-buffer completion of all built-in KiXtart keywords (commands, functions,
+and macros) is available through the standard completion-at-point mechanism,
+and will present completion candidates when the `completion-at-point'
+function is called.
+
+All keywords are stored internally using "PascalCase" to allow the case of
+completion candidates to be customized.
+
+The customization variable `kixtart-completion-list-hook' is a hook which may
+be used to customize the completion keywords list before it is sent to the
+completion interface.  At the time that the hook functions are called, the
+dynamically bound variable `kixtart-completion-list' will have the value of
+the completion list, and the dynamically bound variable
+`kixtart-completion-input' will have a copy of the input string which is
+being completed.  The hook functions are free to modify theses values.  By
+default, the following two functions are already added to the hook:
+
+Function: `kixtart-completion-upcase-macros'
+
+  Convert all macro names in the completion list to uppercase.
+
+Function `kixtart-completion-add-crlf-commands'
+
+  If the string being completed is a sequence of two or more "?" characters
+  (i.e. multiple CRLF output commands which have defined a single pair of
+  symbol boundaries), append the string to the front of the completion list.
+
+The experience with the default hook functions in-place is that:
+
+- Completion candidates for commands and functions will be displayed and
+  inserted in "PascalCase"
+
+- Completion candidates for macros will be displayed and inserted in
+  uppercase
+
+- Attempting to complete a single symbol which is a sequence of "?"
+  characters will always return a single match
+
+The customization variable `kixtart-completion-annotation-function' can be
+used to modify how the completion candidates are annotated in the completions
+interface.  The function is expected to accept a single argument, the string
+of the completion candidate, and return the string to be use as the
+annotation.  The default value of this variable is the following function:
+
+Function: `kixtart-completion-annotate-macros'
+
+  When the completion candidate appears to be a KiXtart macro name, attempt
+  to find a matching documentation structure in the registered documentation
+  (see: ElDoc support) and return the `description' slot value of the
+  `kixtart-doc-macro' structure.  Otherwise return nil.
+
+Note: The presence of the completion-at-point implementation will replace the
+default behaviour of completing symbols using a TAGS file.  To reliably use
+both completion functions, without having to know in advance which will be
+the one which gets activated by matching the input, there are two options:
+
+1. Invoke the TAGS completion separately by using the `complete-tag' command
+
+2. Use a third party package to call both completion functions, merge the
+   results, and present a single list of completion candidates
+
+If taking the second option, the recommended solution is to install the
+"Cape" package and replace the completion functions with the result of
+calling the completion merging function `cape-capf-super':
+
+  (add-hook 'kixtart-mode-hook
+            (lambda ()
+              (setq-local completion-at-point-functions
+                          (list (cape-capf-super
+                                 #'tags-completion-at-point-function
+                                 #'kixtart-completion-at-point-function)))))
 
 Current function name
 =====================
