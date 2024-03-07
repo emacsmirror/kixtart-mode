@@ -930,9 +930,10 @@ to modify both values."
         #'kixtart-doc-search-command-line)
   "Abnormal hook for functions which return documentation.
 Each function is called in sequence until one returns a non-nil
-value, which should be a cons cell containing the symbol which
-was matched and a documentation structure compatible with the
-generic method `kixtart-doc-string'."
+value, which should be a cons cell containing the upper-case form
+of the symbol which was matched and a list of documentation
+structures compatible with the generic method
+`kixtart-doc-string'."
   :type 'hook)
 
 (defcustom kixtart-eldoc-echo-truncate t
@@ -1654,11 +1655,13 @@ in SPECS are passed as additional arguments to CONSTRUCTOR."
 
 (defun kixtart-doc-search-at-point (&optional predicate)
   "Match documentation structures using PREDICATE.
-If any matches are found, return a cons cell of the symbol at
-point and a list of documentation structures which contain the
-symbol in the symbols slot and return non-nil when PREDICATE is
-called with the structure and symbol as its arguments.  The value
-of `kixtart-eldoc-face' is updated as a side-effect."
+If any matches are found, return a cons cell containing the
+upper-case form of the symbol at point and a list of matching
+documentation structures.  The structures are only matched if
+they contain the symbol in their symbols slot and PREDICATE
+returns a non-nil value when called with the structure and symbol
+as its arguments.  The value of `kixtart-eldoc-face' is updated
+as a side-effect."
   (unless predicate (setq predicate #'always))
   (and-let* ((thing (kixtart--thing-at-point 'symbol))
              (symbol (and (stringp thing) (intern (upcase thing))))
@@ -1713,9 +1716,11 @@ This only consider commands which take arguments."
 (defun kixtart-doc-search ()
   "Search for documentation structures.
 Matches are returned as a cons cell, where the first element is
-the symbol which was matched, and the second element is the first
-non-nil result of calling the functions listed in the abnormal
-hook `kixtart-doc-search-functions'."
+the upper-case form of the symbol which was matched, and the
+second element is the first non-nil result of calling the
+functions listed in the abnormal hook
+`kixtart-doc-search-functions', which should be a list of
+documentation structures."
   (save-excursion
     ;; Move out of comments and strings.
     (when-let ((start (kixtart--start-of-comment-or-string)))
