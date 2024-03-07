@@ -314,7 +314,7 @@
 ;; any other character classified as being symbol syntax - in this instance "?"
 ;; is dynamically reclassified as punctuation to prevent the symbol name being
 ;; extended.  For a more consistent editing experience, it is recommended to
-;; leave white-space between usage of the "?"  command and other language
+;; leave white-space between usage of the "?" command and other language
 ;; keywords.
 
 ;; An additional navigation function is also provided in
