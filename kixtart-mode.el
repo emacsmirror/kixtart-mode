@@ -392,11 +392,10 @@
 ;; which is local to point, some flexibility is required to infer which
 ;; documentation is expected to be displayed.  The current implementation will
 ;; move upwards (left) out of strings and comments and then begin calling the
-;; functions listed in the customization variable
-;; `kixtart-doc-search-functions'.  If any of the functions return a non-nil
-;; value, this result is used as the final return value and no further functions
-;; are called.  The default configuration will call the following functions in
-;; order:
+;; functions listed in the abnormal hook `kixtart-doc-search-functions'.  If any
+;; of the functions return a non-nil value, this result is used as the final
+;; return value and no further functions are called.  The default configuration
+;; will call the following functions in order:
 
 ;; Function: `kixtart-doc-search-at-point'
 
@@ -423,10 +422,10 @@
 ;;   (since the match is ambiguous without further context).
 
 ;; Documentation represented as structures (as defined by `cl-defstruct') and
-;; customizing the value of `kixtart-doc-search-functions' will determine which
-;; structures are selected to be displayed.  The return value of each search
-;; function is a cons cell, with the first value being the upper-case form of
-;; the symbol which was matched, and the second value being a list of
+;; functions present in the abnormal hook `kixtart-doc-search-functions' will
+;; determine which structures are selected to be displayed.  The return value of
+;; each function is a cons cell, with the first value being the upper-case form
+;; of the symbol which was matched, and the second value being a list of
 ;; documentation structures which will be converted to text and concatenated
 ;; together, separated by a single new-line character.
 
@@ -495,9 +494,8 @@
 ;; Prevent documentation from being displayed for symbols which are only matched
 ;; by being at the beginning of the current line:
 
-;;   (setq kixtart-doc-search-functions
-;;         (delq #'kixtart-doc-search-command-line
-;;               kixtart-doc-search-functions))
+;;   (remove-hook 'kixtart-doc-search-functions
+;;                #'kixtart-doc-search-command-line)
 
 ;; Register documentation for two KiXtart user-defined functions which takes no
 ;; arguments:
@@ -879,9 +877,8 @@
 
 ;;; Code:
 
-;; `cl-lib' is required at runtime to use `cl-search' and `cl-some'.  Since
-;; `imenu' also requires `cl-lib' there is actually no change in runtime
-;; requirements.
+;; `cl-lib' is required at runtime to use `cl-search'.  Since `imenu' also
+;; requires `cl-lib' there is actually no change in runtime requirements.
 (require 'cl-lib)
 (require 'imenu)
 (require 'tempo)
@@ -931,11 +928,12 @@ to modify both values."
         #'kixtart-doc-search-before-point
         #'kixtart-doc-search-in-function-args
         #'kixtart-doc-search-command-line)
-  "Specifies the list of functions which return documentation.
+  "Abnormal hook for functions which return documentation.
 Each function is called in sequence until one returns a non-nil
-value, which should be a documentation structure compatible with the
+value, which should be a cons cell containing the symbol which
+was matched and a documentation structure compatible with the
 generic method `kixtart-doc-string'."
-  :type '(repeat function))
+  :type 'hook)
 
 (defcustom kixtart-eldoc-echo-truncate t
   "Specifies how `eldoc-mode' will use the echo area.
@@ -1716,13 +1714,13 @@ This only consider commands which take arguments."
   "Search for documentation structures.
 Matches are returned as a cons cell, where the first element is
 the symbol which was matched, and the second element is the first
-non-nil result of calling the functions listed in
-`kixtart-doc-search-functions'."
+non-nil result of calling the functions listed in the abnormal
+hook `kixtart-doc-search-functions'."
   (save-excursion
     ;; Move out of comments and strings.
     (when-let ((start (kixtart--start-of-comment-or-string)))
       (goto-char start))
-    (cl-some #'funcall kixtart-doc-search-functions)))
+    (run-hook-with-args-until-success 'kixtart-doc-search-functions)))
 
 (defun kixtart-eldoc-function (callback)
   "Call CALLBACK with a docstring relevant for point."

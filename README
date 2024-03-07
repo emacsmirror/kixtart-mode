@@ -271,11 +271,10 @@ Since KiXtart Mode operates by attempting to parse the region of the buffer
 which is local to point, some flexibility is required to infer which
 documentation is expected to be displayed.  The current implementation will
 move upwards (left) out of strings and comments and then begin calling the
-functions listed in the customization variable
-`kixtart-doc-search-functions'.  If any of the functions return a non-nil
-value, this result is used as the final return value and no further functions
-are called.  The default configuration will call the following functions in
-order:
+functions listed in the abnormal hook `kixtart-doc-search-functions'.  If any
+of the functions return a non-nil value, this result is used as the final
+return value and no further functions are called.  The default configuration
+will call the following functions in order:
 
 Function: `kixtart-doc-search-at-point'
 
@@ -302,10 +301,10 @@ Function: `kixtart-doc-search-command-line'
   (since the match is ambiguous without further context).
 
 Documentation represented as structures (as defined by `cl-defstruct') and
-customizing the value of `kixtart-doc-search-functions' will determine which
-structures are selected to be displayed.  The return value of each search
-function is a cons cell, with the first value being the upper-case form of
-the symbol which was matched, and the second value being a list of
+functions present in the abnormal hook `kixtart-doc-search-functions' will
+determine which structures are selected to be displayed.  The return value of
+each function is a cons cell, with the first value being the upper-case form
+of the symbol which was matched, and the second value being a list of
 documentation structures which will be converted to text and concatenated
 together, separated by a single new-line character.
 
@@ -374,9 +373,8 @@ Customization examples
 Prevent documentation from being displayed for symbols which are only matched
 by being at the beginning of the current line:
 
-  (setq kixtart-doc-search-functions
-        (delq #'kixtart-doc-search-command-line
-              kixtart-doc-search-functions))
+  (remove-hook 'kixtart-doc-search-functions
+               #'kixtart-doc-search-command-line)
 
 Register documentation for two KiXtart user-defined functions which takes no
 arguments:
