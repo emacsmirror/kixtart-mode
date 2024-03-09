@@ -1215,7 +1215,7 @@ function."
 (defun kixtart--follows-eol-multiline-separator-p ()
   "Return a non-nil value when the current line begins mid-list.
 Being within a list is determined by the previous script line
-ending in a \",\" character, ignoring any trailing whitespace or
+ending in a \",\" character, ignoring any trailing white-space or
 comments."
   (save-excursion
     (beginning-of-line)
