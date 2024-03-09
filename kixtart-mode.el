@@ -1225,8 +1225,8 @@ comments."
            (eq (char-before) ?,)))))
 
 (defun kixtart--follows-eol-multiline-indicator-p ()
-  "Return a non-nil value when following a mutliline indicator.
-Being within a multiline expression is indicated by the previous
+  "Return a non-nil value when following a mutli-line indicator.
+Being within a multi-line expression is indicated by the previous
 script line ending with the special comment \";\\\"."
   (save-excursion
     (beginning-of-line)
