@@ -451,10 +451,17 @@
 ;; documentation are implemented independently and may be overridden or
 ;; replaced.  It is possible to use user defined structures in place of the
 ;; original ones, although to remain compatible with existing documentation
-;; search functions, any new structures should:
+;; search and display functions, any new structures should:
 
-;; - Be compatible with the predicate functions `kixtart-doc-command-p',
+;; - Be compatible with the type predicate functions `kixtart-doc-command-p',
 ;;   `kixtart-doc-function-p', and `kixtart-doc-macro-p'
+
+;; - Be compatible with the generic method `kixtart-doc-accepts-argument-p',
+;;   which returns whether the matched symbol expects to be followed by
+;;   additional KiXtart syntax
+
+;; - Be compatible with the generic method `kixtart-doc-face', which returns the
+;;   face to be used when presenting the matched symbol
 
 ;; - Be compatible with the generic method `kixtart-doc-string', which returns
 ;;   the structure as a string (for macros this requires a slot named
