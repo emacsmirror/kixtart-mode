@@ -1686,7 +1686,8 @@ documentation structures.  The structures are only matched if
 they contain the symbol in their symbols slot and PREDICATE
 returns a non-nil value when called with the structure and symbol
 as its arguments."
-  (unless predicate (setq predicate #'always))
+  ;; The `always' function isn't available before Emacs 28.
+  (unless predicate (setq predicate (lambda (&rest _) t)))
   (and-let* ((thing (kixtart--thing-at-point 'symbol))
              (symbol (and (stringp thing) (intern (upcase thing))))
              (docs (cl-loop for doc in kixtart-doc-docs
