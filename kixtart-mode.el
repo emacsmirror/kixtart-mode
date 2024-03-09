@@ -1591,6 +1591,27 @@ DOC is a `kixtart-doc-symbol' structure."
          ((and (pred listp) final) (memq symbol final))
          ((and final (guard final)) t))))
 
+(cl-defgeneric kixtart-doc-face (doc)
+  "Return the face used to present DOC.")
+
+(cl-defmethod kixtart-doc-face ((doc kixtart-doc-command))
+  "Return the face used to present DOC.
+DOC is a `kixtart-doc-command' structure."
+  (ignore doc)
+  'kixtart-command-face)
+
+(cl-defmethod kixtart-doc-face ((doc kixtart-doc-function))
+  "Return the face used to present DOC.
+DOC is a `kixtart-doc-function' structure."
+  (ignore doc)
+  'kixtart-function-face)
+
+(cl-defmethod kixtart-doc-face ((doc kixtart-doc-macro))
+  "Return the face used to present DOC.
+DOC is a `kixtart-doc-macro' structure."
+  (ignore doc)
+  'kixtart-macro-face)
+
 (defun kixtart-doc-type-name (id)
   "Return the integer type ID as a string."
   (pcase id
@@ -1650,9 +1671,6 @@ in SPECS are passed as additional arguments to CONSTRUCTOR."
 (defvar kixtart-doc-docs nil
   "The list of documentation structures available to search.")
 
-(defvar kixtart-eldoc-face nil
-  "The face used to present the value of `thing' by `eldoc-mode'.")
-
 (defun kixtart-doc-search-at-point (&optional predicate)
   "Match documentation structures using PREDICATE.
 If any matches are found, return a cons cell containing the
@@ -1660,8 +1678,7 @@ upper-case form of the symbol at point and a list of matching
 documentation structures.  The structures are only matched if
 they contain the symbol in their symbols slot and PREDICATE
 returns a non-nil value when called with the structure and symbol
-as its arguments.  The value of `kixtart-eldoc-face' is updated
-as a side-effect."
+as its arguments."
   (unless predicate (setq predicate #'always))
   (and-let* ((thing (kixtart--thing-at-point 'symbol))
              (symbol (and (stringp thing) (intern (upcase thing))))
@@ -1669,7 +1686,6 @@ as a side-effect."
                             when (memq symbol (kixtart-doc-symbol-symbols doc))
                             when (funcall predicate doc symbol)
                             collect doc)))
-    (setq kixtart-eldoc-face (get-text-property 0 'face thing))
     (cons symbol docs)))
 
 (defun kixtart-doc-search-before-point ()
@@ -1734,7 +1750,7 @@ documentation structures."
      (let ((docstring (mapconcat #'kixtart-doc-string docs "\n")))
        (funcall callback docstring
                 :thing (symbol-name thing)
-                :face kixtart-eldoc-face
+                :face (kixtart-doc-face (car docs))
                 :echo (or (and (integerp kixtart-eldoc-echo-truncate)
                                kixtart-eldoc-echo-truncate)
                           (and kixtart-eldoc-echo-truncate
