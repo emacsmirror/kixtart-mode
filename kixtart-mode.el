@@ -326,9 +326,9 @@
 ;; is non-nil the previous location will be pushed to the mark ring when the
 ;; value of point is modified.
 
-;; KiXtart Mode binds `kixtart-up-script-block' to 'C-c C-u' by default.  If
+;; KiXtart Mode binds `kixtart-up-script-block' to {C-c C-u} by default.  If
 ;; `repeat-mode' is active the command may be repeated through the use of the
-;; repeat-map binding 'u'.
+;; repeat-map binding {u}.
 
 ;; Imenu support
 ;; =============
@@ -345,7 +345,7 @@
 ;; "*Rescan*" option from the menu.  Consider configuring `imenu-auto-rescan'
 ;; and `imenu-auto-rescan-maxout' to suitable values.
 
-;; KiXtart Mode binds `imenu' to 'C-c C-j' by default.
+;; KiXtart Mode binds `imenu' to {C-c C-j} by default.
 
 ;; ElDoc support
 ;; =============
@@ -371,7 +371,7 @@
 ;; be enabled in all new KiXtart Mode buffers, with context sensitive
 ;; documentation appearing in the echo area.  The `eldoc' function can also be
 ;; used to request the documentation for the symbol at point, and KiXtart Mode
-;; binds this function to 'C-c C-d' by default.
+;; binds this function to {C-c C-d} by default.
 
 ;; The majority of options for customizing the ElDoc display will be handled by
 ;; setting ElDoc specific variables, although an additional customization
@@ -702,13 +702,13 @@
 ;; For direct use of Tempo functionality, the following key-bindings exist by
 ;; default:
 
-;; 'C-c C-t C-b'
+;; {C-c C-t C-b}
 ;;   `tempo-backward-mark'
 
-;; 'C-c C-t C-f'
+;; {C-c C-t C-f}
 ;;   `tempo-forward-mark'
 
-;; 'C-c C-t C-t'
+;; {C-c C-t C-t}
 ;;   `tempo-complete-tag'
 
 ;; Note: Tempo tag completion will match a template tag even when the match is a
@@ -782,14 +782,14 @@
 ;;     EndIf
 
 ;;   Expands from string "ifelse".
-;;   Bound to 'C-c C-t I' by default.
+;;   Bound to {C-c C-t I} by default.
 
 ;; Function: `kixtart-template-case'
 
 ;;     Case *
 
 ;;   Expands from string "case".
-;;   Bound to 'C-c C-t c' by default.
+;;   Bound to {C-c C-t c} by default.
 
 ;; Function: `kixtart-template-do'
 
@@ -798,7 +798,7 @@
 ;;     Until
 
 ;;   Expands from string "do".
-;;   Bound to 'C-c C-t d' by default.
+;;   Bound to {C-c C-t d} by default.
 
 ;; Function: `kixtart-template-foreach'
 
@@ -807,7 +807,7 @@
 ;;     Next
 
 ;;   Expands from string "foreach".
-;;   Bound to 'C-c C-t e' by default.
+;;   Bound to {C-c C-t e} by default.
 
 ;; Function: `kixtart-template-for'
 
@@ -816,7 +816,7 @@
 ;;     Next
 
 ;;   Expands from string "for".
-;;   Bound to 'C-c C-t f' by default.
+;;   Bound to {C-c C-t f} by default.
 
 ;; Function: `kixtart-template-if'
 
@@ -825,7 +825,7 @@
 ;;     EndIf
 
 ;;   Expands from string "if".
-;;   Bound to 'C-c C-t i' by default.
+;;   Bound to {C-c C-t i} by default.
 
 ;; Function: `kixtart-template-else'
 
@@ -833,7 +833,7 @@
 ;;         *
 
 ;;   Expands from string "else".
-;;   Bound to 'C-c C-t l' by default.
+;;   Bound to {C-c C-t l} by default.
 
 ;; Function: `kixtart-template-select'
 
@@ -843,7 +843,7 @@
 ;;     EndSelect
 
 ;;   Expands from string "select".
-;;   Bound to 'C-c C-t s' by default.
+;;   Bound to {C-c C-t s} by default.
 
 ;; Function: `kixtart-template-function'
 
@@ -852,7 +852,7 @@
 ;;     EndFunction
 
 ;;   Expands from string "function".
-;;   Bound to 'C-c C-t u' by default.
+;;   Bound to {C-c C-t u} by default.
 
 ;; Function: `kixtart-template-while'
 
@@ -861,7 +861,7 @@
 ;;     Loop
 
 ;;   Expands from string "while".
-;;   Bound to 'C-c C-t w' by default.
+;;   Bound to {C-c C-t w} by default.
 
 ;; Closing open blocks
 ;; ===================
@@ -878,9 +878,9 @@
 ;; the block opening.  For example, "WHILE" will be closed by "LOOP", "while"
 ;; will be closed "loop", and any other case-variation will be closed by "Loop".
 
-;; KiXtart Mode binds `kixtart-close-command-block' to 'C-c C-c' by default.  If
+;; KiXtart Mode binds `kixtart-close-command-block' to {C-c C-c} by default.  If
 ;; `repeat-mode' is active the command may be repeated through the use of the
-;; repeat-map bindings 'C-c' and 'c'.
+;; repeat-map bindings {C-c} and {c}.
 
 ;;; Code:
 
