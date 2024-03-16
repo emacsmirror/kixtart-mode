@@ -1,0 +1,31 @@
+Assuming that the KiXtart Mode package is currently not loaded, the
+following example demonstrates how to load the package, configure some
+basic settings, and enable some optional features:
+
+@example lisp
+;; Load the package by searching in paths listed in `load-path'.
+(require 'kixtart-mode)
+
+;; Load the default docstrings.
+(require 'kixtart-docstrings)
+
+;; Set indentation and fill preferences.
+(add-hook 'kixtart-mode-hook
+          (lambda ()
+            (indent-tabs-mode 1)
+            (setq tab-width 4)
+            (setq fill-column 80)))
+
+;; Set template insertion to use interactive prompts.
+(setq tempo-interactive t)
+
+;; Enable `abbrev-mode' by default.
+(add-hook 'kixtart-mode-hook #'abbrev-mode)
+;; Enable automatic abbrev expansion with the KiXtart Mode abbrev
+;; table when outside of comments and strings.
+(setq kixtart-abbrev-table-enabled t)
+
+;; Default to using the dos coding system (ASCII character set and
+;; CRLF line endings) for file names with a .kix extension.
+(add-to-list 'file-coding-system-alist (cons "\\.kix\\'" 'dos))
+@end example

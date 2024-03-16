@@ -1,0 +1,14 @@
+Clone this repository to a local subdirectory:
+
+@example sh
+git clone https://git.sr.ht/~mew/kixtart-mode
+@end example
+
+Within the Emacs configuration, add the path of the cloned directory
+to the value of @code{load-path}.  The following example assumes that
+the repository was cloned within a directory named "manual-packages"
+within the user's ".emacs.d" directory:
+
+@example lisp
+(add-to-list 'load-path "~/.emacs.d/manual-packages/kixtart-mode")
+@end example

@@ -1,1 +1,15 @@
 *.elc
+.dirstamp
+Makefile
+Makefile.in
+VERSION
+aclocal.m4
+autom4te.cache
+build-aux
+config.log
+config.status
+configure
+doc/version.texi
+kixtart-mode.info
+set-values.texi
+stamp-vti

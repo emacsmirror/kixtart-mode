@@ -1,0 +1,23 @@
+KiXtart Mode is an Emacs major mode for creating and editing KiXtart
+script files.  The following features are implemented:
+
+@itemize @bullet
+@item
+Syntax highlighting for commands, functions, labels, and macros.
+@item
+Indentation based on the usage of commands and parentheses.
+@item
+Motion around and selection of defined functions.
+@item
+Imenu support for function and label names.
+@item
+ElDoc support for display of documentation.
+@item
+Completion for built-in syntax (commands, functions, and macros).
+@item
+Current function name for which-function-mode and add-log functions.
+@item
+Outline Mode support.
+@item
+Predefined Tempo templates with optional abbrev expansion.
+@end itemize

@@ -1,0 +1,1216 @@
+\input texinfo
+@c %**start of header
+@settitle KiXtart Mode
+@setfilename kixtart-mode.info
+@paragraphindent 0
+@c %**end of header
+
+@include version.texi
+
+@copying
+Copyright @copyright{} 2022-2024 Morgan Willcock
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover Texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation
+License''.
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.''
+@end quotation
+@end copying
+
+@dircategory Emacs languages
+@direntry
+* KiXtart Mode: (kixtart-mode).  Support for editing KiXtart scripts.
+@end direntry
+
+@titlepage
+@title KiXtart Mode
+@subtitle Version @value{VERSION}
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+
+@node Top
+@top KiXtart Mode
+
+Version @value{VERSION}.
+
+@menu
+* Overview::
+* Syntax highlighting::
+* Indentation::
+* Multi-line expressions::
+* Motion commands::
+* Imenu support::
+* ElDoc support::
+* Symbol completion::
+* Current function name::
+* Outline Mode support::
+* Templates::
+* Closing open blocks::
+
+Appendices
+
+* GNU Free Documentation License::
+
+Indices
+
+* Keystroke Index::
+* Function Index::
+* Variable Index::
+* Index::
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Overview
+
+* Installation::
+* Example configuration::
+
+ElDoc support
+
+* Customizing documentation search::
+* Customizing documentation::
+* Customization examples::
+
+Symbol completion
+
+* Completion annotations::
+* @dfn{TAGS} completion::
+
+Templates
+
+* Abbrev expansion::
+* Template case control::
+* Predefined templates::
+
+@end detailmenu
+@end menu
+
+@node Overview
+@chapter Overview
+@cindex overview
+@cindex package overview
+
+@include features.texi
+
+
+@menu
+* Installation::
+* Example configuration::
+@end menu
+
+@node Installation
+@section Installation
+@cindex installation
+
+@include installation.texi
+
+
+@node Example configuration
+@section Example configuration
+@cindex configuration @subentry example
+
+@include example-configuration.texi
+
+
+@node Syntax highlighting
+@chapter Syntax highlighting
+@cindex font-lock
+@cindex fontification
+@cindex highlighting @subentry errors
+@cindex highlighting @subentry syntax
+@cindex syntax highlighting
+
+Syntax highlighting is implemented for all KiXtart language keywords
+using the following font-lock faces:
+
+@multitable {Function (definition)} {@code{font-lock-function-name-face}}
+@headitem Keyword type @tab Face
+@item Command @tab @code{kixtart-command-face}
+@item Function (built-in) @tab @code{kixtart-function-face}
+@item Function (definition) @tab @code{kixtart-function-name-face}
+@item Label @tab @code{kixtart-label-face}
+@item Macro @tab @code{kixtart-macro-face}
+@item Property @tab @code{kixtart-property-face}
+@item Variable @tab @code{kixtart-variable-face}
+@end multitable
+
+The additional face @code{kixtart-warning-face} is used to highlight
+portions of text which are likely to be scripting errors.  Currently
+this covers two potentially problematic cases related to KiXtart
+macros.  The first case is where the macro name does not match any
+known macro: such macros always evaluate to @code{0} and are likely
+the result of a spelling error.  The second case covers a peculiarity
+of the original KiXtart parser, which seems to silently discard a
+trailing portion of a macro name when the following criteria are met:
+
+@enumerate
+@item
+The beginning of the macro name matches a valid KiXtart macro name.
+
+@item
+Immediately following this match, there are additional characters
+present which are valid for use within a macro name.
+
+@item
+The additional characters do not extend the match to a different
+(longer) KiXtart macro name.
+@end enumerate
+
+Where the parser will discard the trailing portion of the macro name,
+the trailing portion will be highlighted as an error.
+
+
+@node Indentation
+@chapter Indentation
+@cindex block
+@cindex indent
+@cindex indentation
+
+KiXtart Mode calculates the indentation level for a given line by
+determining the number of script-blocks which are open around the
+current buffer position, where parentheses or the following commands
+are deemed to open a new or close an existing script-block:
+
+@multitable {Block-opening commands} {Block-closing commands}
+@headitem Block-opening commands @tab Block-closing commands
+@item @code{DO} @tab @code{UNTIL}
+@item @code{CASE} @tab @code{CASE} @code{ENDSELECT}
+@item @code{ELSE} @tab @code{ENDIF}
+@item @code{FOR} @tab @code{NEXT}
+@item @code{FUNCTION} @tab @code{ENDFUNCTION}
+@item @code{IF} @tab @code{ELSE} @code{ENDIF}
+@item @code{WHILE} @tab @code{LOOP}
+@end multitable
+
+@quotation Note
+@code{SELECT} commands are ignored for indentation purposes, to
+allow the contained @code{CASE} commands to maintain the current
+indentation level.
+@end quotation
+
+The default value will increase indentation by four columns per
+script-block level, which will provide indentation similar to the
+following examples:
+
+@example kixtart
+;; Point within an IF statement.
+IF $a
+    @point{}
+ENDIF
+
+;; Point within parentheses.
+1 + (
+    @point{}
+)
+@end example
+
+Using the indentation level of the line which opened the current
+script-block allows nested script-blocks to share a line and only
+increase the indentation by a single level.  For example, to create
+the equivalent of an @code{AND} expression which will correctly
+short-circuit, it is likely preferable to use two @code{IF} commands
+which are on the same line:
+
+@example kixtart
+IF $a IF $b
+    @point{}
+ENDIF ENDIF
+@end example
+
+The indentation offset applied to each subsequent script-block level
+is determined by multiplying the value of customization variable
+@code{kixtart-indent-offset} with the indentation level of the line
+which opened the current script-block.
+
+@defopt kixtart-indent-offset
+Specifies the indentation applied by KiXtart Mode indentation
+functions.  The value should be an integer which indicates how many
+columns a line will be indented by per script-block level.
+@end defopt
+
+
+@node Multi-line expressions
+@chapter Multi-line expressions
+@cindex expression @subentry multi-line
+@cindex multi-line expressions
+
+Additional indentation is applied to a line where the previous script
+line ends in a comma.  This provides automatic indentation for KiXtart
+commands and expressions which expect comma-separated tokens:
+
+@example kixtart
+$x = 1, 2, 3,
+    4, 5, 6,
+    @point{}
+@end example
+
+For tokens which are not comma-separated, it is currently not possible
+to manage indentation across lines automatically.  As a workaround,
+additional indentation is applied or persisted when a special comment
+indicates that the current line is ending in the middle of an
+expression.  The presence of the special comment @samp{;\} appearing
+at the end of the previous script line will increase the indentation
+of the current line.
+
+@example kixtart
+COPY $source ;\
+    $destination ;\
+    @point{}
+@end example
+
+
+@node Motion commands
+@chapter Motion commands
+@cindex function @subentry navigation @seealso{Imenu support}
+@cindex function @subentry selection
+@cindex motion
+@cindex navigation
+@cindex navigation @subentry function @seealso{Outline Mode support}
+@cindex selection
+
+KiXtart Mode permits navigation around and selection of function
+definitions with commands such as @code{beginning-of-defun},
+@code{end-of-defun}, and @code{mark-defun}.  These commands should
+work well for function definitions which appear at the top-level of
+the script, where the @code{FUNCTION} and @code{ENDFUNCTION} commands
+which define a KiXtart function have not been indented.  If
+@code{FUNCTION} commands have been indented, operation may be improved
+by remapping the key-binding which would normally call
+@code{beginning-of-defun} to call @code{beginning-of-defun-raw} in its
+place:
+
+@example lisp
+(add-hook 'kixtart-mode-hook
+          (lambda ()
+            (local-set-key [remap beginning-of-defun]
+                           'beginning-of-defun-raw)))
+@end example
+
+This will leave point at the beginning of the relevant @code{FUNCTION}
+command rather than at the beginning of the line which contained the
+relevant @code{FUNCTION} command.
+
+Rather than attempt to guess where a syntactically valid KiXtart
+expression begins and ends, movement by S-expression will typically
+move around symbols and words.  The exception to this is where the
+@samp{?} character is adjacent to any other character classified as
+being symbol syntax -- in this instance @samp{?} is dynamically
+reclassified as punctuation to prevent the symbol name being extended.
+For a more consistent editing experience, it is recommended to leave
+white-space between usage of the @samp{?} command and other language
+keywords.
+
+@findex kixtart-up-script-block
+An additional navigation function is also provided in the form of
+@code{kixtart-up-script-block}.  This function uses the same rules of
+script-block definition to move point to the buffer position which
+opens the current script-block, based on its currently determined
+script-block level.  When at the top-level of the script, point is
+moved to the beginning of the buffer.
+
+@kindex C-C C-u
+KiXtart Mode binds @code{kixtart-up-script-block} to @kbd{C-c C-u} by
+default.  If @code{repeat-mode} is active the command may be repeated
+through the use of the repeat-map binding @kbd{u}.
+
+When point is moved by using @code{kixtart-up-script-block}, the value
+of the customisation variable @code{kixtart-block-motion-push-mark}
+determines whether the mark ring is modified.  By default, the
+previous position will be pushed to the mark ring.
+
+@defopt kixtart-block-motion-push-mark
+Determines whether block-based motion (such as by calling
+@code{kixtart-up-script-block}) will modify the mark ring.  A
+non-@code{nil} value indicates that block motion commands are
+permitted to push the previous location to the mark-ring when the
+value of point changes.
+@end defopt
+
+See also: @ref{Imenu support} and @ref{Outline Mode support}.
+
+
+@node Imenu support
+@chapter Imenu support
+@cindex Imenu
+
+The @code{imenu} command provides code indexing and navigation options
+which allow point to jump to indexed buffer positions.  The
+@code{imenu} menu is presented as a list of completions which contains
+the names of all defined functions, as well as a single @samp{/Labels}
+submenu entry which lists all defined label names (the @samp{/}
+character is chosen as a submenu prefix because it is invalid as part
+of a function name).
+
+For very large scripts, scanning for index entries can potentially be
+slow, although automatic re-scanning may be preferable to manually
+invoking the @samp{*Rescan*} option from the menu.  Consider
+configuring @code{imenu-auto-rescan} and
+@code{imenu-auto-rescan-maxout} to suitable values.
+
+@kindex C-c C-j
+KiXtart Mode binds @code{imenu} to @kbd{C-c C-j} by default.
+
+
+@node ElDoc support
+@chapter ElDoc support
+@cindex ElDoc
+@cindex docstring
+@cindex documentation
+
+ElDoc provides functions and a minor mode which can display
+information for language symbols, either in the echo area or within a
+dedicated buffer.  KiXtart Mode implements ElDoc mode support by
+attempting to lookup documentation based on the context at point, and
+will be activated automatically (as part of mode initialization) after
+documentation has loaded.  By default, since the original KiXtart
+documentation is copyrighted and attempts to contact the author
+failed, no documentation is automatically loaded by inclusion within
+the definition of KiXtart Mode.  Basic documentation which just
+describes KiXtart syntax and macro values is provided within an
+accompanying file and can be explicitly loaded if required.
+
+To load the accompanying documentation, assuming that the file
+@file{kixtart-docstring.el} is in a directory listed in
+@code{load-path}, require the feature @samp{kixtart-docstrings}:
+
+@example lisp
+(require 'kixtart-docstrings)
+@end example
+
+@kindex C-c C-d
+Once documentation has been loaded, the ElDoc minor mode will
+automatically be enabled in all new KiXtart Mode buffers.  The
+@code{eldoc} command can also be used to request the documentation for
+the symbol at point, and KiXtart Mode binds this command to @kbd{C-c
+C-d} by default.
+
+The majority of options for customizing the ElDoc display will be
+handled by setting ElDoc specific variables, although an additional
+customization variable @code{kixtart-eldoc-echo-truncate} is provided
+to determine how much documentation ElDoc should display when using
+the echo area.  By default, only the first paragraph of text is
+displayed and longer documentation would need to be viewed in another
+location (such as the buffer produced by the @code{eldoc} command).
+
+@defopt kixtart-eldoc-echo-truncate
+Specifies the amount of text which ElDoc should display in the echo
+area.  An integer value indicates that only the given number of
+characters will be displayed, otherwise a non-@code{nil} value
+specifies to only display the first paragraph.  A paragraph is
+determined to end at the position where a documentation string
+contains two new-line characters (i.e. at the starting position of the
+substring @samp{\n\n}).
+@end defopt
+
+
+@menu
+* Customizing documentation search::
+* Customizing documentation::
+* Customization examples::
+@end menu
+
+@node Customizing documentation search
+@section Customizing documentation search
+
+Since KiXtart Mode operates by attempting to parse the region of the
+buffer which is local to point, some flexibility is required to infer
+which documentation is expected to be displayed.  The current
+implementation will move upwards (left) out of strings and comments
+and then begin calling the functions listed in the abnormal hook
+@code{kixtart-doc-search-functions}.
+
+@defopt kixtart-doc-search-functions
+The value of this abnormal hook determines the strategy to be used
+when searching for documentation, and should be a list of functions to
+call.  If any of the functions return a non-@code{nil} value, this
+result is used as the documentation match and no further functions
+will be called.  The return value of each function should be a cons
+cell, with the first value being the upper-case form of the symbol
+which was matched, and the second value being a list of documentation
+structures (as defined by @code{cl-defstruct}) to use.
+@end defopt
+
+With the default value of @code{kixtart-doc-search-functions}, the
+following functions will be called in order:
+
+@defun kixtart-doc-search-at-point
+Only consider the symbol at point.
+@end defun
+
+@defun kixtart-doc-search-before-point
+Move point backwards through comments and white-space and then
+consider the symbol at point.  The match must be a KiXtart command or
+function which accepts arguments.
+@end defun
+
+@defun kixtart-doc-search-in-function-args
+If point is within parentheses, move upwards (left) out of the
+parentheses, move point backwards through comments and white-space,
+and then consider the symbol at point.  The match must be a KiXtart
+function which accepts arguments.
+@end defun
+
+@defun kixtart-doc-search-command-line
+If point is not within the indentation of the current line, move to
+the indentation column and consider the symbol at point.  The match
+must be a KiXtart command which accepts arguments, and not be for the
+@code{FOR} symbol (since the match is ambiguous without further
+context).
+@end defun
+
+@findex kixtart-doc-string
+The final documentation string to be displayed will be determined by
+converting each of the returned structures to a string (by calling the
+generic method @code{kixtart-doc-string}), and concatenating them
+together, separated by a single new-line character.  The requirement
+for handling multiple matches is to ensure that all matches for
+ambiguous KiXtart commands such as @code{FOR} and @code{NEXT} are
+given a chance to be displayed.
+
+@node Customizing documentation
+@section Customizing documentation
+
+@findex kixtart-doc-register
+At the most basic level of customization, it is possible to register
+additional documentation using the existing documentation structures
+and helper functions.  The macro @code{kixtart-doc-register} can be
+used to register multiple documentation entries for a given structure
+type, taking the constructor name as the first argument and processing
+the body as one or more documentation specifications.  Each
+specification is itself a list, where the first element is a symbol or
+list of symbols to be passed to the constructor as the keyword
+argument :@code{symbols}, and all other elements are passed as
+additional constructor arguments.  Symbols should be registered in
+upper-case in order for matching to succeed.
+
+At a more general level, the mechanisms for finding and formatting
+documentation are implemented independently and may be overridden or
+replaced.  It is possible to use user defined structures in place of
+the original ones, although to remain compatible with existing
+documentation search and display functions, any new structures should:
+
+@itemize @bullet
+@item
+Be compatible with the type predicate functions
+@code{kixtart-doc-command-p}, @code{kixtart-doc-function-p}, and
+@code{kixtart-doc-macro-p}.
+
+@item
+Be compatible with the generic method
+@code{kixtart-doc-accepts-argument-p}, which returns whether the
+matched symbol expects to be followed by additional KiXtart syntax.
+
+@item
+Be compatible with the generic method @code{kixtart-doc-face}, which
+returns the face to be used when presenting the matched symbol.
+
+@item
+Be compatible with the generic method @code{kixtart-doc-string}, which
+returns the structure as a string (for macros this requires a slot
+named @code{description} which describes the macro value, for commands
+and functions this requires a slot named @code{syntax} which describes
+the syntax).
+
+@item
+Implement a slot named @code{symbols} which contains the list of
+symbols to be matched.
+
+@item
+Implement a slot named @code{final} which determines which of the
+symbols in the @code{symbols} slot list expect to be followed by
+additional syntax.
+@end itemize
+
+The value of the @code{final} slot should be one of the following:
+
+@table @code
+@item nil
+Indicates that all symbols expect to be followed by additional syntax.
+
+@item t
+Indicates none of the symbols expect to be followed by
+additional syntax.
+
+@item first
+Indicates that all symbols in the @code{symbols} slot except the first
+expect to be followed by additional syntax.
+
+@item last
+Indicates that all symbols in the @code{symbols} slot except the last
+expect to be followed by additional syntax.
+
+@item (SYMBOL [SYMBOL ...])
+A list of symbols which are present in the @code{symbols} slot and do
+not expect to be followed by additional syntax.
+@end table
+
+The most direct way to implement compatibility with existing search
+functions, and just customize documentation content or formatting, is
+to declare any new structures as inheriting from
+@code{kixtart-doc-command}, @code{kixtart-doc-function}, or
+@code{kixtart-doc-macro}.
+
+
+@node Customization examples
+@section Customization examples
+
+Prevent documentation from being displayed for symbols which are only
+matched by being at the beginning of the current line:
+
+@example lisp
+(remove-hook 'kixtart-doc-search-functions
+             #'kixtart-doc-search-command-line)
+@end example
+
+Register documentation for two KiXtart user-defined functions which
+takes no arguments:
+
+@example lisp
+(kixtart-doc-register kixtart-make-doc-function
+  (_SETUPDEBUG :syntax "_SetDebug ()" :final t)
+  (_SETUPGLOBALS :syntax "_SetupGlobals ()" :final t))
+@end example
+
+Register documentation for a single KiXtart user-defined function
+which takes arguments:
+
+@example lisp
+(kixtart-doc-register kixtart-make-doc-function
+  (LOG :syntax "Log ($message, optional $level)"))
+@end example
+
+Register extended documentation which contains additional information:
+
+@example lisp
+;; Declare a new structure to represent a command, including the
+;; default slots, and extended with additional slots suitable for use
+;; with the official KiXtart documentation.
+(cl-defstruct (kixtart-manual-command
+               (:include kixtart-doc-command)
+               (:constructor kixtart-make-manual-command)
+               (:copier nil))
+  (action nil :type string)
+  (examples nil :type string)
+  (parameters nil :type string)
+  (remarks nil :type string))
+
+;; Require the `eieio' feature to allow convenient slot access with
+;; the `with-slots' macro.
+(require 'eieio)
+
+;; Declare a method which specializes on the new structure type and
+;; returns it as a string.  Assume that the default documentation is
+;; not loaded so that the concatenating of multiple symbol matches is
+;; not relevant.
+(cl-defmethod kixtart-doc-string ((doc kixtart-manual-command))
+  "Return DOC as a string.
+DOC is a `kixtart-manual-command' structure."
+  (concat
+   ;; Get the docstring from the structure which was included.  This
+   ;; is a choice to re-use existing code to convert the syntax slot
+   ;; to a string instead of reading the slot value.
+   (cl-call-next-method)
+   ;; Build a new string based on the additional slot values.
+   (with-slots (action examples parameters remarks) doc
+     (concat
+      (and action (format "\n\nAction\n\n%s" action))
+      (and examples (format "\n\nExamples\n\n%s" examples))
+      (and parameters (format "\n\nParameters\n\n%s" parameters))
+      (and remarks (format "\n\nRemarks\n\n%s" remarks))))))
+
+;; Register new documentation with the new type.
+(kixtart-doc-register kixtart-make-manual-command
+  (GOTO
+   :action "Description of the GOTO command's action."
+   :examples "Example of GOTO command's use."
+   :remarks "Remarks on GOTO command."
+   :syntax "GOTO expression"
+   :parameters "Details of the GOTO command's parameters."))
+@end example
+
+
+@node Symbol completion
+@chapter Symbol completion
+@cindex completion
+@cindex symbol completion
+
+In-buffer completion of all built-in KiXtart keywords (commands,
+functions, and macros) is available through the standard
+completion-at-point mechanism, and will present completion candidates
+when the @code{completion-at-point} function is called.
+
+All keywords are stored internally using @dfn{PascalCase} to allow the
+case of completion candidates to be customized.  The customization
+variable @code{kixtart-completion-list-hook} is a hook which may be
+used to customize the completion keywords list before it is sent to
+the completion interface.
+
+@vindex kixtart-completion-input
+@vindex kixtart-completion-list
+@defopt kixtart-completion-list-hook
+At the time that the functions of this hook variable are called, the
+dynamically bound variable @code{kixtart-completion-list} will have
+the value of the completion list, and the dynamically bound variable
+@code{kixtart-completion-input} will have a copy of the input string
+which is being completed.  The hook functions are free to modify both
+of these values.
+@end defopt
+
+By default, the following two functions are already added to the
+@code{kixtart-completion-list} hook:
+
+@defun kixtart-completion-upcase-macros
+Convert all macro names in the completion list to uppercase.
+@end defun
+
+@defun kixtart-completion-add-crlf-commands
+If the string being completed is a sequence of two or more @samp{?}
+characters (i.e. multiple @samp{CRLF} output commands which have
+defined a single pair of symbol boundaries), append the string to the
+front of the completion list.
+@end defun
+
+The completion experience with both of these hook functions in-place
+is that:
+
+@itemize @bullet
+@item
+Completion candidates for commands and functions will be displayed and
+inserted in @dfn{PascalCase}.
+
+@item
+Completion candidates for macros will be displayed and inserted in
+uppercase.
+
+@item
+Attempting to complete a single symbol which is a sequence of @samp{?}
+characters will always return a single match.
+@end itemize
+
+
+@menu
+* Completion annotations::
+* @dfn{TAGS} completion::
+@end menu
+
+@node Completion annotations
+@section Completion annotations
+@cindex completion annotations
+@cindex annotation @subentry of completions
+
+The customization variable
+@code{kixtart-completion-annotation-function} can be used to modify
+how the completion candidates are annotated in the completions
+interface.
+
+@defopt kixtart-completion-annotation-function
+The value of this variable should be a function which accepts a single
+argument, which is the string of the completion candidate to be
+annotated.  The return value should be the string to use as an
+annonation or @code{nil} to indicate that no annonation should be
+added.
+@end defopt
+
+The default value of @code{kixtart-completion-annotation-function} is
+the function @code{kixtart-completion-annotate-macros} which adds
+annotations for completion candidates which are KiXtart macros.
+
+@defun kixtart-completion-annotate-macros
+When the completion candidate appears to be a KiXtart macro name,
+attempt to find a matching documentation structure in the registered
+documentation (@pxref{ElDoc support}) and return the
+@code{description} slot value of the @code{kixtart-doc-macro}
+structure.  Otherwise return @code{nil}.
+@end defun
+
+
+@node @dfn{TAGS} completion
+@section @dfn{TAGS} completion
+@cindex @dfn{TAGS}
+@cindex completion @subentry with @dfn{TAGS}
+
+The presence of the completion-at-point implementation (@pxref{Symbol
+completion}) will replace the default Emacs behavior of completing
+symbols using a @dfn{TAGS} file.  However, the completions provided by
+a @dfn{TAGS} file are likely still useful and can be used for locating
+and navigating to user-defined KiXtart functions.  To reliably use use
+both completion functions at the same time, without having to know in
+advance which will be activated by matching the initial input, there
+are two options:
+
+@enumerate
+@item
+Invoke the @dfn{TAGS} completion separately by using the
+@code{complete-tag} command.
+
+@item
+Use a third party package to call both completion functions, merge the
+results, and present a single list of completion candidates.
+@end enumerate
+
+If taking the second option, the recommended solution is to install
+the @url{https://github.com/minad/cape, Cape} package and replace the
+completion functions with the result of calling the completion merging
+function @code{cape-capf-super}:
+
+@example lisp
+(add-hook
+ 'kixtart-mode-hook
+ (lambda ()
+   (setq-local completion-at-point-functions
+               (list (cape-capf-super
+                      #'tags-completion-at-point-function
+                      #'kixtart-completion-at-point-function)))))
+@end example
+
+Using Cape also provides the option of converting the completion
+mechanism to be case-insensitive, scoped to KiXtart syntax completion,
+by wrapping the new completion function with a call to the
+case-transforming function @code{cape-capf-case-fold}:
+
+@example lisp
+(add-hook
+ 'kixtart-mode-hook
+ (lambda ()
+   (setq-local completion-at-point-functions
+               (list (cape-capf-case-fold
+                      (cape-capf-super
+                       #'tags-completion-at-point-function
+                       #'kixtart-completion-at-point-function))))))
+@end example
+
+This is likely desirable since KiXtart syntax (including the names of
+user-defined functions) is case-insensitive.
+
+
+@node Current function name
+@chapter Current function name
+@cindex current function @subentry name of
+@cindex function @subentry name of
+
+@findex kixtart-current-defun
+The function @code{kixtart-current-defun} will return the name of the
+user-defined KiXtart function which currently surrounds point, or
+@code{nil} if point is currently outside of a function.  This function
+is also used internally to provide support for:
+
+@itemize @bullet
+@item
+@code{add-log} functions, which allow the current function name to be
+automatically added to change log entries.
+
+@item
+@code{which-function-mode}, a minor mode which displays the current
+function name in the mode-line.
+@end itemize
+
+The customization variable @code{kixtart-which-function-default-name}
+can be used to customize the @code{which-function-mode} display when
+outside of a function.
+
+@defopt kixtart-which-function-default-name
+Specifies the function name to be displayed by
+@code{which-function-mode} when point is outside of a function.  The
+value should either be the string to be used, or @code{nil}, which
+allows the default string provided by @code{which-function-mode} to be
+used.
+@end defopt
+
+@node Outline Mode support
+@chapter Outline Mode support
+@cindex Outline Mode
+@cindex outline
+
+Outline Mode is major mode intended to edit outline-format documents
+with selective display.  The same functionality is also available
+through alternate key-bindings using the minor mode version, enabled
+by invoking @code{outline-minor-mode}.
+
+KiXtart Mode defines Outline Mode settings by borrowing some
+conventions for headings and their associated depth from the built-in
+Lisp mode.  Two types of headings are defined:
+
+@itemize @bullet
+@item
+Comments created by three or more @samp{;} characters at the beginning
+of a line, followed by at least one white-space character.
+
+@item
+@code{FUNCTION} commands at the beginning of a line.
+@end itemize
+
+The @emph{depth} of comment-based headings is determined by
+subtracting two from the number of @samp{;} characters which were
+used.  For example, the following comments define Outline Mode
+headings for the first three levels:
+
+@example kixtart
+;;; Level 1 heading
+;;;; Level 2 heading
+;;;;; Level 3 heading
+@end example
+
+The @emph{depth} of @code{FUNCTION} command-based headings is not
+variable: all headings of this type have the maximum possible value
+for their depth, meaning that selective display of function
+definitions cannot affect selective display of comment-based headings.
+
+
+@node Templates
+@chapter Templates
+@cindex Tempo
+@cindex templates
+
+Tempo templates for inserting command-defined KiXtart script-blocks
+are predefined, with the Tempo tag name also serving as a word which
+can be expanded by abbrev expansion.
+
+For direct use of Tempo functionality, KiXtart Mode includes the
+following key-bindings by default:
+
+@table @kbd
+@kindex C-c C-t C-b
+@item C-c C-t C-b
+@code{tempo-backward-mark}
+
+@kindex C-c C-t C-f
+@item C-c C-t C-f
+@code{tempo-forward-mark}
+
+@kindex C-c C-t C-t
+@item C-c C-t C-t
+@code{tempo-complete-tag}
+@end table
+
+If using Tempo's own tag completion (as initiated by
+@code{tempo-complete-tag}), it should be noted that the completion
+mechanism operates independently from the traditional Emacs completion
+configuration; a template tag may be matched even when the match is a
+prefix of a longer template tag.  For example, an input of @samp{i} or
+@samp{if} will expand based on the template tag @samp{if}, even though
+it is a prefix of the longer template tag @samp{ifelse}.  To expand
+based on the template tag @samp{ifelse} the input would have to be
+@samp{ife}, @samp{ifel}, @samp{ifels}, or @samp{ifelse}.
+
+Instead of relying on commands such as @code{tempo-backward-mark} and
+@code{tempo-forward-mark} to move point to the relevant buffer
+positions after the template has been inserted, customizing the value
+of @code{tempo-interactive} to @code{t} will enable the use of
+interactive prompts which appear during template insertion.
+
+Regardless of how a template has been inserted, the customization
+variable @code{kixtart-template-insert-newline} determines whether
+template insertion will include a final newline character.  The
+default value is the function @code{eobp}, which has the effect of
+preserving the final newline when templates are inserted at the end of
+the buffer.
+
+@defopt kixtart-template-insert-newline
+Specifies whether a final newline be inserted following the content of
+an inserted Tempo template.  A non-@code{nil} value will cause a
+newline to be inserted.  When the value is a function (as determined
+by @code{functionp}) it is called, and a new-line is inserted if the
+return value is non-@code{nil}.
+@end defopt
+
+@menu
+* Abbrev expansion::
+* Template case control::
+* Predefined templates::
+@end menu
+
+@node Abbrev expansion
+@section Abbrev expansion
+@cindex abbrev
+@cindex abbrev @subentry expansion
+
+The KiXtart Mode abbrev table will be considered for use when the
+following conditions are true:
+
+@enumerate
+@vindex kixtart-abbrev-table-enabled
+@item
+@code{kixtart-abbrev-table-enabled} has a non-@code{nil} value.
+@item
+Point is currently not within a comment or a string.
+@end enumerate
+
+@defopt kixtart-abbrev-table-enabled
+Specifies whether the KiXtart Mode abbrev table will be considered as
+enabled when point is outside of comments and strings.  A
+non-@code{nil} value will indicate that the table should be used.
+@end defopt
+
+Expansion of the predefined template tags can be performed manually
+with functions such as @code{expand-abbrev}.  For automatic
+expansions, this can be achieved by enabling the abbrev minor mode
+(@code{abbrev-mode}) in the current buffer.  It may be convenient to
+automatically enable @code{abbrev-mode} in all KiXtart Mode buffers:
+
+@example lisp
+(add-hook 'kixtart-mode-hook #'abbrev-mode)
+@end example
+
+
+@node Template case control
+@section Template case control
+
+Since all template insertion is done either directly or indirectly
+through Tempo functions, customization of inserted text can be
+achieved by modifying the Tempo configuration.  For example, if
+template content should be converted to upper-case, this can be
+achieved by adding the @code{upcase} function to
+@code{tempo-insert-string-functions}:
+
+@example lisp
+(add-hook 'kixtart-mode-hook
+          (lambda ()
+            (add-to-list (make-local-variable
+                          'tempo-insert-string-functions)
+                         #'upcase)))
+@end example
+
+@quotation Note
+Changes to the Tempo configuration should be kept buffer-local unless
+they are relevant to all usage of Tempo templates.
+@end quotation
+
+
+@node Predefined templates
+@section Predefined templates
+@cindex templates @subentry predefined
+
+KiXtart Mode defines aliases to predefined Tempo template functions
+which will insert commonly used command-defined script-blocks.  The
+content of the templates are written using @dfn{PascalCase} for
+language keywords; the first letter of all words within KiXtart
+commands are capitalized (for example, @samp{EndIf} rather than
+@samp{ENDIF} or @samp{endif}).  This allows the case to customized by
+optionally down-casing or up-casing the template as it is inserted
+(@pxref{Template case control}).
+
+By default, templates may be inserted into the buffer by four methods:
+
+@enumerate
+@item
+Typing a partial or complete Tempo tag name (e.g. @samp{i}) and
+triggering Tempo completion, either by calling the completion command
+(@kbd{M-x tempo-complete-tag}) or by using its key-binding (@kbd{C-c
+C-t C-t}).
+@item
+Typing a complete Tempo tag name (e.g @samp{if}) and triggering abbrev
+expansion.
+@item
+Using the key-binding assigned to the template (e.g. @kbd{C-c C-t i}).
+@item
+Calling the template command directly (e.g. @kbd{M-x
+kixtart-template-if @key{RET}}).
+@end enumerate
+
+@defun kixtart-template-ifelse
+
+@example kixtart
+If @point{}
+
+Else
+
+EndIf
+@end example
+
+Expands from tag/word @samp{ifelse}.
+@*
+@kindex C-c C-t I
+Bound to @kbd{C-c C-t I} by default.
+@end defun
+
+@defun kixtart-template-case
+
+@example kixtart
+Case @point{}
+@end example
+
+Expands from tag/word @samp{case}.
+@*
+@kindex C-c C-t c
+Bound to @kbd{C-c C-t c} by default.
+@end defun
+
+@defun kixtart-template-do
+
+@example kixtart
+Do
+    @point{}
+Until
+@end example
+
+Expands from tag/word @samp{do}.
+@*
+@kindex C-c C-t d
+Bound to @kbd{C-c C-t d} by default.
+@end defun
+
+@defun kixtart-template-foreach
+
+@example kixtart
+For Each @point{} In
+
+Next
+@end example
+
+Expands from tag/word @samp{foreach}.
+@*
+@kindex C-c C-t e
+Bound to @kbd{C-c C-t e} by default.
+@end defun
+
+@defun kixtart-template-for
+
+@example kixtart
+For $@point{} =  To  Step
+
+Next
+@end example
+
+Expands from tag/word @samp{for}.
+@*
+@kindex C-c C-t f
+Bound to @kbd{C-c C-t f} by default.
+@end defun
+
+@defun kixtart-template-if
+
+@example kixtart
+If @point{}
+
+EndIf
+@end example
+
+Expands from tag/word @samp{if}.
+@*
+@kindex C-c C-t i
+Bound to @kbd{C-c C-t i} by default.
+@end defun
+
+@defun kixtart-template-else
+
+@example kixtart
+Else
+    @point{}
+@end example
+
+Expands from tag/word @samp{else}.
+@*
+@kindex C-c C-t l
+Bound to @kbd{C-c C-t l} by default.
+@end defun
+
+@defun kixtart-template-select
+
+@example kixtart
+Select
+Case @point{}
+
+EndSelect
+@end example
+
+Expands from tag/word @samp{select}.
+@*
+@kindex C-c C-t s
+Bound to @kbd{C-c C-t s} by default.
+@end defun
+
+@defun kixtart-template-function
+
+@example kixtart
+Function @point{}()
+
+EndFunction
+@end example
+
+Expands from tag/word @samp{function}.
+@*
+@kindex C-c C-t u
+Bound to @kbd{C-c C-t u} by default.
+@end defun
+
+@defun kixtart-template-while
+
+@example kixtart
+While @point{}
+
+Loop
+@end example
+
+Expands from tag/word @samp{while}.
+@*
+@kindex C-c C-t w
+Bound to @kbd{C-c C-t w} by default.
+@end defun
+
+
+@node Closing open blocks
+@chapter Closing open blocks
+@cindex block @subentry closing
+@cindex open blocks @subentry closing
+
+@findex kixtart-close-command-block
+As an alternative to inserting fully-templated code into the buffer
+(@pxref{Templates}), the command @code{kixtart-close-command-block}
+will insert a KiXtart command which can close the currently open
+script-block, where an open block is determined by looking backwards
+from point.  Repeatedly invoking the command will cycle through the
+possible options, with the previously inserted option being removed.
+When no further options are available the previously inserted option
+will be removed and no new option will be inserted.
+
+The case of the inserted KiXtart command will be determined by the
+case of the block opening.  For example, @samp{WHILE} will be closed
+by @samp{LOOP}, @samp{while} will be closed @samp{loop}, and any other
+case-variation will be closed by @samp{Loop}.
+
+@kindex C-c C-c
+KiXtart Mode binds @code{kixtart-close-command-block} to @kbd{C-c C-c}
+by default.  If @code{repeat-mode} is active the command may be
+repeated through the use of the repeat-map bindings @kbd{C-c} and
+@kbd{c}.
+
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
+
+@node Keystroke Index
+@unnumbered Keystroke Index
+@printindex ky
+
+
+@node Function Index
+@unnumbered Function Index
+@printindex fn
+
+
+@node Variable Index
+@unnumbered Variable Index
+@printindex vr
+
+
+@node Index
+@unnumbered Index
+@printindex cp
+
+
+@bye

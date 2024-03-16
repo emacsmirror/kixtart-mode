@@ -1,0 +1,99 @@
+* Version 1.3.0 (????-??-??)
+
+Fixed parsing error when calling indentation functions with point
+inside a comment.
+
+Added ElDoc support to display documentation for KiXtart symbols at or
+near point.
+
+The syntax classification for the "?" character is now applied
+dynamically based on symbol boundaries.  Discrete groups of "?"
+characters are now considered to be a symbol, while "?" characters
+which are adjacent to other symbol characters retain the previous
+behavior of being classification as punctuation.  Font-lock rules will
+now only apply syntax highlighting to "?" characters which are
+classified as symbols to provide a visual indicator of the
+classification.  To restore the previous behaviour where all "?"
+characters are highlighted, it is possible to add an additional
+font-lock rule to cover this case:
+
+  (font-lock-add-keywords 'kixtart-mode
+                          '(("?" . 'kixtart-command-face)) t)
+
+Added completion-at-point support for built-in KiXtart syntax
+(commands, functions, and macros).
+
+The package commentary is now converted into Texinfo format as a
+separate manual.
+
+The custom Makefile is replaced with GNU Autotools.  A release of the
+package now provides an installable archive which includes a pre-built
+copy of the new Info manual.
+
+* Version 1.2.0 (2024-01-01)
+
+Fixed indentation for hanging CASE and ELSE commands.
+
+The function `kixtart-up-script-block' can now be repeated with the
+repeat-map binding {u}.
+
+Unless the value of the new customization variable
+`kixtart-block-motion-push-mark' has been customized to nil the
+function `kixtart-up-script-block' now pushes the previous location to
+the mark ring when the value of point is modified.
+
+Font-locking now uses custom faces which inherit from the previously
+used default font-lock faces.
+
+The command `kixtart-close-command-block' now re-indents the current
+line when KiXtart commands are inserted or removed from the buffer.
+
+The command `kixtart-close-command-block' prints a message when point
+is not within an open command block.
+
+Fixed indentation not being applied to the first line of syntax in the
+buffer.
+
+* Version 1.1.1 (2023-03-14)
+
+Fixed retrieving the current function name when the buffer is
+narrowed.
+
+Fixed incorrect multi-line fontification of a symbol as a function
+name when the word "function" appeared within a previous comment.
+
+* Version 1.1.0 (2023-02-17)
+
+Fontification for function names now works where the function name
+appears on a later line than the FUNCTION command.
+
+The Imenu index now includes functions where the function name appears
+on a later line than the FUNCTION command.
+
+The Imenu index entries for labels now have the ":" prefix removed.
+
+Macros are now fontified with the `font-lock-preprocessor-face' face.
+
+Font-lock rules now includes a match for object properties, fontified
+using the `font-lock-type-face' face.  This addition helps to reduce
+the chance of incorrect font-lock highlighting performed by later
+rules.
+
+The function `kixtart-current-defun' is now available to return the
+name of the user-defined KiXtart function which currently surrounds
+point.
+
+Support was added for `add-log' functions, which allow the current
+function name to be automatically added to change log entries.
+
+Support was added for `which-function-mode', a minor mode which
+displays the current function name in the mode-line.
+
+Fixed the use of multi-line comment indicators at the beginning of the
+buffer and within strings.
+
+Fixed the use of multi-line separators within strings.
+
+* Version 1.0.0 (2022-12-04)
+
+Initial release.
