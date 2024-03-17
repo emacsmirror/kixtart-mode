@@ -17,14 +17,32 @@ See the manual for full details.
 Installation
 ============
 
-Clone this repository to a local subdirectory:
+The recommended way to install the package is to use a release archive.
+Using this method will also install the pre-built Info manual.  The
+following example shows shell commands which will extract, configure,
+build, and install the package, assuming that the installation should be
+system-wide:
+
+     tar -xf kixtart-mode-1.2.0.tar.gz
+     cd kixtart-mode-1.2.0
+     ./configure
+     make
+     # System-wide installation will likely require root privileges.
+     sudo make install
+
+Alternatively, to use the latest development version of the package, the
+repository can be cloned to a location which is present in the Emacs
+'load-path'.
+
+To clone the repository to a local subdirectory:
 
      git clone https://git.sr.ht/~mew/kixtart-mode
 
-Within the Emacs configuration, add the path of the cloned directory to
-the value of 'load-path'.  The following example assumes that the
-repository was cloned within a directory named "manual-packages" within
-the user's ".emacs.d" directory:
+The value of 'load-path' can be modified in the Emacs configuration,
+although such a change will need to placed before any actions which
+attempt to load the package.  The following example assumes that the
+repository has been cloned within a directory named "manual-packages"
+within the user's ".emacs.d" directory:
 
      (add-to-list 'load-path "~/.emacs.d/manual-packages/kixtart-mode")
 

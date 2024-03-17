@@ -1,13 +1,33 @@
-Clone this repository to a local subdirectory:
+The recommended way to install the package is to use a release
+archive.  Using this method will also install the pre-built Info
+manual.  The following example shows shell commands which will
+extract, configure, build, and install the package, assuming that the
+installation should be system-wide:
+
+@example sh
+tar -xf kixtart-mode-@value{VERSION}.tar.gz
+cd kixtart-mode-@value{VERSION}
+./configure
+make
+# System-wide installation will likely require root privileges.
+sudo make install
+@end example
+
+Alternatively, to use the latest development version of the package,
+the repository can be cloned to a location which is present in the
+Emacs @code{load-path}.
+
+To clone the repository to a local subdirectory:
 
 @example sh
 git clone https://git.sr.ht/~mew/kixtart-mode
 @end example
 
-Within the Emacs configuration, add the path of the cloned directory
-to the value of @code{load-path}.  The following example assumes that
-the repository was cloned within a directory named "manual-packages"
-within the user's ".emacs.d" directory:
+The value of @code{load-path} can be modified in the Emacs
+configuration, although such a change will need to placed before any
+actions which attempt to load the package.  The following example
+assumes that the repository has been cloned within a directory named
+"manual-packages" within the user's ".emacs.d" directory:
 
 @example lisp
 (add-to-list 'load-path "~/.emacs.d/manual-packages/kixtart-mode")

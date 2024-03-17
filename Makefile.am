@@ -11,7 +11,7 @@ doc_kixtart_mode_TEXINFOS = doc/doclicense.texi doc/example-configuration.texi d
 
 EXTRA_DIST = doc/README.texi
 
-README: doc/README.texi doc/example-configuration.texi doc/features.texi doc/installation.texi
+README: doc/README.texi doc/example-configuration.texi doc/features.texi doc/installation.texi doc/version.texi
 	$(MAKEINFO) --plaintext --output=$@ $(srcdir)/doc/README.texi
 
 check: kixtart-mode-tests.elc

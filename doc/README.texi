@@ -3,6 +3,8 @@
 @paragraphindent 0
 @c %**end of header
 
+@include version.texi
+
 @include features.texi
 
 See the manual for full details.
