@@ -1,4 +1,4 @@
-;;; kixtart-mode.el --- Major mode for editing KiXtart files -*- lexical-binding: t; -*-
+;;; kixtart-mode.el --- Major mode for editing KiXtart scripts -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2022-2024 Morgan Willcock
 
@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; Support for editing KiXtart script files.
+;; Support for editing KiXtart script scripts.
 
 ;; See the manual for configuration examples and instructions.
 
@@ -41,7 +41,7 @@
 ;;;; Customization
 
 (defgroup kixtart nil
-  "Major mode for editing KiXtart files."
+  "Major mode for editing KiXtart scripts."
   :tag "KiXtart"
   :link '(custom-manual "(kixtart-mode)Top")
   :group 'languages
@@ -1190,7 +1190,7 @@ which will be expanded to the template."
 
 ;;;###autoload
 (define-derived-mode kixtart-mode prog-mode "KiXtart Mode"
-  "Major mode for editing KiXtart files."
+  "Major mode for editing KiXtart scripts."
   (setq mode-name "KiXtart")
   (setq-local comment-start ";")
   (setq-local font-lock-defaults '(kixtart-font-lock-keywords nil t))
