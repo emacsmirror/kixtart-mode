@@ -48,9 +48,6 @@ basic settings, and enable some optional features:
                  (setq tab-width 4)
                  (setq fill-column 80)))
 
-     ;; Set template insertion to use interactive prompts.
-     (setq tempo-interactive t)
-
      ;; Enable `abbrev-mode' by default.
      (add-hook 'kixtart-mode-hook #'abbrev-mode)
      ;; Enable automatic abbrev expansion with the KiXtart Mode abbrev
