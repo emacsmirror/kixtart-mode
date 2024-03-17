@@ -818,10 +818,10 @@ in SPECS are passed as additional arguments to CONSTRUCTOR."
                    ((pred symbolp)
                     (setq symbols (list symbols))))
                  `(push (funcall #',constructor :symbols ',symbols ,@rest)
-                        kixtart-doc-docs))
+                        kixtart-doc-list))
                specs)))
 
-(defvar kixtart-doc-docs nil
+(defvar kixtart-doc-list nil
   "The list of documentation structures available to search.")
 
 (defun kixtart-doc-search-at-point (&optional predicate)
@@ -836,7 +836,7 @@ as its arguments."
   (unless predicate (setq predicate (lambda (&rest _) t)))
   (and-let* ((thing (kixtart--thing-at-point 'symbol))
              (symbol (and (stringp thing) (intern (upcase thing))))
-             (docs (cl-loop for doc in kixtart-doc-docs
+             (docs (cl-loop for doc in kixtart-doc-list
                             when (memq symbol (kixtart-doc-symbol-symbols doc))
                             when (funcall predicate doc symbol)
                             collect doc)))
@@ -936,7 +936,7 @@ there is a single match."
   "Return the annotation for STRING when it is a macro name."
   (and (string-prefix-p "@" string)
        (let ((symbol (intern (upcase string))))
-         (cl-loop for doc in kixtart-doc-docs
+         (cl-loop for doc in kixtart-doc-list
                   when (kixtart-doc-macro-p doc)
                   when (memq symbol (kixtart-doc-macro-symbols doc))
                   return (concat " " (kixtart-doc-macro-description doc))))))
@@ -1210,7 +1210,7 @@ which will be expanded to the template."
                #'kixtart--font-lock-extend-region-function-def t)
   (add-to-list 'syntax-propertize-extend-region-functions
                #'syntax-propertize-wholelines)
-  (when kixtart-doc-docs
+  (when kixtart-doc-list
     (add-hook 'eldoc-documentation-functions #'kixtart-eldoc-function nil t)))
 
 ;;;###autoload

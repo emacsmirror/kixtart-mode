@@ -771,7 +771,7 @@ The leading colon is removed from each label name."
       " COMMAND "
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-at-point))
-          (kixtart-doc-docs))
+          (kixtart-doc-list))
       (kixtart-doc-register kixtart-make-doc-command
         (COMMAND :final t))
       (should-not (kixtart-doc-search))
@@ -793,7 +793,7 @@ CLOSE
 "
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-before-point))
-          kixtart-doc-docs)
+          kixtart-doc-list)
       (kixtart-doc-register kixtart-make-doc-command
         ((OPEN COMMAND CLOSE)))
       (should (kixtart-doc-search))
@@ -814,7 +814,7 @@ CLOSE
 "
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-before-point))
-          kixtart-doc-docs)
+          kixtart-doc-list)
       (kixtart-doc-register kixtart-make-doc-command
         ((OPEN COMMAND CLOSE) :final t))
       (should-not (kixtart-doc-search))
@@ -835,7 +835,7 @@ CLOSE
 "
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-before-point))
-          kixtart-doc-docs)
+          kixtart-doc-list)
       (kixtart-doc-register kixtart-make-doc-command
         ((OPEN COMMAND CLOSE) :final 'first))
       (should (kixtart-doc-search))
@@ -856,7 +856,7 @@ CLOSE
 "
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-before-point))
-          kixtart-doc-docs)
+          kixtart-doc-list)
       (kixtart-doc-register kixtart-make-doc-command
         ((OPEN COMMAND CLOSE) :final 'last))
       (should-not (kixtart-doc-search))
@@ -877,7 +877,7 @@ CLOSE
 "
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-before-point))
-          kixtart-doc-docs)
+          kixtart-doc-list)
       (kixtart-doc-register kixtart-make-doc-command
         ((OPEN COMMAND CLOSE) :final '(OPEN CLOSE)))
       (should-not (kixtart-doc-search))
@@ -895,7 +895,7 @@ Only search backwards when inside parentheses."
 )"
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-in-function-args))
-          kixtart-doc-docs)
+          kixtart-doc-list)
       (kixtart-doc-register kixtart-make-doc-function
         (FUNCTION))
       (should-not (kixtart-doc-search))
@@ -912,7 +912,7 @@ Do not return a match when point within the current indentation."
       " COMMAND WITH ARGS "
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-command-line))
-          kixtart-doc-docs)
+          kixtart-doc-list)
       (kixtart-doc-register kixtart-make-doc-command
         (COMMAND))
       (should (kixtart-doc-search))
@@ -926,7 +926,7 @@ Ignore \"FOR\" since the match is ambiguous."
       " FOR "
     (let ((kixtart-doc-search-functions
            (list #'kixtart-doc-search-command-line))
-          kixtart-doc-docs)
+          kixtart-doc-list)
       (kixtart-doc-register kixtart-make-doc-command
         (FOR))
       (should-not (kixtart-doc-search))
