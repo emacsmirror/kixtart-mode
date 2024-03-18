@@ -23,8 +23,8 @@ following example shows shell commands which will extract, configure,
 build, and install the package, assuming that the installation should be
 system-wide:
 
-     tar -xf kixtart-mode-1.2.0.tar.gz
-     cd kixtart-mode-1.2.0
+     tar -xf kixtart-mode-1.3.0.tar.gz
+     cd kixtart-mode-1.3.0
      ./configure
      make
      # System-wide installation will likely require root privileges.
