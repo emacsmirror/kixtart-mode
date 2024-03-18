@@ -8,5 +8,6 @@
                      (indent-tabs-mode . nil)))
  (kixtart-mode . ((fill-column . 80)
                   (indent-tabs-mode . nil)))
+ (makefile-automake-mode . ((fill-column . 80)))
  (sh-mode . ((fill-column . 80)))
  (texinfo-mode . ((fill-column . 70))))
