@@ -91,7 +91,10 @@ structures compatible with the generic method
   "Specifies how `eldoc-mode' will use the echo area.
 An integer value indicates that text should be truncated after
 the given number of characters.  Any other non-nil value
-indicates that text should be truncated at the first paragraph."
+indicates that text should be truncated at the first paragraph.
+
+Note that ElDoc version 1.14.0 or newer is required for this
+option to work correctly."
   :type '(choice (const :tag "Never" nil)
                  (integer :tag "After number of characters")
                  (const :tag "At end of paragraph" t)))

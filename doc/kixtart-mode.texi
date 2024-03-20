@@ -416,6 +416,11 @@ contains two new-line characters (i.e. at the starting position of the
 substring @samp{\n\n}).
 @end defopt
 
+@quotation Note
+The @code{kixtart-eldoc-echo-truncate} option will only function
+correctly with ElDoc version 1.14.0 or newer.
+@end quotation
+
 @menu
 * Customizing documentation search::
 * Customizing documentation::
