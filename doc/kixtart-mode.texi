@@ -98,6 +98,7 @@ Templates
 @end detailmenu
 @end menu
 
+
 @node Overview
 @chapter Overview
 @cindex overview
@@ -105,11 +106,11 @@ Templates
 
 @include features.texi
 
-
 @menu
 * Installation::
 * Example configuration::
 @end menu
+
 
 @node Installation
 @section Installation
@@ -415,12 +416,12 @@ contains two new-line characters (i.e. at the starting position of the
 substring @samp{\n\n}).
 @end defopt
 
-
 @menu
 * Customizing documentation search::
 * Customizing documentation::
 * Customization examples::
 @end menu
+
 
 @node Customizing documentation search
 @section Customizing documentation search
@@ -479,6 +480,7 @@ together, separated by a single new-line character.  The requirement
 for handling multiple matches is to ensure that all matches for
 ambiguous KiXtart commands such as @code{FOR} and @code{NEXT} are
 given a chance to be displayed.
+
 
 @node Customizing documentation
 @section Customizing documentation
@@ -706,6 +708,7 @@ characters will always return a single match.
 * @dfn{TAGS} completion::
 @end menu
 
+
 @node Completion annotations
 @section Completion annotations
 @cindex completion annotations
@@ -829,6 +832,7 @@ allows the default string provided by @code{which-function-mode} to be
 used.
 @end defopt
 
+
 @node Outline Mode support
 @chapter Outline Mode support
 @cindex Outline Mode
@@ -931,6 +935,7 @@ return value is non-@code{nil}.
 * Template case control::
 * Predefined templates::
 @end menu
+
 
 @node Abbrev expansion
 @section Abbrev expansion
