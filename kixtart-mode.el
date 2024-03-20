@@ -30,12 +30,10 @@
 
 ;;; Code:
 
-;; `cl-lib' is required at runtime to use `cl-search'.  Since `imenu' also
-;; requires `cl-lib' there is actually no change in runtime requirements.
-(require 'cl-lib)
 (require 'imenu)
 (require 'tempo)
 (eval-when-compile
+  (require 'cl-lib)
   (require 'rx))
 
 ;;;; Customization
@@ -908,7 +906,9 @@ documentation structures."
                 :echo (or (and (integerp kixtart-eldoc-echo-truncate)
                                kixtart-eldoc-echo-truncate)
                           (and kixtart-eldoc-echo-truncate
-                               (cl-search "\n\n" docstring))))))))
+                               ;; The `string-search' function isn't available
+                               ;; before Emacs 28.
+                               (string-match-p "\n\n" docstring))))))))
 
 ;;;; Completion
 
