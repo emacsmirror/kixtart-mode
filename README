@@ -7,6 +7,7 @@ script files.  The following features are implemented:
    * Imenu support for function and label names.
    * ElDoc support for display of documentation.
    * Completion for built-in syntax (commands, functions, and macros).
+   * Code evaluation (requires KiXtart interpreter).
    * Current function name for which-function-mode and add-log
      functions.
    * Outline Mode support.

@@ -54,6 +54,7 @@ Version @value{VERSION}.
 * Imenu support::
 * ElDoc support::
 * Symbol completion::
+* Code evaluation::
 * Current function name::
 * Outline Mode support::
 * Templates::
@@ -802,6 +803,92 @@ case-transforming function @code{cape-capf-case-fold}:
 
 This is likely desirable since KiXtart syntax (including the names of
 user-defined functions) is case-insensitive.
+
+
+@node Code evaluation
+@chapter Code evaluation
+@cindex code @subentry evaluation of
+@cindex evaluation @subentry of code
+
+@kindex C-c C-e
+KiXtart Mode includes limited support for code evaluation.  If a
+KiXtart interpreter is available it can be used to evaluate code in
+the current buffer by calling the function
+@code{kixtart-eval-region-or-buffer}, which is bound to @kbd{C-c C-e}
+by default.
+
+@defun kixtart-eval-region-or-buffer
+Evaluate the text in the active region as a KiXtart script.  If there
+is no active region then evaluate the entire buffer contents.
+@end defun
+
+To evaluate code by typing it at a prompt, call the command
+@code{kixtart-eval}.  There is not a default key binding for this
+command.
+
+@defun kixtart-eval
+Evaluate a string as a KiXtart script.  When called interactively this
+function will prompt for a string in the minibuffer.
+@end defun
+
+The interpreter has no ability to interactively evaluate code or
+receive code as an input stream; evaluation of code is performed by
+writing it to a temporary script file and starting the interpreter
+process with the temporary script path as an argument.  The following
+customization variables define how the interpreter process is started:
+
+@defopt kixtart-eval-buffer-name
+Specifies the buffer name used for KiXtart interpreter output.
+@end defopt
+
+@defopt kixtart-eval-extra-args
+Specifies additional interpreter arguments which will be used in
+addition to the final argument of the script path.  The value should
+be a list of strings.
+@end defopt
+
+@defopt kixtart-eval-header
+Specifies a string which is used as a script header for temporary
+script files which are evaluated.  In order for the interpreter output
+to appear in the output buffer, this value should include the
+expression @samp{SetOption("ASCII", "ON")}.
+@end defopt
+
+@defopt kixtart-program
+Specifies the path to the KiXtart interpreter.
+@end defopt
+
+The customization variable @code{kixtart-eval-hook} is a hook which
+may be used to modify the behavior of the output buffer.
+
+@defopt kixtart-eval-hook
+The given hook functions will be called with the buffer used for
+interpreter output as the current buffer, prior to the interpreter
+process being started.  The read-only status of the buffer is
+inhibited at this time.
+@end defopt
+
+By default, the function @code{kixtart-scroll-buffer-windows} is added
+to the hook variable @code{kixtart-eval-hook}, which has the effect of
+scrolling all interpreter output windows to the bottom of the buffer.
+
+@defun kixtart-scroll-buffer-windows
+Move point to the end of the buffer, for all windows which are
+displaying the current buffer.
+@end defun
+
+The output buffer is reused between evaluations.  If it is preferable
+to clear the previous buffer contents, this can be achieved by
+modifying which hook functions are present in
+@code{kixtart-eval-hook}:
+
+@example lisp
+;; There is no longer a need to scroll the windows.
+(remove-hook 'kixtart-eval-hook #'kixtart-scroll-buffer-windows)
+
+;; Erase the buffer before the interpreter is started.
+(add-hook 'kixtart-eval-hook #'erase-buffer)
+@end example
 
 
 @node Current function name

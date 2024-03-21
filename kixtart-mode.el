@@ -99,11 +99,40 @@ option to work correctly."
                  (integer :tag "After number of characters")
                  (const :tag "At end of paragraph" t)))
 
+(defcustom kixtart-eval-buffer-name "*KiXtart Output*"
+  "Specifies the buffer name used for interpreter output."
+  :type 'string)
+
+(defcustom kixtart-eval-extra-args nil
+  "Specifies additional interpreter arguments.
+The value should be a list of strings which will be used as
+additional arguments for the KiXtart interpreter."
+  :type '(repeat string))
+
+(defcustom kixtart-eval-header "$ = SetOption(\"ASCII\", \"ON\")\n"
+  "Specifies a string which is included in evaluated code.
+The string value is inserted at the beginning of any scripts
+which are sent to the KiXtart interpreter.  Note that the script
+which is being executed will need to set the \"ASCII\" option to
+\"ON\" to allow the process output to be read."
+  :type 'string)
+
+(defcustom kixtart-eval-hook (list #'kixtart-scroll-buffer-windows)
+  "A hook which is called during code evaluation.
+The hook functions will be called with the buffer used for
+displaying interpreter output as the current buffer, before the
+interpreter process is started."
+  :type 'hook)
+
 (defcustom kixtart-indent-offset 4
   "Specifies the indentation offset applied by `kixtart-indent-line'.
 Lines determined to be within script-blocks are indented by this
 number of columns per script-block level."
   :type 'integer)
+
+(defcustom kixtart-program "kix32"
+  "Specifies the name of the KiXtart executable."
+  :type 'string)
 
 (defcustom kixtart-template-insert-newline #'eobp
   "Specifies whether a template includes a final newline."
@@ -611,6 +640,54 @@ new indentation column."
           (indent-line-to new-indent))
         (when goto-indentation
           (back-to-indentation))))))
+
+;;;; Code evaluation
+
+(defun kixtart-eval (string)
+  "Evaluate STRING in the KiXtart interpreter."
+  (interactive "sKiXtart: ")
+  (let ((script-file (make-temp-file "kixtart-mode" nil ".kix"
+                                     (concat kixtart-eval-header string)))
+        (buffer (or (get-buffer kixtart-eval-buffer-name)
+                    (with-current-buffer (generate-new-buffer
+                                          kixtart-eval-buffer-name)
+                      (special-mode)
+                      (current-buffer)))))
+    (with-current-buffer buffer
+      (let ((inhibit-read-only t))
+        (run-hooks 'kixtart-eval-hook)))
+    (display-buffer
+     (process-buffer
+      (apply #'start-process `(,(file-name-base kixtart-program)
+                               ,buffer
+                               ,kixtart-program
+                               ,@kixtart-eval-extra-args
+                               ,script-file))))))
+
+(defun kixtart-eval-region-or-buffer ()
+  "Evaluate a portion of the buffer in the KiXtart interpreter.
+When a region is active, evaluation that region, otherwise
+evaluate the entire buffer."
+  (interactive)
+  (let (beg end region-message)
+    (if (region-active-p)
+        (setq beg (region-beginning)
+              end (region-end)
+              region-message "region in the ")
+      (setq beg (point-min)
+            end (point-max)
+            region-message ""))
+    (kixtart-eval (buffer-substring-no-properties beg end))
+    (message "Evaluated the %s%s buffer" region-message (buffer-name))))
+
+(defun kixtart-scroll-buffer-windows ()
+  "Scroll all windows which are displaying the current buffer."
+  (let ((buffer (current-buffer)))
+    (walk-windows (lambda (window)
+                    (when (eq (window-buffer window) buffer)
+                      (select-window window)
+                      (goto-char (point-max))))
+                  nil t)))
 
 ;;;; Block closing
 
@@ -1125,6 +1202,7 @@ which will be expanded to the template."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-c") #'kixtart-close-command-block)
     (define-key map (kbd "C-c C-d") #'eldoc)
+    (define-key map (kbd "C-c C-e") #'kixtart-eval-region-or-buffer)
     (define-key map (kbd "C-c C-j") #'imenu)
     (define-key map (kbd "C-c C-t C-b") #'tempo-backward-mark)
     (define-key map (kbd "C-c C-t C-f") #'tempo-forward-mark)
