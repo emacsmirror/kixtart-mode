@@ -1,6 +1,6 @@
 # Prevent byte-compilation warning:
-#   Warning (bytecomp): Changing ‘byte-compile-dest-file’ is obsolete (as of 23.2);
-#   set ‘byte-compile-dest-file-function’ instead.
+#   Warning (bytecomp): Changing 'byte-compile-dest-file' is obsolete (as of 23.2);
+#   set 'byte-compile-dest-file-function' instead.
 AM_ELCFLAGS = --eval '(require (quote bytecomp))'
 
 dist_lisp_LISP = kixtart-mode.el kixtart-docstrings.el
