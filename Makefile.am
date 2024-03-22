@@ -9,6 +9,7 @@ dist_noinst_LISP = kixtart-mode-tests.el
 info_TEXINFOS = doc/kixtart-mode.texi
 doc_kixtart_mode_TEXINFOS = doc/doclicense.texi doc/example-configuration.texi doc/features.texi doc/installation.texi
 
+AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 EXTRA_DIST = doc/README.texi
 
 README: doc/README.texi doc/example-configuration.texi doc/features.texi doc/installation.texi doc/version.texi

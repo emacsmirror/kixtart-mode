@@ -9,6 +9,9 @@ Added functionality to evaluate strings as scripts, by executing them
 in a KiXtart interpreter.  This allows evaluation of the active
 region, the entire buffer, or a string entered at a minibuffer prompt.
 
+The html make target now defaults to creating a single HTML file
+without node separators and menus.
+
 * Version 1.3.0 (2024-03-18)
 
 Fixed parsing error when calling indentation functions with point
