@@ -871,9 +871,9 @@ DOC is a `kixtart-doc-macro' structure."
   "Return DOC as a string.
 DOC is a `kixtart-doc-macro' structure."
   (let ((description (kixtart-doc-macro-description doc))
-        (type (kixtart-doc-type-name (kixtart-doc-macro-type doc))))
+        (type (kixtart-doc-macro-type doc)))
     (if type
-        (format "(%s) %s" type description)
+        (format "(%s) %s" (kixtart-doc-type-name type) description)
       description)))
 
 (cl-defmethod kixtart-doc-string ((doc kixtart-doc-syntax))
