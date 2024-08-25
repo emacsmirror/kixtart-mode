@@ -69,3 +69,23 @@ $`
 $var
 ${
 $}
+
+;;; Properties and methods
+
+$array[i].prop
+$object.method("string")
+$object.method($var)
+$object.method()
+$object.method().method()
+$object.method().method().property
+$object.method().property
+$object.method(1)
+$object.property
+
+;;; Floating point numbers
+
+0.1
+56.
+56.2
+56.2e7
+56.2e-7
