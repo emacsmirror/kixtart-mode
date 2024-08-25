@@ -8,6 +8,8 @@ SetOption("NoNetwork", "ON")
 
 ;;; Commands and user defined function names
 
+Call "lib"
+Include "lib"
 Function Function1 EndFunction
 Function Function:1 EndFunction
 Function F EndFunction
