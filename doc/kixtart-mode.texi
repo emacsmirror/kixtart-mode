@@ -149,6 +149,20 @@ using the following font-lock faces:
 @item Variable @tab @code{kixtart-variable-face}
 @end multitable
 
+Three levels of font-lock are available for selection based on the
+value of customization variable @code{font-lock-maximum-decoration}.
+The nature of the scripting language will likely lead to a high
+density of syntax-highlighting being present when using the third
+font-lock level; it may be preferable to use the second font-lock
+level which will only highlight KiXtart's internal commands,
+functions, and macros:
+
+@example lisp
+;; Use second level syntax-highlighting for kixtart-mode and the
+;; highest level which is available for all other modes.
+(setq font-lock-maximum-decoration '((kixtart-mode . 2) (t . t)))
+@end example
+
 The additional face @code{kixtart-warning-face} is used to highlight
 portions of text which are likely to be scripting errors.  Currently
 this covers two potentially problematic cases related to KiXtart
@@ -171,8 +185,10 @@ The additional characters do not extend the match to a different
 (longer) KiXtart macro name.
 @end enumerate
 
-Where the parser will discard the trailing portion of the macro name,
-the trailing portion will be highlighted as an error.
+Where a macro name is unknown or the parser will discard the trailing
+portion of the macro name, the invalid portion of the name will be
+highlighted as an error if the font-lock level being used is at least
+the second level.
 
 
 @node Indentation

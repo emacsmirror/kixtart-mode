@@ -361,30 +361,51 @@ function."
           (setq changed t)))
       changed)))
 
-(defvar kixtart-font-lock-keywords
-  `((,(kixtart-rx (group macro) (group (0+ user-chars)))
-     ;; The real parser seems to silently discard the trailing part of a
-     ;; macro name if the leading part matches an actual macro name.
+(defconst kixtart-font-lock-keywords-1
+  `((,(rx symbol-start
+          (or "call" "endfunction" "function" "include")
+          symbol-end)
+     . kixtart-command-face))
+  "Font lock keywords for level 1 highlighting in KiXtart mode.
+Highlights the KiXtart commands used for function declarations
+and for calling or including other scripts.")
+
+(defconst kixtart-font-lock-keywords-2
+  `((,(kixtart-rx command)      . kixtart-command-face)
+    (,(kixtart-rx function)     . kixtart-function-face)
+    (,(kixtart-rx (group macro) (group (0+ user-chars)))
+     ;; The real parser seems to silently discard the trailing part of a macro
+     ;; name if the leading part matches an actual macro name.
      (1 kixtart-macro-face) (2 kixtart-warning-face))
     ;; Unknown macros will always evaluate to 0.
-    (,(kixtart-rx macro-format) . kixtart-warning-face)
-    (,(kixtart-rx dot-property) . kixtart-property-face)
-    (,(kixtart-rx function)     . kixtart-function-face)
-    (,(kixtart-rx label)        . kixtart-label-face)
-    (,(kixtart-rx variable)     . kixtart-variable-face)
-    (,(kixtart-rx command-function) (0 kixtart-command-face)
-     ;; Anchored match for function name.
-     (,(kixtart-rx function-name)
-      (unless (kixtart--in-comment-or-string-p)
-        (forward-comment (point-max))
-        (if (looking-at (kixtart-rx function-name))
-            (match-end 0)
-          ;; Skip highlighting anything else on this line by leaving point at
-          ;; the end of the line.
-          (end-of-line)))
-      nil
-      (0 kixtart-function-name-face)))
-    (,(kixtart-rx command)      . kixtart-command-face)))
+    (,(kixtart-rx macro-format) . kixtart-warning-face))
+  "Font lock keywords for level 2 highlighting in KiXtart mode.
+Highlights all internal KiXtart commands, functions, and macros.")
+
+(defconst kixtart-font-lock-keywords-3
+  (append
+   `((,(kixtart-rx dot-property) . kixtart-property-face)
+     (,(kixtart-rx label)        . kixtart-label-face)
+     (,(kixtart-rx variable)     . kixtart-variable-face)
+     (,(kixtart-rx command-function) (0 kixtart-command-face)
+      ;; Anchored match for function name.
+      (,(kixtart-rx function-name)
+       (unless (kixtart--in-comment-or-string-p)
+         (forward-comment (point-max))
+         (if (looking-at (kixtart-rx function-name))
+             (match-end 0)
+           ;; Skip highlighting anything else on this line by leaving point at
+           ;; the end of the line.
+           (end-of-line)))
+       nil
+       (0 kixtart-function-name-face))))
+   kixtart-font-lock-keywords-2)
+  "Font lock keywords for level 3 highlighting in KiXtart mode.
+Highlights all internal KiXtart commands, functions, and macros,
+as well as user-defined or external names.")
+
+(defvar kixtart-font-lock-keywords kixtart-font-lock-keywords-1
+  "Default expressions to highlight in KiXtart mode.")
 
 ;;;; Utility
 
@@ -1274,7 +1295,11 @@ which will be expanded to the template."
   "Major mode for editing KiXtart scripts."
   (setq mode-name "KiXtart")
   (setq-local comment-start ";")
-  (setq-local font-lock-defaults '(kixtart-font-lock-keywords nil t))
+  (setq-local font-lock-defaults '((kixtart-font-lock-keywords
+                                    kixtart-font-lock-keywords-1
+                                    kixtart-font-lock-keywords-2
+                                    kixtart-font-lock-keywords-3)
+                                   nil t))
   (setq-local beginning-of-defun-function #'kixtart-beginning-of-defun)
   (setq-local end-of-defun-function #'kixtart-end-of-defun)
   (setq-local indent-line-function #'kixtart-indent-line)
