@@ -925,7 +925,7 @@ automatically added to change log entries.
 
 @item
 @code{which-function-mode}, a minor mode which displays the current
-function name in the mode-line.
+function name in the mode-line or the header-line.
 @end itemize
 
 The customization variable @code{kixtart-which-function-default-name}
