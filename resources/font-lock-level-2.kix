@@ -1,0 +1,280 @@
+;;; Comments
+
+/* -------------------
+; <- font-lock-comment-face
+;^^^^^^^^^^^^^^^^^^^^^ font-lock-comment-face
+   Multi-line comment.
+   ------------------- */
+; <- font-lock-comment-face
+;^^^^^^^^^^^^^^^^^^^^^^^^ font-lock-comment-face
+
+;; Single-line comment.
+; <- font-lock-comment-delimiter-face
+;^^ <- font-lock-comment-delimiter-face
+;  ^^^^^^^^^^^^^^^^^^^^ font-lock-comment-face
+
+;;; Built in functions
+
+SetOption("NoNetwork", "ON")
+; <- kixtart-function-face
+;^^^^^^^^ kixtart-function-face
+;        ^ nil
+;         ^^^^^^^^^^^ font-lock-string-face
+;                    ^^ nil
+;                      ^^^^ font-lock-string-face
+;                          ^ nil
+
+;;; Commands and user defined function names
+
+Call "lib"
+; <- kixtart-command-face
+;^^^ kixtart-command-face
+;   ^ nil
+;    ^^^^^ font-lock-string-face
+Include "lib"
+; <- kixtart-command-face
+;^^^^^^ kixtart-command-face
+;      ^ nil
+;       ^^^^^ font-lock-string-face
+?
+; <- kixtart-command-face
+Function Function1 EndFunction
+; <- kixtart-command-face
+;^^^^^^^ kixtart-command-face
+;       ^ nil
+;        ^^^^^^^^^ nil
+;                 ^ nil
+;                  ^^^^^^^^^^^ kixtart-command-face
+Function Function:1 EndFunction
+; <- kixtart-command-face
+;^^^^^^^ kixtart-command-face
+;       ^ nil
+;        ^^^^^^^^^^ nil
+;                  ^ nil
+;                   ^^^^^^^^^^^ kixtart-command-face
+Function F EndFunction
+; <- kixtart-command-face
+;^^^^^^^ kixtart-command-face
+;       ^ nil
+;        ^ nil
+;         ^ nil
+;          ^^^^^^^^^^^ kixtart-command-face
+
+;; Trailing ? commands, Macros, and Variables are valid and become part of the
+;; body of the function.
+Function Function2? EndFunction
+; <- kixtart-command-face
+;^^^^^^^ kixtart-command-face
+;       ^ nil
+;        ^^^^^^^^^ nil
+;                 ^^ nil
+;                   ^ kixtart-command-face
+Function Function3@WKSTA EndFunction
+; <- kixtart-command-face
+;^^^^^^^ kixtart-command-face
+;       ^ nil
+;        ^^^^^^^^^ nil
+;                 ^^^^^^ kixtart-macro-face
+;                       ^ nil
+;                        ^^^^^^^^^^^ kixtart-command-face
+Function Function4$var EndFunction
+; <- kixtart-command-face
+;^^^^^^^ kixtart-command-face
+;       ^ nil
+;        ^^^^^^^^^ nil
+;                 ^^^^ nil
+;                     ^ nil
+;                      ^^^^^^^^^^^ kixtart-command-face
+
+;;; Labels
+
+:!
+; <- nil
+;^ nil
+:#
+; <- nil
+;^ nil
+:%
+; <- nil
+;^ nil
+::
+; <- nil
+;^ nil
+:\
+; <- nil
+;^ nil
+:_
+; <- nil
+;^ nil
+:`
+; <- nil
+;^ nil
+:label
+; <- nil
+;^^^^^ nil
+:{
+; <- nil
+;^ nil
+:}
+; <- nil
+;^ nil
+
+;; Trailing variables are not part of the label.
+:label$var
+; <- nil
+;^^^^^ nil
+;     ^^^^ nil
+
+;;; Macros
+
+@WKSTA
+; <- kixtart-macro-face
+;^^^^^ kixtart-macro-face
+
+;; Variables are not part of the macro name.
+@WKSTA$var
+; <- kixtart-macro-face
+;^^^^^ kixtart-macro-face
+;     ^^^^ nil
+$var@WKSTA
+; <- nil
+;^^^ nil
+;   ^^^^^^ kixtart-macro-face
+
+;; Leading labels are not part of the macro name.
+:label@WKSTA
+; <- nil
+;^^^^^ nil
+;     ^^^^^^ kixtart-macro-face
+
+;; Any trailing syntax seems to be silently discarded if the start of the macro
+;; is valid, the trailing portion can be highlighted as a warning.
+@WKSTA:label
+; <- kixtart-macro-face
+;^^^^^ kixtart-macro-face
+;     ^^^^^^ kixtart-warning-face
+@WKSTAEnd
+; <- kixtart-macro-face
+;^^^^^ kixtart-macro-face
+;     ^^^ kixtart-warning-face
+
+;; Unknown macro values will evaluate to 0 so the entire name can be highlighted
+;; as a warning.
+@NOTWKSTA
+; <- kixtart-warning-face
+;^^^^^^^^ kixtart-warning-face
+@FUNCTION
+; <- kixtart-warning-face
+;^^^^^^^^ kixtart-warning-face
+@:label
+; <- kixtart-warning-face
+;^^^^^^ kixtart-warning-face
+
+;;; Variables
+
+$
+; <- nil
+$!
+; <- nil
+;^ nil
+$#
+; <- nil
+;^ nil
+$%
+; <- nil
+;^ nil
+$:
+; <- nil
+;^ nil
+$\
+; <- nil
+;^ nil
+$_
+; <- nil
+;^ nil
+$`
+; <- nil
+;^ nil
+$var
+; <- nil
+;^^^ nil
+${
+; <- nil
+;^ nil
+$}
+; <- nil
+;^ nil
+
+;;; Properties and methods
+
+$array[i].prop
+; <- nil
+;^^^^^ nil
+;     ^^^ nil
+;        ^^^^^ nil
+$object.method("string")
+; <- nil
+;^^^^^^ nil
+;      ^^^^^^^ nil
+;             ^ nil
+;              ^^^^^^^^ font-lock-string-face
+;                      ^ nil
+$object.method($var)
+; <- nil
+;^^^^^^ nil
+;      ^^^^^^^ nil
+;             ^ nil
+;              ^^^^ nil
+;                  ^ nil
+$object.method()
+; <- nil
+;^^^^^^ nil
+;      ^^^^^^^ nil
+;             ^^ nil
+$object.method().method()
+; <- nil
+;^^^^^^ nil
+;      ^^^^^^^ nil
+;             ^^ nil
+;               ^^^^^^^ nil
+;                      ^^ nil
+$object.method().method().
+; <- nil
+;^^^^^^ nil
+;      ^^^^^^^ nil
+;             ^^ nil
+;               ^^^^^^^ nil
+;                      ^^^ nil
+$object.method().property
+; <- nil
+;^^^^^^ nil
+;      ^^^^^^^ nil
+;             ^^ nil
+;               ^^^^^^^^^ nil
+$object.method(1)
+; <- nil
+;^^^^^^ nil
+;      ^^^^^^^ nil
+;             ^^^ nil
+$object.property
+; <- nil
+;^^^^^^ nil
+;      ^^^^^^^^^ nil
+
+;;; Floating point numbers
+
+0.1
+; <- nil
+;^^ nil
+56.
+; <- nil
+;^^ nil
+56.2
+; <- nil
+;^^^ nil
+56.2e7
+; <- nil
+;^^^^^ nil
+56.2e-7
+; <- nil
+;^^^^^^ nil
