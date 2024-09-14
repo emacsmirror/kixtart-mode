@@ -883,7 +883,8 @@ DOC is a `kixtart-doc-macro' structure."
     (11 "Boolean")
     (12 "Variant")
     (13 "Object")
-    (17 "Byte")))
+    (17 "Byte")
+    (_  (error "Unknown type"))))
 
 (cl-defgeneric kixtart-doc-string (doc)
   "Return DOC as a string.")
