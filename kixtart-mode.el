@@ -726,7 +726,7 @@ evaluate the entire buffer."
   (let ((tick (buffer-chars-modified-tick)))
     (if (and kixtart--close-command-strings
              (eq last-command #'kixtart-close-command-block))
-        (backward-delete-char (length (pop kixtart--close-command-strings)))
+        (delete-char (- (length (pop kixtart--close-command-strings))))
       (setq kixtart--close-command-strings
             (let* ((block (kixtart--parse-block))
                    (close-list (pcase (kixtart-block-token block)
