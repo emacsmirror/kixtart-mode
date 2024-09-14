@@ -932,5 +932,44 @@ Ignore \"FOR\" since the match is ambiguous."
       (should-not (kixtart-doc-search))
       (goto-char (point-min))
       (should-not (kixtart-doc-search)))))
+
+;;;; Font-lock
+
+(require 'ert-font-lock nil 'noerror)
+;; Prevent compilation warnings where there is no ert-font-lock.
+(eval-when-compile
+  (unless (functionp 'ert-font-lock-test-file)
+    (declare-function ert-font-lock-test-file nil)))
+
+(require 'ert-x)
+;; Prevent compilation warnings for the older version of ert-x which comes with
+;; Emacs 27.
+(eval-when-compile
+  (unless (functionp 'ert-resource-file)
+    (declare-function ert-resource-file nil)))
+
+(ert-deftest kixtart-font-lock-level-3 ()
+  "Test level 3 font-lock."
+  (skip-unless (featurep 'ert-font-lock))
+  (let ((font-lock-maximum-decoration '((kixtart-mode . 3))))
+    (ert-font-lock-test-file
+     (ert-resource-file "font-lock-level-3.kix")
+     'kixtart-mode)))
+
+(ert-deftest kixtart-font-lock-level-2 ()
+  "Test level 2 font-lock."
+  (skip-unless (featurep 'ert-font-lock))
+  (let ((font-lock-maximum-decoration '((kixtart-mode . 2))))
+    (ert-font-lock-test-file
+     (ert-resource-file "font-lock-level-2.kix")
+     'kixtart-mode)))
+
+(ert-deftest kixtart-font-lock-level-1 ()
+  "Test level 1 font-lock."
+  (skip-unless (featurep 'ert-font-lock))
+  (let ((font-lock-maximum-decoration '((kixtart-mode . 1))))
+    (ert-font-lock-test-file
+     (ert-resource-file "font-lock-level-1.kix")
+     'kixtart-mode)))
 
 ;;; kixtart-mode-tests.el ends here
