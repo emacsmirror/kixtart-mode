@@ -141,7 +141,7 @@ number of columns per script-block level."
                  (const :tag "At end of buffer" ,#'eobp)
                  (function :tag "Custom function")))
 
-(defcustom kixtart-which-function-default-name "-"
+(defcustom kixtart-which-function-default-name nil
   "Specifies the default function name provided to `which-function-mode'.
 This name is provided as the function name when point is outside
 of a function.  When the value is set to nil
