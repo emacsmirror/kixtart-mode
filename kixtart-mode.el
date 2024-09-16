@@ -1083,7 +1083,6 @@ added into a submenu."
         (when labels
           (push (cons "/Labels" labels) index))
         index))))
-
 
 ;;;; Outline mode
 
