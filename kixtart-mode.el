@@ -142,13 +142,13 @@ number of columns per script-block level."
                  (function :tag "Custom function")))
 
 (defcustom kixtart-which-function-default-name nil
-  "Specifies the default function name provided to `which-function-mode'.
-This name is provided as the function name when point is outside
-of a function.  When the value is set to nil
-`which-function-mode' falls back to matching based on the latest
-Imenu index data."
-  :type '(choice (string :tag "Default name")
-                 (const :tag "Use Imenu index" nil)))
+  "Specifies the default function name for `which-function-mode'.
+This value is provided to `which-function-mode' as the current
+function name when point is outside of a function.  When the
+value is set to nil, the name used when point is outside of a
+function will only be determined by `which-function-mode'."
+  :type '(choice (string :tag "Default function name")
+                 (const :tag "Let `which-function-mode' decide" nil)))
 
 ;;;; Faces
 
