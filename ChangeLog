@@ -18,6 +18,9 @@ previous behavior can be restored by setting the value back to "-":
 
 Fixed compilation warnings when using the old version of ElDoc.
 
+Fixed ElDoc documentation lookup and the associated compilation
+warning for Emacs 27 and 28.
+
 * Version 1.3.2 (2024-09-01)
 
 Fixed returning a documentation string for a macro which was defined

@@ -453,7 +453,9 @@ value."
   ;; dynamically based on symbol boundaries.
   (or (let ((start (or (and (eq (char-after) ??) (point))
                        (and (eq (char-before) ??) (1- (point))))))
-        (and start (with-restriction start (1+ start)
+        ;; The `with-restriction' macro isn't available until Emacs 29.
+        (and start (save-restriction
+                     (narrow-to-region start (1+ start))
                      (thing-at-point thing no-properties))))
       (thing-at-point thing no-properties)))
 
