@@ -840,8 +840,9 @@ DOC is a `kixtart-doc-symbol' structure."
   (not (pcase (kixtart-doc-symbol-final doc)
          ('last (eq (car (last (kixtart-doc-symbol-symbols doc))) symbol))
          ('first (eq (car (kixtart-doc-symbol-symbols doc)) symbol))
-         ((and (pred listp) final) (memq symbol final))
-         ((and final (guard final)) t))))
+         ((and (pred listp) final-list) (memq symbol final-list))
+         ((and (pred booleanp) final) final)
+         (_ (error "Unknown final")))))
 
 (cl-defgeneric kixtart-doc-face (doc)
   "Return the face used to present DOC.")

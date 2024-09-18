@@ -4,6 +4,10 @@ An error will now be signalled when attempting to resolve an unknown
 KiXtart type ID to a type name.  Previously the type would have been
 presented as "nil".
 
+An error will now be signalled for unknown symbols set in the `final'
+slot of documentation structures.  Previously an unknown symbol would
+have given the same behavior as setting the slot value to `t'.
+
 The default value of the customisation variable
 `kixtart-which-function-default-name' is now set to nil.  This has
 been changed because the default string of `which-function-mode' was
