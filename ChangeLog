@@ -16,6 +16,8 @@ previous behavior can be restored by setting the value back to "-":
 
   (setq kixtart-which-function-default-name "-")
 
+Fixed compilation warnings when using the old version of ElDoc.
+
 * Version 1.3.2 (2024-09-01)
 
 Fixed returning a documentation string for a macro which was defined

@@ -1220,6 +1220,11 @@ which will be expanded to the template."
 
 ;;;; Keymap
 
+;; Prevent compilation warnings when the older version of ElDoc is loaded.
+(eval-when-compile
+  (unless (functionp #'eldoc)
+    (declare-function eldoc nil)))
+
 (defvar kixtart-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-c") #'kixtart-close-command-block)
