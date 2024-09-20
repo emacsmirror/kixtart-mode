@@ -21,6 +21,14 @@ Fixed compilation warnings when using the old version of ElDoc.
 Fixed ElDoc documentation lookup and the associated compilation
 warning for Emacs 27 and 28.
 
+Added customisation variable `kixtart-completion-case-fold' which
+determines whether KiXtart completion matching is case-sensitive.
+
+The recommendation of using the external Cape package to combine
+KiXtart syntax completion with TAGS completions has been replaced by
+an example of modifying the completions list using the new function
+`kixtart-completion-include-tags'.
+
 * Version 1.3.2 (2024-09-01)
 
 Fixed returning a documentation string for a macro which was defined

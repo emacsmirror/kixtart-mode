@@ -30,6 +30,7 @@
 
 ;;; Code:
 
+(require 'etags)
 (require 'imenu)
 (require 'tempo)
 (eval-when-compile
@@ -62,6 +63,10 @@ the value of point changes."
   #'kixtart-completion-annotate-macros
   "Specifies the function which creates completion annotations."
   :type 'function)
+
+(defcustom kixtart-completion-case-fold nil
+  "Specifies that KiXtart completion should be case-insensitive."
+  :type 'boolean)
 
 (defcustom kixtart-completion-list-hook
   (list #'kixtart-completion-upcase-macros
@@ -1031,6 +1036,14 @@ there is a single match."
   (when (string-match-p (rx (>= 2 ??)) kixtart-completion-input)
     (push kixtart-completion-input kixtart-completion-list)))
 
+(defun kixtart-completion-include-tags ()
+  "Append the current TAGS table to the completion list.
+Note that this function is not responsible for visiting or
+updating the TAGS file."
+  (when (or tags-file-name tags-table-list)
+    (setq kixtart-completion-list
+          (nconc kixtart-completion-list (tags-completion-table)))))
+
 (defun kixtart-completion-upcase-macros ()
   "Convert macro names in the completion list to uppercase."
   (setq kixtart-completion-list
@@ -1052,12 +1065,14 @@ there is a single match."
        (pcase (bounds-of-thing-at-point 'symbol)
          (`(,beg . ,end)
           (list beg end
-                (completion-table-dynamic
-                 (lambda (string)
-                   (let ((kixtart-completion-list kixtart-keywords)
-                         (kixtart-completion-input string))
-                     (run-hooks 'kixtart-completion-list-hook)
-                     kixtart-completion-list)))
+                (completion-table-case-fold
+                 (completion-table-dynamic
+                  (lambda (string)
+                    (let ((kixtart-completion-list kixtart-keywords)
+                          (kixtart-completion-input string))
+                      (run-hooks 'kixtart-completion-list-hook)
+                      kixtart-completion-list)))
+                 (not kixtart-completion-case-fold))
                 :annotation-function kixtart-completion-annotation-function)))))
 
 ;;;; Imenu

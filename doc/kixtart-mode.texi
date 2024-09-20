@@ -724,6 +724,20 @@ Attempting to complete a single symbol which is a sequence of @samp{?}
 characters will always return a single match.
 @end itemize
 
+Completion matches are case-sensitive by default, but matching can be
+made case-insensitive by setting @code{kixtart-completion-case-fold}
+to a non-@code{nil} value.  Case-insensitivity may be desirable
+because KiXtart syntax (including the names of user-defined functions)
+is case-insensitive.
+
+@defopt kixtart-completion-case-fold
+Specifies whether completion is case-insensitive.  A non-@code{nil}
+value indicates that case-insensitive matching is enabled for all
+completions candidates offered by the kixtart-mode completion-at-point
+function.  This also applies to any additional completion candidates
+which may have been added by functions added to the
+@code{kixtart-completion-list} hook.
+@end defopt
 
 @menu
 * Completion annotations::
@@ -771,10 +785,10 @@ The presence of the completion-at-point implementation (@pxref{Symbol
 completion}) will replace the default Emacs behavior of completing
 symbols using a @dfn{TAGS} file.  However, the completions provided by
 a @dfn{TAGS} file are likely still useful and can be used for locating
-and navigating to user-defined KiXtart functions.  To reliably use use
-both completion functions at the same time, without having to know in
-advance which will be activated by matching the initial input, there
-are two options:
+and navigating to user-defined KiXtart functions.  To reliably use
+both completion backends at the same time, without having to know in
+advance which backend will be activated by matching the given input,
+there are three options:
 
 @enumerate
 @item
@@ -782,43 +796,40 @@ Invoke the @dfn{TAGS} completion separately by using the
 @code{complete-tag} command.
 
 @item
-Use a third party package to call both completion functions, merge the
-results, and present a single list of completion candidates.
+Configure the KiXtart completion function to also include completion
+candidates from a @dfn{TAGS} file, if one is currently visited.
+
+@item
+Use a third party completion feature to call both completion
+functions, merge the results, and present a single list of completion
+candidates.
 @end enumerate
 
-If taking the second option, the recommended solution is to install
-the @url{https://github.com/minad/cape, Cape} package and replace the
-completion functions with the result of calling the completion merging
-function @code{cape-capf-super}:
+The second option, of including completions from the @dfn{TAGS} file
+along with the completions for KiXtart syntax, is likely the easiest
+solution and can be achieved by adding the function
+@code{kixtart-completion-include-tags} to the
+@code{kixtart-completion-list} hook.
+
+@defun kixtart-completion-include-tags
+Add all completions from the currently loaded @dfn{TAGS} file to the
+completion list.
+@end defun
+
+To avoid unnecessary processing of the additional completion
+candidates, it is recommended to add this function to the end of the
+hook list to ensure that it is the last hook function to be called:
 
 @example lisp
-(add-hook
- 'kixtart-mode-hook
- (lambda ()
-   (setq-local completion-at-point-functions
-               (list (cape-capf-super
-                      #'tags-completion-at-point-function
-                      #'kixtart-completion-at-point-function)))))
+(add-to-list 'kixtart-completion-list-hook
+             #'kixtart-completion-include-tags
+             t)
 @end example
 
-Using Cape also provides the option of converting the completion
-mechanism to be case-insensitive, scoped to KiXtart syntax completion,
-by wrapping the new completion function with a call to the
-case-transforming function @code{cape-capf-case-fold}:
-
-@example lisp
-(add-hook
- 'kixtart-mode-hook
- (lambda ()
-   (setq-local completion-at-point-functions
-               (list (cape-capf-case-fold
-                      (cape-capf-super
-                       #'tags-completion-at-point-function
-                       #'kixtart-completion-at-point-function))))))
-@end example
-
-This is likely desirable since KiXtart syntax (including the names of
-user-defined functions) is case-insensitive.
+@quotation Note
+The @code{kixtart-completion-include-tags} function is not responsible
+for visiting or updating a @dfn{TAGS} file.
+@end quotation
 
 
 @node Code evaluation
