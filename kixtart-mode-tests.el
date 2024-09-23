@@ -432,7 +432,7 @@ Function:1($a,
    ";; A multiline command.
 Copy ;\\
     $source ;\\
-    $desintation ;\\
+    $destination ;\\
     /c /h /r /s
 Quit"))
 
@@ -445,7 +445,7 @@ Copy ;\\
     ;; The source directory.
     $source ;\\
     ;; The destination directory.
-    $desintation ;\\
+    $destination ;\\
     ;; Flags.
     /c /h /r /s
 Quit"))

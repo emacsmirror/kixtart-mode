@@ -1,14 +1,14 @@
 * Version 1.3.3 (????-??-??)
 
-An error will now be signalled when attempting to resolve an unknown
+An error will now be signaled when attempting to resolve an unknown
 KiXtart type ID to a type name.  Previously the type would have been
 presented as "nil".
 
-An error will now be signalled for unknown symbols set in the `final'
+An error will now be signaled for unknown symbols set in the `final'
 slot of documentation structures.  Previously an unknown symbol would
 have given the same behavior as setting the slot value to `t'.
 
-The default value of the customisation variable
+The default value of the customization variable
 `kixtart-which-function-default-name' is now set to nil.  This has
 been changed because the default string of `which-function-mode' was
 improved from "???" to "n/a" to appear less like an error.  The
@@ -21,7 +21,7 @@ Fixed compilation warnings when using the old version of ElDoc.
 Fixed ElDoc documentation lookup and the associated compilation
 warning for Emacs 27 and 28.
 
-Added customisation variable `kixtart-completion-case-fold' which
+Added customization variable `kixtart-completion-case-fold' which
 determines whether KiXtart completion matching is case-sensitive.
 
 The recommendation of using the external Cape package to combine
@@ -67,7 +67,7 @@ which are adjacent to other symbol characters retain the previous
 behavior of being classification as punctuation.  Font-lock rules will
 now only apply syntax highlighting to "?" characters which are
 classified as symbols to provide a visual indicator of the
-classification.  To restore the previous behaviour where all "?"
+classification.  To restore the previous behavior where all "?"
 characters are highlighted, it is possible to add an additional
 font-lock rule to cover this case:
 

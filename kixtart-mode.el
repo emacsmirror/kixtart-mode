@@ -427,7 +427,7 @@ comments."
            (eq (char-before) ?,)))))
 
 (defun kixtart--follows-eol-multiline-indicator-p ()
-  "Return a non-nil value when following a mutli-line indicator.
+  "Return a non-nil value when following a multi-line indicator.
 Being within a multi-line expression is indicated by the previous
 script line ending with the special comment \";\\\"."
   (save-excursion
@@ -546,7 +546,7 @@ return nil."
       ;; Ensure that searching forwards doesn't match the current position.
       (when (and forwards (looking-at-p (kixtart-rx command-function)))
         (forward-char 8))
-      ;; Search for the arg-th FUNCTION command in the given direction.
+      ;; Search for the argth FUNCTION command in the given direction.
       (while (and (not (zerop arg))
                   (funcall search-fn (kixtart-rx command-function) nil t)
                   (or (kixtart--in-comment-or-string-p)
@@ -627,7 +627,7 @@ of point is modified."
                   ;; script-block open.
                   (`(nil . ,_))
                   ;; Always match an opening "SELECT" to allow anything
-                  ;; preceeding the first "CASE" block to align with the
+                  ;; preceding the first "CASE" block to align with the
                   ;; "SELECT" block.
                   (`(kixtart-select-t . ,_))
                   ;; Avoid further pattern matches for a script-block open

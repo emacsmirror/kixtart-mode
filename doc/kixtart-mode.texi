@@ -345,7 +345,7 @@ default.  If @code{repeat-mode} is active the command may be repeated
 through the use of the repeat-map binding @kbd{u}.
 
 When point is moved by using @code{kixtart-up-script-block}, the value
-of the customisation variable @code{kixtart-block-motion-push-mark}
+of the customization variable @code{kixtart-block-motion-push-mark}
 determines whether the mark ring is modified.  By default, the
 previous position will be pushed to the mark ring.
 
@@ -759,7 +759,7 @@ interface.
 The value of this variable should be a function which accepts a single
 argument, which is the string of the completion candidate to be
 annotated.  The return value should be the string to use as an
-annonation or @code{nil} to indicate that no annonation should be
+annotation or @code{nil} to indicate that no annotation should be
 added.
 @end defopt
 
