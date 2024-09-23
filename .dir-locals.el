@@ -1,7 +1,8 @@
 ;;; Directory Local Variables            -*- no-byte-compile: t -*-
 ;;; For more information see (info "(emacs) Directory Variables")
 
-((autoconf-mode . ((fill-column . 80)))
+((nil . ((ispell-local-dictionary . "en_US")))
+ (autoconf-mode . ((fill-column . 80)))
  (change-log-mode . ((mode . outline)
                      (fill-column . 70)))
  (emacs-lisp-mode . ((emacs-lisp-docstring-fill-column . 65)
