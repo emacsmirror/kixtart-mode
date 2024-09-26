@@ -129,6 +129,10 @@ displaying interpreter output as the current buffer, before the
 interpreter process is started."
   :type 'hook)
 
+(defcustom kixtart-imenu-submenu-prefix "/"
+  "Specifies the string prefix used for Imenu submenu names."
+  :type 'string)
+
 (defcustom kixtart-indent-offset 4
   "Specifies the indentation offset applied by `kixtart-indent-line'.
 Lines determined to be within script-blocks are indented by this
@@ -1099,7 +1103,8 @@ added into a submenu."
                  (when-let ((name (kixtart--current-defun)))
                    (push (cons name (point)) index)))))
         (when labels
-          (push (cons "/Labels" labels) index))
+          (push (cons (concat kixtart-imenu-submenu-prefix "Labels") labels)
+                index))
         index))))
 
 ;;;; Outline mode
