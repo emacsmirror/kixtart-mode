@@ -31,7 +31,6 @@
 ;;; Code:
 
 (require 'etags)
-(require 'imenu)
 (require 'tempo)
 (eval-when-compile
   (require 'cl-lib)
