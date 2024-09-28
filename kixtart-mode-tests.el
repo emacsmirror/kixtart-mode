@@ -59,7 +59,9 @@ BUFFER-CONTENTS is equal to ALIST."
   (declare (indent 1))
   `(kixtart-mode-tests--with-temp-buffer
        ,buffer-contents
-     (should (equal ,@alist (kixtart--create-imenu-index)))))
+     (should (equal ,@alist
+                    (let (kixtart-imenu-submenu-prefix)
+                      (kixtart--create-imenu-index))))))
 
 ;;;; Indentation for individual command blocks
 
@@ -749,10 +751,10 @@ The leading colon is removed from each label name."
 
   :three
 :four"
-    '(("/Labels" . (("one"   . 1)
-                    ("two"   . 6)
-                    ("three" . 14)
-                    ("four"  . 21))))))
+    '(("Labels" . (("one"   . 1)
+                   ("two"   . 6)
+                   ("three" . 14)
+                   ("four"  . 21))))))
 
 (ert-deftest kixtart-imenu-labels-ignoring-comments-and-strings ()
   "Labels are ignored in comments and strings."
@@ -761,7 +763,7 @@ The leading colon is removed from each label name."
 /*  :three
 
 :four*/"
-    '(("/Labels" . (("two" . 8))))))
+    '(("Labels" . (("two" . 8))))))
 
 ;;;; Docstring search
 
