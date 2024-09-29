@@ -33,8 +33,7 @@
 (require 'etags)
 (require 'tempo)
 (eval-when-compile
-  (require 'cl-lib)
-  (require 'rx))
+  (require 'cl-lib))
 
 ;;;; Customization
 
