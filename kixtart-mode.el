@@ -1274,10 +1274,10 @@ which will be expanded to the template."
     ;; Add ' for string-quotes.
     (modify-syntax-entry ?' "\"" table)
     ;; Set line comment start and end.
-    (modify-syntax-entry ?\; "\<" table)
+    (modify-syntax-entry ?\; "<" table)
     (modify-syntax-entry ?\n ">" table)
     ;; Set block comment open and close.  Nesting is not supported.
-    (modify-syntax-entry ?\/ ". 14b" table)
+    (modify-syntax-entry ?/ ". 14b" table)
     (modify-syntax-entry ?* ". 23b" table)
     ;; Set punctuation.  The numeric operators * / ^ and ~ are already set.
     (modify-syntax-entry ?& "." table)
