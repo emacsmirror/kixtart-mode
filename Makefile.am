@@ -13,14 +13,14 @@ AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
 EXTRA_DIST = doc/README.texi
 
 README: doc/README.texi doc/example-configuration.texi doc/features.texi doc/installation.texi doc/version.texi
-	$(MAKEINFO) \
+	$(AM_V_GEN)$(MAKEINFO) \
 	    --set-customization-variable ASCII_PUNCTUATION=1 \
 	    --plaintext \
 	    --output=$@ \
 	    $(srcdir)/doc/README.texi
 
 check: kixtart-mode-tests.elc
-	$(EMACS) --batch --quick \
+	$(AM_V_at)$(EMACS) --batch --quick \
 	    --directory . \
 	    --load kixtart-mode-tests.elc \
 	    --funcall ert-run-tests-batch-and-exit
