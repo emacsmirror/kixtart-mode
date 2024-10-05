@@ -21,6 +21,17 @@ The string BUFFER-CONTENTS is inserted into the buffer before
      (insert ,buffer-contents)
      ,@body))
 
+(defmacro kixtart-mode-tests--buffer-changes (before after &rest body)
+  "Test a buffer change within a temporary KiXtart mode buffer.
+The string BEFORE is inserted into a temporary buffer before BODY
+is evaluated.  The test succeeds if the new buffer contents are
+now equal to the string AFTER."
+  (declare (indent 2))
+  `(kixtart-mode-tests--with-temp-buffer
+       ,before
+     ,@body
+     (should (equal (buffer-string) ,after))))
+
 (defmacro kixtart-mode-tests--test-indentation (buffer-contents &optional result)
   "Test indentation within a temporary KiXtart mode buffer.
 The string BUFFER-CONTENTS is inserted into a temporary buffer
@@ -464,6 +475,51 @@ $a ;; Not special. \\
 $b ;; Special. ;\\
     $c
 $d"))
+
+;;;; Electric layout
+
+(ert-deftest kixtart-electric-layout-eol ()
+  "Insert a newline after the special multiline comment."
+  (skip-unless (boundp 'electric-layout-allow-in-comment-or-string))
+  (kixtart-mode-tests--buffer-changes
+      ";"
+      ";\\\n"
+    (electric-layout-local-mode)
+    (self-insert-command 1 ?\\)))
+
+(ert-deftest kixtart-electric-layout-eol-inline-comment ()
+  "The special comment doesn't have to open the comment."
+  (skip-unless (boundp 'electric-layout-allow-in-comment-or-string))
+  (kixtart-mode-tests--buffer-changes
+      "; ;"
+      "; ;\\\n"
+    (electric-layout-local-mode)
+    (self-insert-command 1 ?\\)))
+
+(ert-deftest kixtart-electric-layout-eol-ignore-block-comment ()
+  "Ignore the special comment in a block comment."
+  (kixtart-mode-tests--buffer-changes
+      "/* ;"
+      "/* ;\\"
+    (electric-layout-local-mode)
+    (self-insert-command 1 ?\\)))
+
+(ert-deftest kixtart-electric-layout-eol-ignore-string ()
+  "Ignore the multiline indicator characters in a string."
+  (kixtart-mode-tests--buffer-changes
+      "\";"
+      "\";\\"
+    (electric-layout-local-mode)
+    (self-insert-command 1 ?\\)))
+
+(ert-deftest kixtart-electric-layout-eol-ignore-noneol ()
+  "Unless at line end, ignore the multiline indicator characters."
+  (kixtart-mode-tests--buffer-changes
+      "; "
+      ";\\ "
+    (electric-layout-local-mode)
+    (goto-char 2)
+    (self-insert-command 1 ?\\)))
 
 ;;;; Beginning of defun
 

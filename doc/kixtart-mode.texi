@@ -289,6 +289,10 @@ COPY $source ;\
     @point{}
 @end example
 
+The newline following the special comment @samp{;\} will automatically
+be inserted if @code{electric-layout-mode} supports inserting newlines
+into comments and is enabled in the current buffer.
+
 
 @node Motion commands
 @chapter Motion commands

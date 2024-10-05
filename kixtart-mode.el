@@ -442,6 +442,11 @@ script line ending with the special comment \";\\\"."
                             (line-end-position)
                             t))))
 
+(defun kixtart--in-comment-line-p (&optional ppss)
+  "Return a non-nil value when inside a single comment line.
+Prefer existing parser state PPSS over calling `syntax-ppss'."
+  (null (nth 7 (or ppss (syntax-ppss)))))
+
 (defun kixtart--start-of-comment-or-string (&optional ppss)
   "Return the starting position of the comment or string at point.
 Return nil when point is outside of a comment or string.  Prefer
@@ -450,6 +455,15 @@ existing parser state PPSS over calling `syntax-ppss'."
 
 (defalias 'kixtart--in-comment-or-string-p #'kixtart--start-of-comment-or-string
   "Return a non-nil value when inside a comment or string.")
+
+(defun kixtart--string-terminator (&optional ppss)
+  "Return the termination character for the string at point.
+Return nil when point is outside of a string.  Prefer existing
+parser state PPSS over calling `syntax-ppss'."
+  (nth 3 (or ppss (syntax-ppss))))
+
+(defalias 'kixtart--in-string-p #'kixtart--string-terminator
+  "Return a non-nil value when inside a string.")
 
 (defun kixtart--thing-at-point (thing &optional no-properties)
   "Return the THING at point.
@@ -670,6 +684,20 @@ new indentation column."
           (indent-line-to new-indent))
         (when goto-indentation
           (back-to-indentation))))))
+
+;;;; Electric layout
+
+(defun kixtart--electric-layout-eol ()
+  "Return how to insert a newline using `electric-layout-mode'.
+It is assumed that this function will be called immediately after
+the \"\\\" character has been typed by the user, with the newline
+being inserted if the end of the line now appears to be the
+special comment which indicates a multiline expression."
+  (and (looking-back (kixtart-rx multiline-indicator) (- (point) 2))
+       (let ((ppss (syntax-ppss)))
+         (and (not (kixtart--in-string-p ppss))
+              (kixtart--in-comment-line-p ppss)
+              'after))))
 
 ;;;; Code evaluation
 
@@ -1342,6 +1370,10 @@ which will be expanded to the template."
                #'kixtart--font-lock-extend-region-function-def t)
   (add-to-list 'syntax-propertize-extend-region-functions
                #'syntax-propertize-wholelines)
+  (when (boundp 'electric-layout-allow-in-comment-or-string)
+    (setq-local electric-layout-allow-in-comment-or-string t)
+    (setq-local electric-layout-rules `((?\\
+                                         . ,#'kixtart--electric-layout-eol))))
   (when kixtart-doc-list
     (add-hook 'eldoc-documentation-functions #'kixtart-eldoc-function nil t)))
 
