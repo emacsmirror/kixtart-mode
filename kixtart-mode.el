@@ -5,7 +5,7 @@
 ;; Author: Morgan Willcock <morgan@ice9.digital>
 ;; Keywords: languages
 ;; Maintainer: Morgan Willcock <morgan@ice9.digital>
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Requires: ((emacs "27.1") (eldoc "1.14.0"))
 ;; URL: https://git.sr.ht/~mew/kixtart-mode
 ;; Version: 1.3.2
 
