@@ -281,6 +281,8 @@ function will only be determined by `which-function-mode'."
              (seq symbol-start "endfunction" symbol-end))
             (command-function
              (seq symbol-start "function" symbol-end))
+            (command-global
+             (seq symbol-start "global" symbol-end))
             (dot-property
              ;; Assume that object properties cannot start with a number, which
              ;; is probably true and prevents matching floating point numbers.
@@ -540,6 +542,40 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
        :position (point)
        :token block-start
        :token-string token-string))))
+
+;;;; Expression parser
+
+(defun kixtart--parse-declared-variables ()
+  "Return an alist of variables names and their buffer positions.
+Assume that point is on the first character of a command which
+declares variables."
+  (save-excursion
+    (forward-sexp)
+    (let (vars)
+      (condition-case nil
+          (while (and (progn
+                        (forward-comment (point-max))
+                        (looking-at (kixtart-rx variable)))
+                      (progn
+                        ;; Move over this variable.
+                        (goto-char (match-end 0))
+                        ;; Move over an array specification.  This does not
+                        ;; check that the specification is actually valid.
+                        (when (eq (char-after) ?\[)
+                          (forward-sexp))
+                        ;; Store the variable if there was no was no scan error
+                        ;; from trying to move across the [ ] pair of an array
+                        ;; specification.
+                        (push (cons (match-string-no-properties 0)
+                                    (match-beginning 0))
+                              vars)
+                        (forward-comment (point-max))
+                        ;; Match a comma, which indicates that there are
+                        ;; additional variables being defined.
+                        (and (eq (char-after) ?,)
+                             (progn (forward-char) t)))))
+        (scan-error))
+      (nreverse vars))))
 
 ;;;; Motion
 
@@ -1115,19 +1151,26 @@ added into a submenu."
     (save-restriction
       (widen)
       (goto-char (point-max))
-      (let (labels index)
+      (let (globals index labels)
         (while (re-search-backward
-                (kixtart-rx (or command-function label)) nil t)
+                (kixtart-rx (or command-function command-global label)) nil t)
           (cond ((kixtart--in-comment-or-string-p))
                 ((eq (char-after) ?:)
                  ;; Add label names.
                  (push (cons (substring (match-string-no-properties 0) 1)
                              (point))
                        labels))
+                ((looking-at-p (kixtart-rx command-global))
+                 ;; Add global variable declarations.
+                 (when-let ((vars (kixtart--parse-declared-variables)))
+                   (setq globals (nconc globals vars))))
                 (t
                  ;; Add function names.
                  (when-let ((name (kixtart--current-defun)))
                    (push (cons name (point)) index)))))
+        (when globals
+          (push (cons (concat kixtart-imenu-submenu-prefix "Globals") globals)
+                index))
         (when labels
           (push (cons (concat kixtart-imenu-submenu-prefix "Labels") labels)
                 index))

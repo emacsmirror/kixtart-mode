@@ -767,6 +767,102 @@ IF $maybe
 "
     "ELSE" "ENDIF"))
 
+;;;; Expression parser
+
+(ert-deftest kixtart-parse-variable-definition ()
+  "Parse a single variable definition."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A
+"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8))))))
+
+(ert-deftest kixtart-parse-variable-definition-eob ()
+  "Parse a single variable definition.
+The definition ends at the end of the buffer."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8))))))
+
+(ert-deftest kixtart-parse-variable-definitions ()
+  "Parse multiple variable definitions."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A, $B
+"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8) ("$B" . 12))))))
+
+(ert-deftest kixtart-parse-variable-definitions-eob ()
+  "Parse multiple variable definitions.
+The definitions ends at the end of the buffer."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A, $B"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8) ("$B" . 12))))))
+
+(ert-deftest kixtart-parse-variable-definitions-ignore-array-size ()
+  "Parse multiple variable definitions ignoring array sizes."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A[10], $B[2, 3], $C[], $D[22, 33, 44]"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8) ("$B" . 16) ("$C" . 26) ("$D" . 32))))))
+
+(ert-deftest kixtart-parse-variable-definitions-ignore-array-size-unbalanced ()
+  "Parse multiple variable definitions ignoring array sizes.
+Stop at unbalanced [] pair and ignore the preceding variable."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A[10], $B[2, 3], $C[, $D[22, 33, 44]"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8) ("$B" . 16))))))
+
+(ert-deftest kixtart-parse-variable-definitions-multiline ()
+  "Parse multiple multiline variable definitions."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A,
+$B
+"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8) ("$B" . 12))))))
+
+(ert-deftest kixtart-parse-variable-definitions-multiline-eob ()
+  "Parse a multiple multiline variable definitions.
+The definitions ends at the end of the buffer."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A,
+$B"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8) ("$B" . 12))))))
+
+(ert-deftest kixtart-parse-variable-incomplete-definitions-multiline ()
+  "Parse multiple multiline variable definitions.
+The definitions end in a trailing comma."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A,
+$B,
+"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8) ("$B" . 12))))))
+
+(ert-deftest kixtart-parse-variable-incomplete-definitions-multiline-eob ()
+  "Parse a multiple multiline variable definitions.
+The definitions end in a trailing comma at the end of the buffer."
+  (kixtart-mode-tests--with-temp-buffer
+      "global $A,
+$B,"
+    (goto-char (point-min))
+    (should (equal (kixtart--parse-declared-variables)
+                   '(("$A" . 8) ("$B" . 12))))))
+
 ;;;; Imenu index entries
 
 (ert-deftest kixtart-imenu-functions ()
@@ -820,6 +916,26 @@ The leading colon is removed from each label name."
 
 :four*/"
     '(("Labels" . (("two" . 8))))))
+
+(ert-deftest kixtart-imenu-globals ()
+  "Global variable names appear in a sub-menu of the index."
+  (kixtart-mode-tests--test-imenu-index
+      "global $A, $B,
+$C, $D
+"
+    '(("Globals" . (("$A" . 8)
+                    ("$B" . 12)
+                    ("$C" . 16)
+                    ("$D" . 20))))))
+
+(ert-deftest kixtart-imenu-globals-ignoring-comments-and-strings ()
+  "Global variable names are ignored in comments and strings."
+  (kixtart-mode-tests--test-imenu-index
+      "\"global $A,\" global $B
+/*  global $C,
+
+$D*/"
+    '(("Globals" . (("$B" . 21))))))
 
 ;;;; Docstring search
 

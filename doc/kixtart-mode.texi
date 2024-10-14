@@ -370,12 +370,12 @@ See also: @ref{Imenu support} and @ref{Outline Mode support}.
 
 The @code{imenu} command provides code indexing and navigation options
 which allow point to jump to indexed buffer positions.  The
-@code{imenu} menu is presented as a list of completions which contains
-the names of all defined functions, as well as a single submenu entry
-which lists all defined label names.  By default, the submenu name is
-prefixed with the @samp{/} character to make reaching the submenu
-easier when using the default Emacs completion interface (the @samp{/}
-character is not valid as part of a function name).  To use a
+@code{imenu} menu lists the names of all defined functions as
+top-level items, along with submenu entries which list all defined
+label names and all defined global variables.  By default, the submenu
+names are prefixed with the @samp{/} character to make reaching the
+submenu easier when using the default Emacs completion interface (the
+@samp{/} character is not valid as part of a function name).  To use a
 different submenu prefix or to remove it entirely, configure the
 customization variable @code{kixtart-imenu-submenu-prefix}.
 
