@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; Support for editing KiXtart script scripts.
+;; Support for editing KiXtart scripts.
 
 ;; See the manual for configuration examples and instructions.
 
