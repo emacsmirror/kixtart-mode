@@ -33,7 +33,10 @@
 (require 'etags)
 (require 'tempo)
 (eval-when-compile
-  (require 'cl-lib))
+  (require 'cl-lib)
+  ;; For `when-let*' and `and-let*' in Emacs 27 and 28.
+  (when (< emacs-major-version 29)
+    (require 'subr-x)))
 
 ;;;; Customization
 
@@ -505,7 +508,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
   "Scan backwards and return the current block state."
   (save-excursion
     ;; Move out of strings and comments.
-    (when-let ((start (kixtart--start-of-comment-or-string)))
+    (when-let* ((start (kixtart--start-of-comment-or-string)))
       (goto-char start))
     ;; Search backwards matching pairs of script-block defining keyword tokens.
     (let ((parse-sexp-ignore-comments t)
@@ -818,7 +821,7 @@ evaluate the entire buffer."
                 (_ close-list))))
       (unless kixtart--close-command-strings
         (message "No open command block to close.")))
-    (when-let ((close-command (car kixtart--close-command-strings)))
+    (when-let* ((close-command (car kixtart--close-command-strings)))
       (insert close-command))
     (unless (eq tick (buffer-chars-modified-tick))
       (funcall indent-line-function))))
@@ -1066,7 +1069,7 @@ functions listed in the abnormal hook
 documentation structures."
   (save-excursion
     ;; Move out of comments and strings.
-    (when-let ((start (kixtart--start-of-comment-or-string)))
+    (when-let* ((start (kixtart--start-of-comment-or-string)))
       (goto-char start))
     (run-hook-with-args-until-success 'kixtart-doc-search-functions)))
 
@@ -1161,11 +1164,11 @@ added into a submenu."
                        labels))
                 ((looking-at-p (kixtart-rx command-global))
                  ;; Add global variable declarations.
-                 (when-let ((vars (kixtart--parse-declared-variables)))
+                 (when-let* ((vars (kixtart--parse-declared-variables)))
                    (setq globals (nconc globals vars))))
                 (t
                  ;; Add function names.
-                 (when-let ((name (kixtart--current-defun)))
+                 (when-let* ((name (kixtart--current-defun)))
                    (push (cons name (point)) index)))))
         (when globals
           (push (cons (concat kixtart-imenu-submenu-prefix "Globals") globals)
