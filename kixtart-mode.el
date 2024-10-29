@@ -359,16 +359,15 @@ function."
               (forward-comment (point-max))
               (and (looking-at (kixtart-rx function-name))
                    (match-end 0))))
-    (let (changed)
-      (when (before-name font-lock-beg)
-        (when-let ((func-beg (after-func font-lock-beg)))
-          (setq font-lock-beg func-beg)
-          (setq changed t)))
-      (when (after-func font-lock-end)
-        (when-let ((name-end (before-name font-lock-end)))
-          (setq font-lock-end name-end)
-          (setq changed t)))
-      changed)))
+    (let ((new-beg (and (before-name font-lock-beg)
+                        (after-func font-lock-beg)))
+          (new-end (and (after-func font-lock-end)
+                        (before-name font-lock-end))))
+      (when new-beg
+        (setq font-lock-beg new-beg))
+      (when new-end
+        (setq font-lock-end new-end))
+      (or new-beg new-end))))
 
 (defconst kixtart-font-lock-keywords-1
   `((,(rx symbol-start
