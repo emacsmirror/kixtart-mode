@@ -10,7 +10,7 @@ info_TEXINFOS = doc/kixtart-mode.texi
 doc_kixtart_mode_TEXINFOS = doc/doclicense.texi doc/example-configuration.texi doc/features.texi doc/installation.texi
 
 AM_MAKEINFOHTMLFLAGS = --no-headers --no-split
-EXTRA_DIST = doc/README.texi
+EXTRA_DIST = doc/README.texi resources/font-lock-level-1.kix resources/font-lock-level-2.kix resources/font-lock-level-3.kix
 
 README: doc/README.texi doc/example-configuration.texi doc/features.texi doc/installation.texi doc/version.texi
 	$(AM_V_GEN)$(MAKEINFO) \
