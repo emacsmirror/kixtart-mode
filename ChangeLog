@@ -1,4 +1,4 @@
-* Version 1.3.3 (????-??-??)
+* Version 1.3.3 (2024-11-01)
 
 An error will now be signaled when attempting to resolve an unknown
 KiXtart type ID to a type name.  Previously the type would have been
