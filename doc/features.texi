@@ -9,7 +9,7 @@ Indentation based on the usage of commands and parentheses.
 @item
 Motion around and selection of defined functions.
 @item
-Imenu support for function and label names.
+Imenu support for function, global variable, and label names.
 @item
 ElDoc support for display of documentation.
 @item

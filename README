@@ -4,7 +4,7 @@ script files.  The following features are implemented:
    * Syntax highlighting for commands, functions, labels, and macros.
    * Indentation based on the usage of commands and parentheses.
    * Motion around and selection of defined functions.
-   * Imenu support for function and label names.
+   * Imenu support for function, global variable, and label names.
    * ElDoc support for display of documentation.
    * Completion for built-in syntax (commands, functions, and macros).
    * Code evaluation (requires KiXtart interpreter).
