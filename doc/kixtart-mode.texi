@@ -436,9 +436,9 @@ location (such as the buffer produced by the @code{eldoc} command).
 
 @defopt kixtart-eldoc-echo-truncate
 Specifies the amount of text which ElDoc should display in the echo
-area.  An integer value indicates that only the given number of
-characters will be displayed, otherwise a non-@code{nil} value
-specifies to only display the first paragraph.  A paragraph is
+area.  A non-negative integer value indicates that only the given
+number of characters will be displayed, otherwise a non-@code{nil}
+value specifies to only display the first paragraph.  A paragraph is
 determined to end at the position where a documentation string
 contains two new-line characters (i.e. at the starting position of the
 substring @samp{\n\n}).

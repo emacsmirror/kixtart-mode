@@ -1,3 +1,14 @@
+* Version 1.3.4 (????-??-??)
+
+The type for the customization variable `kixtart-eldoc-echo-truncate'
+is now set to natnum instead of integer.
+
+The type for the `position' slot of the `kixtart-block' structure is
+now set to natnum instead of integer.
+
+The type for the `type' slot of the `kixtart-doc-macro' structure is
+now set to natnum instead of integer.
+
 * Version 1.3.3 (2024-11-01)
 
 An error will now be signaled when attempting to resolve an unknown

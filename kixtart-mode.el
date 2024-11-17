@@ -95,14 +95,14 @@ structures compatible with the generic method
 
 (defcustom kixtart-eldoc-echo-truncate t
   "Specifies how `eldoc-mode' will use the echo area.
-An integer value indicates that text should be truncated after
-the given number of characters.  Any other non-nil value
+A postive integer value indicates that text should be truncated
+after the given number of characters.  Any other non-nil value
 indicates that text should be truncated at the first paragraph.
 
 Note that ElDoc version 1.14.0 or newer is required for this
 option to work correctly."
   :type '(choice (const :tag "Never" nil)
-                 (integer :tag "After number of characters")
+                 (natnum :tag "After number of characters")
                  (const :tag "At end of paragraph" t)))
 
 (defcustom kixtart-eval-buffer-name "*KiXtart Output*"
@@ -502,7 +502,8 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
   (in-parens nil :type boolean)
   (token nil :type symbol)
   (token-string nil :type string)
-  (position nil :type (integer 0 *)))
+  (position nil :type (natnum 0 *)))
+
 
 (defun kixtart--parse-block ()
   "Scan backwards and return the current block state."
@@ -904,7 +905,7 @@ When point is not within a function return the value of
                (:constructor kixtart-make-doc-macro)
                (:copier nil))
   (description nil :type string)
-  (type nil :type (integer 0 *)))
+  (type nil :type (natnum 0 *)))
 
 (cl-defgeneric kixtart-doc-accepts-argument-p (doc symbol)
   "Return non-nil when DOC reference for SYMBOL expects arguments.")
@@ -1081,7 +1082,7 @@ documentation structures."
        (funcall callback docstring
                 :thing (symbol-name thing)
                 :face (kixtart-doc-face (car docs))
-                :echo (or (and (integerp kixtart-eldoc-echo-truncate)
+                :echo (or (and (natnump kixtart-eldoc-echo-truncate)
                                kixtart-eldoc-echo-truncate)
                           (and kixtart-eldoc-echo-truncate
                                ;; The `string-search' function isn't available
