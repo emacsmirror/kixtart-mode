@@ -22,6 +22,9 @@ basic settings, and enable some optional features:
 ;; table when outside of comments and strings.
 (setq kixtart-abbrev-table-enabled t)
 
+;; Enable `electric-layout-mode' by default.
+(add-hook 'kixtart-mode-hook #'electric-layout-local-mode)
+
 ;; Default to using the dos coding system (ASCII character set and
 ;; CRLF line endings) for file names with a .kix extension.
 (add-to-list 'file-coding-system-alist (cons "\\.kix\\'" 'dos))
