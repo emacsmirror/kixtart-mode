@@ -13,6 +13,7 @@
 
 (defmacro kixtart-mode-tests--with-temp-buffer (buffer-contents &rest body)
   "Evaluate BODY in a temporary KiXtart mode buffer.
+
 The string BUFFER-CONTENTS is inserted into the buffer before
  evaluation."
   (declare (indent 1))
@@ -23,6 +24,7 @@ The string BUFFER-CONTENTS is inserted into the buffer before
 
 (defmacro kixtart-mode-tests--buffer-changes (before after &rest body)
   "Test a buffer change within a temporary KiXtart mode buffer.
+
 The string BEFORE is inserted into a temporary buffer before BODY
 is evaluated.  The test succeeds if the new buffer contents are
 now equal to the string AFTER."
@@ -34,6 +36,7 @@ now equal to the string AFTER."
 
 (defmacro kixtart-mode-tests--test-indentation (buffer-contents &optional result)
   "Test indentation within a temporary KiXtart mode buffer.
+
 The string BUFFER-CONTENTS is inserted into a temporary buffer
 which will be re-indented.  The test succeeds when buffer
 contents were unaltered or are now equal to the optional RESULT."
@@ -45,6 +48,7 @@ contents were unaltered or are now equal to the optional RESULT."
 
 (defmacro kixtart-mode-tests--test-block-close (buffer-contents &rest strings)
   "Test block closing within a temporary KiXtart mode buffer.
+
 The string BUFFER-CONTENTS should define an open block which will
 be closed by cycling through the insertion of STRINGS."
   (declare (indent 1))
@@ -65,6 +69,7 @@ be closed by cycling through the insertion of STRINGS."
 
 (defmacro kixtart-mode-tests--test-imenu-index (buffer-contents &rest alist)
   "Test Imenu index creation within a temporary KiXtart mode buffer.
+
 Check whether the Imenu alist which is generated for
 BUFFER-CONTENTS is equal to ALIST."
   (declare (indent 1))
@@ -451,6 +456,7 @@ Quit"))
 
 (ert-deftest kixtart-multiline-indicator-with-comments ()
   "Indentation is increased by the special multiline comment.
+
 Comments persist the indentation level."
   (kixtart-mode-tests--test-indentation
    ";\\
@@ -465,6 +471,7 @@ Quit"))
 
 (ert-deftest kixtart-multiline-indicator-script-line-only ()
   "Indentation is increased by the special multiline comment.
+
 The special multiline comment is only valid and persisted from
 the end of most recent line which contains uncommented KiXtart
 syntax."
@@ -780,6 +787,7 @@ IF $maybe
 
 (ert-deftest kixtart-parse-variable-definition-eob ()
   "Parse a single variable definition.
+
 The definition ends at the end of the buffer."
   (kixtart-mode-tests--with-temp-buffer
       "global $A"
@@ -798,6 +806,7 @@ The definition ends at the end of the buffer."
 
 (ert-deftest kixtart-parse-variable-definitions-eob ()
   "Parse multiple variable definitions.
+
 The definitions ends at the end of the buffer."
   (kixtart-mode-tests--with-temp-buffer
       "global $A, $B"
@@ -815,6 +824,7 @@ The definitions ends at the end of the buffer."
 
 (ert-deftest kixtart-parse-variable-definitions-ignore-array-size-unbalanced ()
   "Parse multiple variable definitions ignoring array sizes.
+
 Stop at unbalanced [] pair and ignore the preceding variable."
   (kixtart-mode-tests--with-temp-buffer
       "global $A[10], $B[2, 3], $C[, $D[22, 33, 44]"
@@ -834,6 +844,7 @@ $B
 
 (ert-deftest kixtart-parse-variable-definitions-multiline-eob ()
   "Parse a multiple multiline variable definitions.
+
 The definitions ends at the end of the buffer."
   (kixtart-mode-tests--with-temp-buffer
       "global $A,
@@ -844,6 +855,7 @@ $B"
 
 (ert-deftest kixtart-parse-variable-incomplete-definitions-multiline ()
   "Parse multiple multiline variable definitions.
+
 The definitions end in a trailing comma."
   (kixtart-mode-tests--with-temp-buffer
       "global $A,
@@ -855,6 +867,7 @@ $B,
 
 (ert-deftest kixtart-parse-variable-incomplete-definitions-multiline-eob ()
   "Parse a multiple multiline variable definitions.
+
 The definitions end in a trailing comma at the end of the buffer."
   (kixtart-mode-tests--with-temp-buffer
       "global $A,
@@ -897,6 +910,7 @@ EndFunction"
 
 (ert-deftest kixtart-imenu-labels ()
   "Label names appear in a sub-menu of the index.
+
 The leading colon is removed from each label name."
   (kixtart-mode-tests--test-imenu-index
       ":one :two
@@ -978,6 +992,7 @@ CLOSE
 
 (ert-deftest kixtart-doc-search-before-point-final-t ()
   "Return the structure for the symbol before point.
+
 Ignore all symbols as all are consider \"final\"."
   (kixtart-mode-tests--with-temp-buffer
       "OPEN
@@ -999,6 +1014,7 @@ CLOSE
 
 (ert-deftest kixtart-doc-search-before-point-final-first ()
   "Return the structure for the symbol before point.
+
 Ignore the first symbol which is considered \"final\"."
   (kixtart-mode-tests--with-temp-buffer
       "OPEN
@@ -1020,6 +1036,7 @@ CLOSE
 
 (ert-deftest kixtart-doc-search-before-point-final-last ()
   "Return the structure for the symbol before point.
+
 Ignore the last symbol which is considered \"final\"."
   (kixtart-mode-tests--with-temp-buffer
       "OPEN
@@ -1041,6 +1058,7 @@ CLOSE
 
 (ert-deftest kixtart-doc-search-before-point-final-list ()
   "Return the structure for the symbol before point.
+
 Ignore the last symbol which is considered \"final\"."
   (kixtart-mode-tests--with-temp-buffer
       "OPEN
@@ -1062,6 +1080,7 @@ CLOSE
 
 (ert-deftest kixtart-doc-search-in-function-args ()
   "Return the structure for the current function.
+
 Only search backwards when inside parentheses."
   (kixtart-mode-tests--with-temp-buffer
       "FUNCTION (
@@ -1081,6 +1100,7 @@ Only search backwards when inside parentheses."
 
 (ert-deftest kixtart-doc-search-command-line ()
   "Return the structure for command on this line.
+
 Do not return a match when point within the current indentation."
   (kixtart-mode-tests--with-temp-buffer
       " COMMAND WITH ARGS "
@@ -1095,6 +1115,7 @@ Do not return a match when point within the current indentation."
 
 (ert-deftest kixtart-doc-search-command-line-ignore-for ()
   "Return the structure for command on this line.
+
 Ignore \"FOR\" since the match is ambiguous."
   (kixtart-mode-tests--with-temp-buffer
       " FOR "

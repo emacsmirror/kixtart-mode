@@ -49,12 +49,14 @@
 
 (defcustom kixtart-abbrev-table-enabled nil
   "Specifies whether KiXtart abbrev expansion is enabled.
+
 A non-nil value indicates that `kixtart-mode-abbrev-table' should
 be used as part of abbrev expansion."
   :type 'boolean)
 
 (defcustom kixtart-block-motion-push-mark t
   "Specifies whether block motion will push to the `mark-ring'.
+
 A non-nil value indicates that block motion commands are
 permitted to push the previous location to the `mark-ring' when
 the value of point changes."
@@ -73,6 +75,7 @@ the value of point changes."
   (list #'kixtart-completion-upcase-macros
         #'kixtart-completion-add-crlf-commands)
   "A hook which is called during symbol completion.
+
 At the time that the hook functions are called, the value of
 `kixtart-completion-list' contains the current list of completion
 keywords, and `kixtart-completion-input' contains a copy of the
@@ -86,6 +89,7 @@ to modify both values."
         #'kixtart-doc-search-in-function-args
         #'kixtart-doc-search-command-line)
   "Abnormal hook for functions which return documentation.
+
 Each function is called in sequence until one returns a non-nil
 value, which should be a cons cell containing the upper-case form
 of the symbol which was matched and a list of documentation
@@ -95,6 +99,7 @@ structures compatible with the generic method
 
 (defcustom kixtart-eldoc-echo-truncate t
   "Specifies how `eldoc-mode' will use the echo area.
+
 A postive integer value indicates that text should be truncated
 after the given number of characters.  Any other non-nil value
 indicates that text should be truncated at the first paragraph.
@@ -111,12 +116,14 @@ option to work correctly."
 
 (defcustom kixtart-eval-extra-args nil
   "Specifies additional interpreter arguments.
+
 The value should be a list of strings which will be used as
 additional arguments for the KiXtart interpreter."
   :type '(repeat string))
 
 (defcustom kixtart-eval-header "$ = SetOption(\"ASCII\", \"ON\")\n"
   "Specifies a string which is included in evaluated code.
+
 The string value is inserted at the beginning of any scripts
 which are sent to the KiXtart interpreter.  Note that the script
 which is being executed will need to set the \"ASCII\" option to
@@ -125,6 +132,7 @@ which is being executed will need to set the \"ASCII\" option to
 
 (defcustom kixtart-eval-hook (list #'kixtart-scroll-buffer-windows)
   "A hook which is called during code evaluation.
+
 The hook functions will be called with the buffer used for
 displaying interpreter output as the current buffer, before the
 interpreter process is started."
@@ -136,6 +144,7 @@ interpreter process is started."
 
 (defcustom kixtart-indent-offset 4
   "Specifies the indentation offset applied by `kixtart-indent-line'.
+
 Lines determined to be within script-blocks are indented by this
 number of columns per script-block level."
   :type 'integer)
@@ -153,6 +162,7 @@ number of columns per script-block level."
 
 (defcustom kixtart-which-function-default-name nil
   "Specifies the default function name for `which-function-mode'.
+
 This value is provided to `which-function-mode' as the current
 function name when point is outside of a function.  When the
 value is set to nil, the name used when point is outside of a
@@ -348,6 +358,7 @@ function will only be determined by `which-function-mode'."
 
 (defun kixtart--font-lock-extend-region-function-def ()
   "Move fontification boundaries to include function keyword and name.
+
 It is assumed that this function is added into the
 `font-lock-extend-region-functions' list in a position where it
 will be called after the `font-lock-extend-region-wholelines'
@@ -378,6 +389,7 @@ function."
           symbol-end)
      . kixtart-command-face))
   "Font lock keywords for level 1 highlighting in KiXtart mode.
+
 Highlights the KiXtart commands used for function declarations
 and for calling or including other scripts.")
 
@@ -391,6 +403,7 @@ and for calling or including other scripts.")
     ;; Unknown macros will always evaluate to 0.
     (,(kixtart-rx macro-format) . kixtart-warning-face))
   "Font lock keywords for level 2 highlighting in KiXtart mode.
+
 Highlights all internal KiXtart commands, functions, and macros.")
 
 (defconst kixtart-font-lock-keywords-3
@@ -412,6 +425,7 @@ Highlights all internal KiXtart commands, functions, and macros.")
        (0 kixtart-function-name-face))))
    kixtart-font-lock-keywords-2)
   "Font lock keywords for level 3 highlighting in KiXtart mode.
+
 Highlights all internal KiXtart commands, functions, and macros,
 as well as user-defined or external names.")
 
@@ -422,6 +436,7 @@ as well as user-defined or external names.")
 
 (defun kixtart--follows-eol-multiline-separator-p ()
   "Return a non-nil value when the current line begins mid-list.
+
 Being within a list is determined by the previous script line
 ending in a \",\" character, ignoring any trailing white-space or
 comments."
@@ -434,6 +449,7 @@ comments."
 
 (defun kixtart--follows-eol-multiline-indicator-p ()
   "Return a non-nil value when following a multi-line indicator.
+
 Being within a multi-line expression is indicated by the previous
 script line ending with the special comment \";\\\"."
   (save-excursion
@@ -448,11 +464,13 @@ script line ending with the special comment \";\\\"."
 
 (defun kixtart--in-comment-line-p (&optional ppss)
   "Return a non-nil value when inside a single comment line.
+
 Prefer existing parser state PPSS over calling `syntax-ppss'."
   (null (nth 7 (or ppss (syntax-ppss)))))
 
 (defun kixtart--start-of-comment-or-string (&optional ppss)
   "Return the starting position of the comment or string at point.
+
 Return nil when point is outside of a comment or string.  Prefer
 existing parser state PPSS over calling `syntax-ppss'."
   (nth 8 (or ppss (syntax-ppss))))
@@ -462,6 +480,7 @@ existing parser state PPSS over calling `syntax-ppss'."
 
 (defun kixtart--string-terminator (&optional ppss)
   "Return the termination character for the string at point.
+
 Return nil when point is outside of a string.  Prefer existing
 parser state PPSS over calling `syntax-ppss'."
   (nth 3 (or ppss (syntax-ppss))))
@@ -471,6 +490,7 @@ parser state PPSS over calling `syntax-ppss'."
 
 (defun kixtart--thing-at-point (thing &optional no-properties)
   "Return the THING at point.
+
 Consider the ? character to be self-delimiting.  When
 NO-PROPERTIES is non-nil, strip text properties from the return
 value."
@@ -486,6 +506,7 @@ value."
 
 (defun kixtart--paren-depth (&optional ppss)
   "Return the current parentheses depth.
+
 Prefer existing parser state PPSS over calling `syntax-ppss'."
   (car (or ppss (syntax-ppss))))
 
@@ -550,6 +571,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
 
 (defun kixtart--parse-declared-variables ()
   "Return an alist of variables names and their buffer positions.
+
 Assume that point is on the first character of a command which
 declares variables."
   (save-excursion
@@ -584,6 +606,7 @@ declares variables."
 
 (defun kixtart-beginning-of-defun (&optional arg)
   "Move backwards to the beginning of a function definition.
+
 With ARG, do it that many times.  Negative ARG means move
 forwards to the ARGth following beginning of defun.
 
@@ -624,6 +647,7 @@ return nil."
 
 (defun kixtart-up-script-block ()
   "Move point to the opening of the current script-block.
+
 Unless prevented by the value of `kixtart-block-motion-push-mark'
 the previous location is pushed to the `mark-ring' when the value
 of point is modified."
@@ -712,6 +736,7 @@ of point is modified."
 
 (defun kixtart-indent-line ()
   "Indent the current line to match the script-block level.
+
 When point is within the current indentation it will move to the
 new indentation column."
   (let ((new-indent (kixtart--new-indent))
@@ -728,6 +753,7 @@ new indentation column."
 
 (defun kixtart--electric-layout-eol ()
   "Return how to insert a newline using `electric-layout-mode'.
+
 It is assumed that this function will be called immediately after
 the \"\\\" character has been typed by the user, with the newline
 being inserted if the end of the line now appears to be the
@@ -763,6 +789,7 @@ special comment which indicates a multiline expression."
 
 (defun kixtart-eval-region-or-buffer ()
   "Evaluate a portion of the buffer in the KiXtart interpreter.
+
 When a region is active, evaluation that region, otherwise
 evaluate the entire buffer."
   (interactive)
@@ -841,6 +868,7 @@ evaluate the entire buffer."
 
 (defun kixtart--current-defun ()
   "Internal implementation of `kixtart-current-defun'.
+
 Return the function name which surrounds point.  When point is
 not within a function return nil.  It is assumed that this
 function is called with buffer restrictions removed."
@@ -865,6 +893,7 @@ function is called with buffer restrictions removed."
 
 (defun kixtart-current-defun ()
   "Return the function name which surrounds point.
+
 When point is not within a function return nil."
   (save-restriction
     (widen)
@@ -872,6 +901,7 @@ When point is not within a function return nil."
 
 (defun kixtart-which-function ()
   "Return the function name which surrounds point.
+
 When point is not within a function return the value of
 `kixtart-which-function-default-name'."
   (or (kixtart-current-defun) kixtart-which-function-default-name))
@@ -912,6 +942,7 @@ When point is not within a function return the value of
 
 (cl-defmethod kixtart-doc-accepts-argument-p ((doc kixtart-doc-symbol) symbol)
   "Return non-nil when DOC reference for SYMBOL expects arguments.
+
 DOC is a `kixtart-doc-symbol' structure."
   (not (pcase (kixtart-doc-symbol-final doc)
          ('last (eq (car (last (kixtart-doc-symbol-symbols doc))) symbol))
@@ -925,18 +956,21 @@ DOC is a `kixtart-doc-symbol' structure."
 
 (cl-defmethod kixtart-doc-face ((doc kixtart-doc-command))
   "Return the face used to present DOC.
+
 DOC is a `kixtart-doc-command' structure."
   (ignore doc)
   'kixtart-command-face)
 
 (cl-defmethod kixtart-doc-face ((doc kixtart-doc-function))
   "Return the face used to present DOC.
+
 DOC is a `kixtart-doc-function' structure."
   (ignore doc)
   'kixtart-function-face)
 
 (cl-defmethod kixtart-doc-face ((doc kixtart-doc-macro))
   "Return the face used to present DOC.
+
 DOC is a `kixtart-doc-macro' structure."
   (ignore doc)
   'kixtart-macro-face)
@@ -968,6 +1002,7 @@ DOC is a `kixtart-doc-macro' structure."
 
 (cl-defmethod kixtart-doc-string ((doc kixtart-doc-macro))
   "Return DOC as a string.
+
 DOC is a `kixtart-doc-macro' structure."
   (let ((description (kixtart-doc-macro-description doc))
         (type (kixtart-doc-macro-type doc)))
@@ -977,11 +1012,13 @@ DOC is a `kixtart-doc-macro' structure."
 
 (cl-defmethod kixtart-doc-string ((doc kixtart-doc-syntax))
   "Return DOC as a string.
+
 DOC is a `kixtart-doc-syntax' structure."
   (kixtart-doc-syntax-syntax doc))
 
 (defmacro kixtart-doc-register (constructor &rest specs)
   "Register documentation SPECS using CONSTRUCTOR.
+
 CONSTRUCTOR should be a function which returns a documentation
 structure.  Each form in SPECS should be a list, where the first
 element is a symbol or list of symbols to be passed to
@@ -1003,6 +1040,7 @@ in SPECS are passed as additional arguments to CONSTRUCTOR."
 
 (defun kixtart-doc-search-at-point (&optional predicate)
   "Match documentation structures using PREDICATE.
+
 If any matches are found, return a cons cell containing the
 upper-case form of the symbol at point and a list of matching
 documentation structures.  The structures are only matched if
@@ -1021,6 +1059,7 @@ as its arguments."
 
 (defun kixtart-doc-search-before-point ()
   "Match documentation structures in positions before point.
+
 This only considers functions and commands which take arguments."
   (save-excursion
     ;; Move backwards through white-space.
@@ -1031,6 +1070,7 @@ This only considers functions and commands which take arguments."
 
 (defun kixtart-doc-search-in-function-args ()
   "Match documentation structures for functions.
+
 This only considers functions which take arguments, and only
 when point appears to be within parentheses."
   (save-excursion
@@ -1048,6 +1088,7 @@ when point appears to be within parentheses."
 
 (defun kixtart-doc-search-command-line ()
   "Match documentation structures at the beginning of the line.
+
 This only consider commands which take arguments."
   (save-excursion
     ;; Move to indentation.
@@ -1062,6 +1103,7 @@ This only consider commands which take arguments."
 
 (defun kixtart-doc-search ()
   "Search for documentation structures.
+
 Matches are returned as a cons cell, where the first element is
 the upper-case form of the symbol which was matched, and the
 second element is the first non-nil result of calling the
@@ -1099,6 +1141,7 @@ documentation structures."
 
 (defun kixtart-completion-add-crlf-commands ()
   "Modify the completion list to match CRLF output commands.
+
 When the completion input string is a sequence of 2 or more \"?\"
 characters, add it to the front of the completion list to ensure
 there is a single match."
@@ -1107,6 +1150,7 @@ there is a single match."
 
 (defun kixtart-completion-include-tags ()
   "Append the current TAGS table to the completion list.
+
 Note that this function is not responsible for visiting or
 updating the TAGS file."
   (when (or tags-file-name tags-table-list)
@@ -1148,6 +1192,7 @@ updating the TAGS file."
 
 (defun kixtart--create-imenu-index ()
   "Build and return an index alist suitable for Imenu.
+
 Functions are added at the top level of the menu.  Labels are
 added into a submenu."
   (save-excursion
@@ -1200,6 +1245,7 @@ added into a submenu."
 
 (defun kixtart--tempo-insert-lookup (name template)
   "Optionally insert prompt data for NAME using TEMPLATE.
+
 The template is only returned if the data lookup for NAME does
 not return the empty string.  TEMPLATE will have its `p' symbols
 removed when template insertion is interactive."
@@ -1219,6 +1265,7 @@ removed when template insertion is interactive."
 
 (defmacro kixtart--define-template (tag documentation &rest elements)
   "Define a tempo template and add its tag to the abbrev table.
+
 TAG, DOCUMENTATION, and ELEMENTS are passed directly to
 `tempo-define-template'.  TAG is also used as the abbrev string
 which will be expanded to the template."
