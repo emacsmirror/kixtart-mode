@@ -4,6 +4,10 @@ Imenu index entries for global variable definitions now refer to the
 buffer position which begins the expression that defines the variable
 rather than the buffer position that defines the variable name.
 
+The generation of the Imenu index will now consider the customization
+variable `imenu-use-markers' and use markers instead of buffer
+positions when appropriate.
+
 * Version 1.3.4 (2024-12-10)
 
 The type for the customization variable `kixtart-eldoc-echo-truncate'

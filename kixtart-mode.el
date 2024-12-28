@@ -31,6 +31,7 @@
 ;;; Code:
 
 (require 'etags)
+(require 'imenu)
 (require 'tempo)
 (eval-when-compile
   (require 'cl-lib)
@@ -1190,6 +1191,14 @@ updating the TAGS file."
 
 ;;;; Imenu
 
+(defun kixtart--convert-imenu-item-to-markers (item)
+  "Modify ITEM to use markers instead of buffer positions."
+  (let ((data (cdr item)))
+    (setcdr item
+            (if (listp data)
+                (mapc #'kixtart--convert-imenu-item-to-markers data)
+              (copy-marker data t)))))
+
 (defun kixtart--create-imenu-index ()
   "Build and return an index alist suitable for Imenu.
 
@@ -1223,6 +1232,8 @@ added into a submenu."
         (when labels
           (push (cons (concat kixtart-imenu-submenu-prefix "Labels") labels)
                 index))
+        (when imenu-use-markers
+          (mapc #'kixtart--convert-imenu-item-to-markers index))
         index))))
 
 ;;;; Outline mode
