@@ -1211,6 +1211,7 @@ added into a submenu."
                 ((looking-at-p (kixtart-rx command-global))
                  ;; Add global variable declarations.
                  (when-let* ((vars (kixtart--parse-declared-variables)))
+                   (mapc (lambda (item) (setcdr item (point))) vars)
                    (setq globals (nconc globals vars))))
                 (t
                  ;; Add function names.

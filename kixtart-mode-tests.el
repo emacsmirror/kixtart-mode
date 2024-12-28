@@ -937,10 +937,10 @@ The leading colon is removed from each label name."
       "global $A, $B,
 $C, $D
 "
-    '(("Globals" . (("$A" . 8)
-                    ("$B" . 12)
-                    ("$C" . 16)
-                    ("$D" . 20))))))
+    '(("Globals" . (("$A" . 1)
+                    ("$B" . 1)
+                    ("$C" . 1)
+                    ("$D" . 1))))))
 
 (ert-deftest kixtart-imenu-globals-ignoring-comments-and-strings ()
   "Global variable names are ignored in comments and strings."
@@ -949,7 +949,7 @@ $C, $D
 /*  global $C,
 
 $D*/"
-    '(("Globals" . (("$B" . 21))))))
+    '(("Globals" . (("$B" . 14))))))
 
 ;;;; Docstring search
 
