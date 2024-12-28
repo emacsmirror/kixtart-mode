@@ -374,10 +374,11 @@ function."
               (forward-comment (point-max))
               (and (looking-at (kixtart-rx function-name))
                    (match-end 0))))
-    (let ((new-beg (and (before-name font-lock-beg)
-                        (after-func font-lock-beg)))
-          (new-end (and (after-func font-lock-end)
-                        (before-name font-lock-end))))
+    (let* ((case-fold-search t)
+           (new-beg (and (before-name font-lock-beg)
+                         (after-func font-lock-beg)))
+           (new-end (and (after-func font-lock-end)
+                         (before-name font-lock-end))))
       (when new-beg
         (setq font-lock-beg new-beg))
       (when new-end
@@ -534,7 +535,8 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
     (when-let* ((start (kixtart--start-of-comment-or-string)))
       (goto-char start))
     ;; Search backwards matching pairs of script-block defining keyword tokens.
-    (let ((parse-sexp-ignore-comments t)
+    (let ((case-fold-search t)
+          (parse-sexp-ignore-comments t)
           block-end
           block-start
           token-string)
@@ -577,7 +579,8 @@ Assume that point is on the first character of a command which
 declares variables."
   (save-excursion
     (forward-sexp)
-    (let (vars)
+    (let ((case-fold-search t)
+          vars)
       (condition-case nil
           (while (and (progn
                         (forward-comment (point-max))
@@ -617,7 +620,8 @@ beginning of the line where the search succeeded.  Otherwise,
 return nil."
   (interactive "^p")
   (unless arg (setq arg 1))
-  (let* ((forwards (cl-minusp arg))
+  (let* ((case-fold-search t)
+         (forwards (cl-minusp arg))
          (search-fn (if forwards #'re-search-forward #'re-search-backward))
          (inc-fn (if forwards #'1+ #'1-))
          match-pos)
@@ -637,7 +641,8 @@ return nil."
 
 (defun kixtart-end-of-defun ()
   "Move forwards to the end of a function definition."
-  (let (match-pos)
+  (let ((case-fold-search t)
+        match-pos)
     (save-excursion
       (while (and (re-search-forward (kixtart-rx command-endfunction) nil t)
                   (or (kixtart--in-comment-or-string-p)
@@ -678,12 +683,13 @@ of point is modified."
     (let ((ppss (syntax-ppss)))
       (if (kixtart--in-comment-or-string-p ppss)
           (current-column)
-        (let ((multiline-indicator (kixtart--follows-eol-multiline-indicator-p))
-              (multiline-separator (kixtart--follows-eol-multiline-separator-p))
-              (line-token (and (looking-at (kixtart-rx script-block-close))
-                               (kixtart--match-string-as-token)))
-              (block (kixtart--parse-block))
-              (new-level (kixtart--paren-depth ppss)))
+        (let* ((case-fold-search t)
+               (multiline-indicator (kixtart--follows-eol-multiline-indicator-p))
+               (multiline-separator (kixtart--follows-eol-multiline-separator-p))
+               (line-token (and (looking-at (kixtart-rx script-block-close))
+                                (kixtart--match-string-as-token)))
+               (block (kixtart--parse-block))
+               (new-level (kixtart--paren-depth ppss)))
           ;; Remove one level of indentation when the current line begins by
           ;; closing one parenthesis level.
           (when (and (cl-plusp new-level)
@@ -874,7 +880,8 @@ Return the function name which surrounds point.  When point is
 not within a function return nil.  It is assumed that this
 function is called with buffer restrictions removed."
   (save-excursion
-    (let ((from (point))
+    (let ((case-fold-search t)
+          (from (point))
           (func-beg (progn
                       ;; Move point beyond the current word if it looks like the
                       ;; FUNCTION command.
@@ -1208,7 +1215,8 @@ added into a submenu."
     (save-restriction
       (widen)
       (goto-char (point-max))
-      (let (globals index labels)
+      (let ((case-fold-search t)
+            globals index labels)
         (while (re-search-backward
                 (kixtart-rx (or command-function command-global label)) nil t)
           (cond ((kixtart--in-comment-or-string-p))

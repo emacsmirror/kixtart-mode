@@ -8,6 +8,9 @@ The generation of the Imenu index will now consider the customization
 variable `imenu-use-markers' and use markers instead of buffer
 positions when appropriate.
 
+Fixed the operation of the internal major mode parsing when
+`case-fold-search' has been customized to nil.
+
 * Version 1.3.4 (2024-12-10)
 
 The type for the customization variable `kixtart-eldoc-echo-truncate'
