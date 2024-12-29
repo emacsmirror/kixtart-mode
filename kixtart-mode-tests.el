@@ -19,6 +19,7 @@ The string BUFFER-CONTENTS is inserted into the buffer before
   (declare (indent 1))
   `(with-temp-buffer
      (kixtart-mode)
+     (setq case-fold-search nil)
      (insert ,buffer-contents)
      ,@body))
 
