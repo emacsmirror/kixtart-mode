@@ -323,8 +323,8 @@ function will only be determined by `which-function-mode'."
              ;; expression is unterminated and will continue on a later line.
              (seq ?\; ?\\ line-end))
             (outline
-             (or command-function
-                 (seq (>= 3 (syntax \<)) (1+ whitespace))))
+             (seq line-start (or command-function
+                                 (seq (>= 3 (syntax \<)) (1+ whitespace)))))
             (script-block-close
              (seq symbol-start
                   (or "case" "else" "endif" "endfunction" "endif" "endselect"
@@ -1248,11 +1248,43 @@ added into a submenu."
 
 (defun kixtart-outline-level ()
   "Return the depth for the current outline heading."
-  (if (looking-at-p (kixtart-rx command-function))
-      most-positive-fixnum
-    (save-excursion
-      (forward-same-syntax)
-      (- (current-column) 2))))
+  (if (eq (char-after) ?\;)
+      (save-excursion
+        (forward-same-syntax)
+        (- (current-column) 2))
+    most-positive-fixnum))
+
+(defun kixtart-outline-search (&optional bound move backward looking-at)
+  "Search for the next outline heading.
+
+For BOUND, MOVE, BACKWARD, and LOOKING-AT, see the descriptions
+in `outline-search-function'."
+  (let ((case-fold-search t))
+    (if looking-at
+        (looking-at (kixtart-rx outline))
+      (let ((search-fn (if backward #'re-search-backward #'re-search-forward))
+            found)
+        (save-excursion
+          (while (and
+                  (funcall search-fn (kixtart-rx outline) bound t nil)
+                  (not (setq
+                        found
+                        (and
+                         (save-excursion
+                           (goto-char (match-beginning 0))
+                           (let ((ppss (syntax-ppss)))
+                             (and
+                              ;; Avoid matching anything inside a string.
+                              (not (kixtart--in-string-p ppss))
+                              (if (eq (char-after) ?\;)
+                                  ;; Avoid matching inside block comments.
+                                  (kixtart--in-comment-line-p ppss)
+                                ;; Avoid matching FUNCTION within a comment.
+                                (not (kixtart--in-comment-or-string-p ppss))))))
+                         (point)))))))
+        (when move
+          (goto-char (or found bound (if backward (point-min) (point-max)))))
+        found))))
 
 ;;;; Templates
 
@@ -1467,7 +1499,7 @@ which will be expanded to the template."
   (setq-local indent-line-function #'kixtart-indent-line)
   (setq-local add-log-current-defun-function #'kixtart-current-defun)
   (setq-local outline-level #'kixtart-outline-level)
-  (setq-local outline-regexp (kixtart-rx outline))
+  (setq-local outline-search-function #'kixtart-outline-search)
   (setq-local syntax-propertize-function kixtart-syntax-propertize-function)
   (setq imenu-create-index-function #'kixtart--create-imenu-index)
   (tempo-use-tag-list 'kixtart-tempo-tags)
