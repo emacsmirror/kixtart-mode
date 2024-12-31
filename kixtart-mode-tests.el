@@ -1138,11 +1138,6 @@ Ignore \"FOR\" since the match is ambiguous."
     (declare-function ert-font-lock-test-file nil)))
 
 (require 'ert-x)
-;; Prevent compilation warnings for the older version of ert-x which comes with
-;; Emacs 27.
-(eval-when-compile
-  (unless (functionp 'ert-resource-file)
-    (declare-function ert-resource-file nil)))
 
 (ert-deftest kixtart-font-lock-level-3 ()
   "Test level 3 font-lock."

@@ -5,7 +5,7 @@
 ;; Author: Morgan Willcock <morgan@ice9.digital>
 ;; Keywords: languages
 ;; Maintainer: Morgan Willcock <morgan@ice9.digital>
-;; Package-Requires: ((emacs "27.1") (eldoc "1.14.0"))
+;; Package-Requires: ((emacs "28.1") (eldoc "1.14.0"))
 ;; URL: https://git.sr.ht/~mew/kixtart-mode
 ;; Version: 1.3.5
 
@@ -35,7 +35,7 @@
 (require 'tempo)
 (eval-when-compile
   (require 'cl-lib)
-  ;; For `when-let*' and `and-let*' in Emacs 27 and 28.
+  ;; For `when-let*' and `and-let*' in Emacs 28.
   (when (< emacs-major-version 29)
     (require 'subr-x)))
 
@@ -1380,11 +1380,6 @@ which will be expanded to the template."
      > r (kixtart--tempo-newline-eob)))
 
 ;;;; Keymap
-
-;; Prevent compilation warnings when the older version of ElDoc is loaded.
-(eval-when-compile
-  (unless (functionp #'eldoc)
-    (declare-function eldoc nil)))
 
 (defvar kixtart-mode-map
   (let ((map (make-sparse-keymap)))
