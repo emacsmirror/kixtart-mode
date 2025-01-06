@@ -647,9 +647,7 @@ return nil."
       (while (and (re-search-forward (kixtart-rx command-endfunction) nil t)
                   (or (kixtart--in-comment-or-string-p)
                       (not (setq match-pos (point)))))))
-    (when match-pos
-      (goto-char match-pos))
-    (not (null match-pos))))
+    (and match-pos (goto-char match-pos))))
 
 (defun kixtart-up-script-block ()
   "Move point to the opening of the current script-block.
