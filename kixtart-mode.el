@@ -634,10 +634,9 @@ return nil."
                   (funcall search-fn (kixtart-rx command-function) nil t)
                   (or (kixtart--in-comment-or-string-p)
                       (setq arg (funcall inc-fn arg) match-pos (point))))))
-    ;; Ensure point is at the beginning of the match.
-    (when match-pos
-      (goto-char (if forwards (- match-pos 8) match-pos)))
-    (not (null match-pos))))
+    (and match-pos (goto-char
+                    ;; Ensure point is at the beginning of the match.
+                    (if forwards (- match-pos 8) match-pos)))))
 
 (defun kixtart-end-of-defun ()
   "Move forwards to the end of a function definition."
