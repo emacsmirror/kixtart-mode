@@ -1408,7 +1408,25 @@ which will be expanded to the template."
   (& "Case " (p "case-expression: " expr) > n
      > r (kixtart--tempo-newline-eob)))
 
-;;;; Keymap
+;;;; Keymaps
+
+(defvar kixtart-mode-template-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-b") #'tempo-backward-mark)
+    (define-key map (kbd "C-f") #'tempo-forward-mark)
+    (define-key map (kbd "C-t") #'tempo-complete-tag)
+    (define-key map (kbd "I") #'kixtart-template-ifelse)
+    (define-key map (kbd "c") #'kixtart-template-case)
+    (define-key map (kbd "d") #'kixtart-template-do)
+    (define-key map (kbd "e") #'kixtart-template-foreach)
+    (define-key map (kbd "f") #'kixtart-template-for)
+    (define-key map (kbd "i") #'kixtart-template-if)
+    (define-key map (kbd "l") #'kixtart-template-else)
+    (define-key map (kbd "s") #'kixtart-template-select)
+    (define-key map (kbd "u") #'kixtart-template-function)
+    (define-key map (kbd "w") #'kixtart-template-while)
+    map)
+  "Keymap for `kixtart-mode' templates.")
 
 (defvar kixtart-mode-map
   (let ((map (make-sparse-keymap)))
@@ -1416,19 +1434,7 @@ which will be expanded to the template."
     (define-key map (kbd "C-c C-d") #'eldoc)
     (define-key map (kbd "C-c C-e") #'kixtart-eval-region-or-buffer)
     (define-key map (kbd "C-c C-j") #'imenu)
-    (define-key map (kbd "C-c C-t C-b") #'tempo-backward-mark)
-    (define-key map (kbd "C-c C-t C-f") #'tempo-forward-mark)
-    (define-key map (kbd "C-c C-t C-t") #'tempo-complete-tag)
-    (define-key map (kbd "C-c C-t I") #'kixtart-template-ifelse)
-    (define-key map (kbd "C-c C-t c") #'kixtart-template-case)
-    (define-key map (kbd "C-c C-t d") #'kixtart-template-do)
-    (define-key map (kbd "C-c C-t e") #'kixtart-template-foreach)
-    (define-key map (kbd "C-c C-t f") #'kixtart-template-for)
-    (define-key map (kbd "C-c C-t i") #'kixtart-template-if)
-    (define-key map (kbd "C-c C-t l") #'kixtart-template-else)
-    (define-key map (kbd "C-c C-t s") #'kixtart-template-select)
-    (define-key map (kbd "C-c C-t u") #'kixtart-template-function)
-    (define-key map (kbd "C-c C-t w") #'kixtart-template-while)
+    (define-key map (kbd "C-c C-t") kixtart-mode-template-map)
     (define-key map (kbd "C-c C-u") #'kixtart-up-script-block)
     map))
 

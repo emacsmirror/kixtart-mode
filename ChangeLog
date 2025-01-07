@@ -5,6 +5,9 @@ Removed support for Emacs 27.
 Fixed the outline-mode support when case-fold-search has been
 customized to nil.
 
+Key bindings for templates and Tempo functions are now configured in
+the additional keymap `kixtart-mode-template-map'.
+
 * Version 1.3.5 (2024-12-31)
 
 Imenu index entries for global variable definitions now refer to the
