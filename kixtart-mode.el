@@ -1052,8 +1052,7 @@ documentation structures.  The structures are only matched if
 they contain the symbol in their symbols slot and PREDICATE
 returns a non-nil value when called with the structure and symbol
 as its arguments."
-  ;; The `always' function isn't available before Emacs 28.
-  (unless predicate (setq predicate (lambda (&rest _) t)))
+  (unless predicate (setq predicate #'always))
   (and-let* ((thing (kixtart--thing-at-point 'symbol))
              (symbol (and (stringp thing) (intern (upcase thing))))
              (docs (cl-loop for doc in kixtart-doc-list
@@ -1132,9 +1131,7 @@ documentation structures."
                 :echo (or (and (natnump kixtart-eldoc-echo-truncate)
                                kixtart-eldoc-echo-truncate)
                           (and kixtart-eldoc-echo-truncate
-                               ;; The `string-search' function isn't available
-                               ;; before Emacs 28.
-                               (string-match-p "\n\n" docstring))))))))
+                               (string-search "\n\n" docstring))))))))
 
 ;;;; Completion
 
