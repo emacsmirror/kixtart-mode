@@ -79,6 +79,10 @@ Overview
 * Installation::
 * Example configuration::
 
+Indentation
+
+* Code alignment::
+
 ElDoc support
 
 * Customizing documentation search::
@@ -258,6 +262,68 @@ Specifies the indentation applied by KiXtart Mode indentation
 functions.  The value should be an integer which indicates how many
 columns a line will be indented by per script-block level.
 @end defopt
+
+@menu
+* Code alignment::
+@end menu
+
+
+@node Code alignment
+@section Code alignment
+@cindex align
+@cindex alignment @subentry of indentation
+@cindex code alignment @subentry of indentation
+
+KiXtart Mode defines support for aligning the indentation of variable
+assignments, as performed by built-in Emacs commands such as
+@code{align}, @code{align-current}, and @code{align-entire}.  For
+example, when alignment is performed on the following code:
+
+@example kixtart
+$one = 1
+$two = 2
+$three = 3
+$four = 4
+@end example
+
+the default rules should align both the @code{=} operator and the
+value which is being assigned:
+
+@example kixtart
+$one   = 1
+$two   = 2
+$three = 3
+$four  = 4
+@end example
+
+The alignment rules are defined in the customization variable
+@code{kixtart-align-rules-list} with the default rules specifying that
+all white-space adjustments surrounding the @code{=} operator should
+not align with a tab stop.
+
+@defopt kixtart-align-rules-list
+Specifies the list of available alignment rules which will configured
+in KiXtart mode buffers and available for use by alignment commands.
+The rule format is the same as rules configured in the variable
+@code{align-rules-list}.
+@end defopt
+
+To align indentation with a tab stop the default rules may be
+adjusted; the following example allows the alignment preceding the
+@code{=} operator to align with a tab stop:
+
+@example lisp
+(setf (alist-get 'tab-stop
+                 (alist-get 'kixtart-assignment
+                            kixtart-align-rules-list))
+      '(t nil))
+@end example
+
+@quotation Note
+Usage of the alignment commands should be restricted to the relevant
+region of the buffer where equality tests using the @code{=} operator
+are confused for variable assignments.
+@end quotation
 
 
 @node Multi-line expressions

@@ -30,6 +30,7 @@
 
 ;;; Code:
 
+(require 'align)
 (require 'etags)
 (require 'imenu)
 (require 'tempo)
@@ -752,6 +753,28 @@ new indentation column."
           (indent-line-to new-indent))
         (when goto-indentation
           (back-to-indentation))))))
+
+;;;; Align
+
+(defcustom kixtart-align-rules-list
+  `((kixtart-assignment
+     (regexp   . ,(kixtart-rx (seq variable
+                                   (group (0+ whitespace))
+                                   "="
+                                   (group (0+ whitespace)))))
+     (group    . (1 2))
+     (tab-stop . nil)))
+  "Specifies the list of available alignment rules.
+
+See the variable `align-rules-list' for details on the list
+and rule formats."
+  :type align-rules-list-type
+  :risky t
+  :group 'kixtart)
+
+(add-to-list 'align-dq-string-modes 'kixtart-mode)
+(add-to-list 'align-open-comment-modes 'kixtart-mode)
+(add-to-list 'align-sq-string-modes 'kixtart-mode)
 
 ;;;; Electric layout
 
@@ -1501,6 +1524,7 @@ which will be expanded to the template."
   (setq-local outline-level #'kixtart-outline-level)
   (setq-local outline-search-function #'kixtart-outline-search)
   (setq-local syntax-propertize-function kixtart-syntax-propertize-function)
+  (setq align-mode-rules-list kixtart-align-rules-list)
   (setq imenu-create-index-function #'kixtart--create-imenu-index)
   (tempo-use-tag-list 'kixtart-tempo-tags)
   (add-hook 'completion-at-point-functions

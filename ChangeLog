@@ -8,6 +8,9 @@ customized to nil.
 Key bindings for templates and Tempo functions are now configured in
 the additional keymap `kixtart-mode-template-map'.
 
+Added support for alignment of variable assignments using commands
+such as `align', `align-current', and `align-entire'.
+
 * Version 1.3.5 (2024-12-31)
 
 Imenu index entries for global variable definitions now refer to the
