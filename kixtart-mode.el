@@ -814,7 +814,7 @@ evaluate the entire buffer."
      'repeat-map
      'kixtart-close-command-block-repeat-map)
 
-;;;; Current function.
+;;;; Current function
 
 (defun kixtart--current-defun ()
   "Internal implementation of `kixtart-current-defun'.
