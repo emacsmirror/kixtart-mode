@@ -11,6 +11,13 @@ the additional keymap `kixtart-mode-template-map'.
 Added support for alignment of variable assignments using commands
 such as `align', `align-current', and `align-entire'.
 
+Outline Mode headings defined by comments and the FUNCTION command
+have now been extended to match the remainder of the line and a
+function name on the same line respectively.  This change allows the
+additional highlighting which is available by configuring the
+customization variable `outline-minor-mode-highlight' to act on a more
+meaningful portion of the line.
+
 * Version 1.3.5 (2024-12-31)
 
 Imenu index entries for global variable definitions now refer to the

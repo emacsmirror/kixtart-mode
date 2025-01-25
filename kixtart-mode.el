@@ -201,8 +201,11 @@
              ;; expression is unterminated and will continue on a later line.
              (seq ?\; ?\\ line-end))
             (outline
-             (seq line-start (or command-function
-                                 (seq (>= 3 (syntax \<)) (1+ whitespace)))))
+             (seq line-start (or (seq command-function
+                                      (opt (1+ whitespace) function-name))
+                                 (seq (>= 3 (syntax \<))
+                                      (1+ whitespace)
+                                      (0+ not-newline)))))
             (script-block-close
              (seq symbol-start
                   (or "case" "else" "endif" "endfunction" "endif" "endselect"
