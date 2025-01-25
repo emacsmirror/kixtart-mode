@@ -40,138 +40,6 @@
   (when (< emacs-major-version 29)
     (require 'subr-x)))
 
-;;;; Customization
-
-(defgroup kixtart nil
-  "Major mode for editing KiXtart scripts."
-  :tag "KiXtart"
-  :link '(custom-manual "(kixtart-mode)Top")
-  :group 'languages
-  :prefix "kixtart-")
-
-(defcustom kixtart-abbrev-table-enabled nil
-  "Specifies whether KiXtart abbrev expansion is enabled.
-
-A non-nil value indicates that `kixtart-mode-abbrev-table' should
-be used as part of abbrev expansion."
-  :type 'boolean)
-
-(defcustom kixtart-block-motion-push-mark t
-  "Specifies whether block motion will push to the `mark-ring'.
-
-A non-nil value indicates that block motion commands are
-permitted to push the previous location to the `mark-ring' when
-the value of point changes."
-  :type 'boolean)
-
-(defcustom kixtart-completion-annotation-function
-  #'kixtart-completion-annotate-macros
-  "Specifies the function which creates completion annotations."
-  :type 'function)
-
-(defcustom kixtart-completion-case-fold nil
-  "Specifies that KiXtart completion should be case-insensitive."
-  :type 'boolean)
-
-(defcustom kixtart-completion-list-hook
-  (list #'kixtart-completion-upcase-macros
-        #'kixtart-completion-add-crlf-commands)
-  "A hook which is called during symbol completion.
-
-At the time that the hook functions are called, the value of
-`kixtart-completion-list' contains the current list of completion
-keywords, and `kixtart-completion-input' contains a copy of the
-input string which is being completed.  Hook functions are free
-to modify both values."
-  :type 'hook)
-
-(defcustom kixtart-doc-search-functions
-  (list #'kixtart-doc-search-at-point
-        #'kixtart-doc-search-before-point
-        #'kixtart-doc-search-in-function-args
-        #'kixtart-doc-search-command-line)
-  "Abnormal hook for functions which return documentation.
-
-Each function is called in sequence until one returns a non-nil
-value, which should be a cons cell containing the upper-case form
-of the symbol which was matched and a list of documentation
-structures compatible with the generic method
-`kixtart-doc-string'."
-  :type 'hook)
-
-(defcustom kixtart-eldoc-echo-truncate t
-  "Specifies how `eldoc-mode' will use the echo area.
-
-A postive integer value indicates that text should be truncated
-after the given number of characters.  Any other non-nil value
-indicates that text should be truncated at the first paragraph.
-
-Note that ElDoc version 1.14.0 or newer is required for this
-option to work correctly."
-  :type '(choice (const :tag "Never" nil)
-                 (natnum :tag "After number of characters")
-                 (const :tag "At end of paragraph" t)))
-
-(defcustom kixtart-eval-buffer-name "*KiXtart Output*"
-  "Specifies the buffer name used for interpreter output."
-  :type 'string)
-
-(defcustom kixtart-eval-extra-args nil
-  "Specifies additional interpreter arguments.
-
-The value should be a list of strings which will be used as
-additional arguments for the KiXtart interpreter."
-  :type '(repeat string))
-
-(defcustom kixtart-eval-header "$ = SetOption(\"ASCII\", \"ON\")\n"
-  "Specifies a string which is included in evaluated code.
-
-The string value is inserted at the beginning of any scripts
-which are sent to the KiXtart interpreter.  Note that the script
-which is being executed will need to set the \"ASCII\" option to
-\"ON\" to allow the process output to be read."
-  :type 'string)
-
-(defcustom kixtart-eval-hook (list #'kixtart-scroll-buffer-windows)
-  "A hook which is called during code evaluation.
-
-The hook functions will be called with the buffer used for
-displaying interpreter output as the current buffer, before the
-interpreter process is started."
-  :type 'hook)
-
-(defcustom kixtart-imenu-submenu-prefix "/"
-  "Specifies the string prefix used for Imenu submenu names."
-  :type 'string)
-
-(defcustom kixtart-indent-offset 4
-  "Specifies the indentation offset applied by `kixtart-indent-line'.
-
-Lines determined to be within script-blocks are indented by this
-number of columns per script-block level."
-  :type 'integer)
-
-(defcustom kixtart-program "kix32"
-  "Specifies the name of the KiXtart executable."
-  :type 'string)
-
-(defcustom kixtart-template-insert-newline #'eobp
-  "Specifies whether a template includes a final newline."
-  :type `(choice (const :tag "Never" nil)
-                 (const :tag "Always" t)
-                 (const :tag "At end of buffer" ,#'eobp)
-                 (function :tag "Custom function")))
-
-(defcustom kixtart-which-function-default-name nil
-  "Specifies the default function name for `which-function-mode'.
-
-This value is provided to `which-function-mode' as the current
-function name when point is outside of a function.  When the
-value is set to nil, the name used when point is outside of a
-function will only be determined by `which-function-mode'."
-  :type '(choice (string :tag "Default function name")
-                 (const :tag "Let `which-function-mode' decide" nil)))
-
 ;;;; Faces
 
 (defgroup kixtart-faces nil
@@ -234,6 +102,15 @@ function will only be determined by `which-function-mode'."
 (defvar kixtart-warning-face
   'kixtart-warning-face
   "Face specification to highlight a KiXtart syntax warning.")
+
+;;;; Customization
+
+(defgroup kixtart nil
+  "Major mode for editing KiXtart scripts."
+  :tag "KiXtart"
+  :link '(custom-manual "(kixtart-mode)Top")
+  :group 'languages
+  :prefix "kixtart-")
 
 ;;;; Keywords
 
@@ -609,6 +486,14 @@ declares variables."
 
 ;;;; Motion
 
+(defcustom kixtart-block-motion-push-mark t
+  "Specifies whether block motion will push to the `mark-ring'.
+
+A non-nil value indicates that block motion commands are
+permitted to push the previous location to the `mark-ring' when
+the value of point changes."
+  :type 'boolean)
+
 (defun kixtart-beginning-of-defun (&optional arg)
   "Move backwards to the beginning of a function definition.
 
@@ -673,6 +558,13 @@ of point is modified."
      'kixtart-up-script-block-repeat-map)
 
 ;;;; Indentation
+
+(defcustom kixtart-indent-offset 4
+  "Specifies the indentation offset applied by `kixtart-indent-line'.
+
+Lines determined to be within script-blocks are indented by this
+number of columns per script-block level."
+  :type 'integer)
 
 (defun kixtart--new-indent ()
   "Return the calculated indentation level for the current line."
@@ -769,8 +661,7 @@ new indentation column."
 See the variable `align-rules-list' for details on the list
 and rule formats."
   :type align-rules-list-type
-  :risky t
-  :group 'kixtart)
+  :risky t)
 
 (add-to-list 'align-dq-string-modes 'kixtart-mode)
 (add-to-list 'align-open-comment-modes 'kixtart-mode)
@@ -792,6 +683,38 @@ special comment which indicates a multiline expression."
               'after))))
 
 ;;;; Code evaluation
+
+(defcustom kixtart-eval-buffer-name "*KiXtart Output*"
+  "Specifies the buffer name used for interpreter output."
+  :type 'string)
+
+(defcustom kixtart-eval-extra-args nil
+  "Specifies additional interpreter arguments.
+
+The value should be a list of strings which will be used as
+additional arguments for the KiXtart interpreter."
+  :type '(repeat string))
+
+(defcustom kixtart-eval-header "$ = SetOption(\"ASCII\", \"ON\")\n"
+  "Specifies a string which is included in evaluated code.
+
+The string value is inserted at the beginning of any scripts
+which are sent to the KiXtart interpreter.  Note that the script
+which is being executed will need to set the \"ASCII\" option to
+\"ON\" to allow the process output to be read."
+  :type 'string)
+
+(defcustom kixtart-eval-hook (list #'kixtart-scroll-buffer-windows)
+  "A hook which is called during code evaluation.
+
+The hook functions will be called with the buffer used for
+displaying interpreter output as the current buffer, before the
+interpreter process is started."
+  :type 'hook)
+
+(defcustom kixtart-program "kix32"
+  "Specifies the name of the KiXtart executable."
+  :type 'string)
 
 (defun kixtart-eval (string)
   "Evaluate STRING in the KiXtart interpreter."
@@ -926,6 +849,18 @@ When point is not within a function return nil."
   (save-restriction
     (widen)
     (kixtart--current-defun)))
+
+;;;; Which function
+
+(defcustom kixtart-which-function-default-name nil
+  "Specifies the default function name for `which-function-mode'.
+
+This value is provided to `which-function-mode' as the current
+function name when point is outside of a function.  When the
+value is set to nil, the name used when point is outside of a
+function will only be determined by `which-function-mode'."
+  :type '(choice (string :tag "Default function name")
+                 (const :tag "Let `which-function-mode' decide" nil)))
 
 (defun kixtart-which-function ()
   "Return the function name which surrounds point.
@@ -935,6 +870,33 @@ When point is not within a function return the value of
   (or (kixtart-current-defun) kixtart-which-function-default-name))
 
 ;;;; ElDoc
+
+(defcustom kixtart-doc-search-functions
+  (list #'kixtart-doc-search-at-point
+        #'kixtart-doc-search-before-point
+        #'kixtart-doc-search-in-function-args
+        #'kixtart-doc-search-command-line)
+  "Abnormal hook for functions which return documentation.
+
+Each function is called in sequence until one returns a non-nil
+value, which should be a cons cell containing the upper-case form
+of the symbol which was matched and a list of documentation
+structures compatible with the generic method
+`kixtart-doc-string'."
+  :type 'hook)
+
+(defcustom kixtart-eldoc-echo-truncate t
+  "Specifies how `eldoc-mode' will use the echo area.
+
+A postive integer value indicates that text should be truncated
+after the given number of characters.  Any other non-nil value
+indicates that text should be truncated at the first paragraph.
+
+Note that ElDoc version 1.14.0 or newer is required for this
+option to work correctly."
+  :type '(choice (const :tag "Never" nil)
+                 (natnum :tag "After number of characters")
+                 (const :tag "At end of paragraph" t)))
 
 (cl-defstruct (kixtart-doc-symbol
                (:constructor nil)
@@ -1158,6 +1120,27 @@ documentation structures."
 
 ;;;; Completion
 
+(defcustom kixtart-completion-annotation-function
+  #'kixtart-completion-annotate-macros
+  "Specifies the function which creates completion annotations."
+  :type 'function)
+
+(defcustom kixtart-completion-case-fold nil
+  "Specifies that KiXtart completion should be case-insensitive."
+  :type 'boolean)
+
+(defcustom kixtart-completion-list-hook
+  (list #'kixtart-completion-upcase-macros
+        #'kixtart-completion-add-crlf-commands)
+  "A hook which is called during symbol completion.
+
+At the time that the hook functions are called, the value of
+`kixtart-completion-list' contains the current list of completion
+keywords, and `kixtart-completion-input' contains a copy of the
+input string which is being completed.  Hook functions are free
+to modify both values."
+  :type 'hook)
+
 (defvar kixtart-completion-list nil
   "The list of completion keywords to offer.")
 
@@ -1214,6 +1197,10 @@ updating the TAGS file."
                 :annotation-function kixtart-completion-annotation-function)))))
 
 ;;;; Imenu
+
+(defcustom kixtart-imenu-submenu-prefix "/"
+  "Specifies the string prefix used for Imenu submenu names."
+  :type 'string)
 
 (defun kixtart--convert-imenu-item-to-markers (item)
   "Modify ITEM to use markers instead of buffer positions."
@@ -1304,6 +1291,20 @@ in `outline-search-function'."
         found))))
 
 ;;;; Templates
+
+(defcustom kixtart-abbrev-table-enabled nil
+  "Specifies whether KiXtart abbrev expansion is enabled.
+
+A non-nil value indicates that `kixtart-mode-abbrev-table' should
+be used as part of abbrev expansion."
+  :type 'boolean)
+
+(defcustom kixtart-template-insert-newline #'eobp
+  "Specifies whether a template includes a final newline."
+  :type `(choice (const :tag "Never" nil)
+                 (const :tag "Always" t)
+                 (const :tag "At end of buffer" ,#'eobp)
+                 (function :tag "Custom function")))
 
 (defun kixtart--tempo-newline-eob ()
   "Insert a newline if point is at end of the buffer."
