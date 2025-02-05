@@ -11,5 +11,4 @@ config.status
 configure
 doc/version.texi
 kixtart-mode.info
-set-values.texi
 stamp-vti
