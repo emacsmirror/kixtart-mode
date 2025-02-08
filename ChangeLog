@@ -1,4 +1,4 @@
-* Version 1.4.1 (????-??-??)
+* Version 1.4.1 (2025-02-08)
 
 A custom Makefile replaces the use of GNU Autotools, to allow the
 package to be installed directly by Emacs package management tools.
