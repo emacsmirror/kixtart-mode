@@ -18,22 +18,16 @@ See the manual for full details.
 Installation
 ============
 
-The recommended way to install the package is to use a release archive.
-Using this method will also install the pre-built Info manual.  The
-following example shows shell commands which will extract, configure,
-build, and install the package, assuming that the installation should be
-system-wide:
+The recommended way to install the package is to use an Emacs package
+manager.  Using this method should also install the pre-built Info
+manual.
 
-     tar -xf kixtart-mode-1.4.0.tar.gz
-     cd kixtart-mode-1.4.0
-     ./configure
-     make
-     # System-wide installation will likely require root privileges.
-     sudo make install
+To install the package from MELPA, follow the package archive setup
+instructions available at <https://melpa.org/> and install the package
+named "kixtart-mode".
 
-Alternatively, to use the latest development version of the package, the
-repository can be cloned to a location which is present in the Emacs
-'load-path'.
+Alternatively, the development repository can be cloned to a location
+which is present in the Emacs 'load-path' and made available to use.
 
 To clone the repository to a local subdirectory:
 
