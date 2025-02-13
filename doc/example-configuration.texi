@@ -1,29 +1,28 @@
-Assuming that the KiXtart Mode package is currently not loaded, the
-following example demonstrates how to load the package, configure some
-basic settings, and enable some optional features:
+Assuming that the KiXtart Mode package has been installed by a package
+manager and will be autoloaded, the following example demonstrates how
+to configure some basic settings, and enable some optional features:
 
 @example lisp
-;; Load the package by searching in paths listed in `load-path'.
-(require 'kixtart-mode)
+(with-eval-after-load 'kixtart-mode
+  ;; Load the default docstrings.
+  (require 'kixtart-docstrings)
 
-;; Load the default docstrings.
-(require 'kixtart-docstrings)
+  ;; Set indentation and fill preferences.
+  (add-hook 'kixtart-mode-hook
+            (lambda ()
+              (indent-tabs-mode 1)
+              (setq tab-width 4)
+              (setq fill-column 80)))
 
-;; Set indentation and fill preferences.
-(add-hook 'kixtart-mode-hook
-          (lambda ()
-            (indent-tabs-mode 1)
-            (setq tab-width 4)
-            (setq fill-column 80)))
+  ;; Enable `abbrev-mode' by default.
+  (add-hook 'kixtart-mode-hook #'abbrev-mode)
 
-;; Enable `abbrev-mode' by default.
-(add-hook 'kixtart-mode-hook #'abbrev-mode)
-;; Enable automatic abbrev expansion with the KiXtart Mode abbrev
-;; table when outside of comments and strings.
-(setq kixtart-abbrev-table-enabled t)
+  ;; Enable automatic abbrev expansion with the KiXtart Mode abbrev
+  ;; table when outside of comments and strings.
+  (setq kixtart-abbrev-table-enabled t)
 
-;; Enable `electric-layout-mode' by default.
-(add-hook 'kixtart-mode-hook #'electric-layout-local-mode)
+  ;; Enable `electric-layout-mode' by default.
+  (add-hook 'kixtart-mode-hook #'electric-layout-local-mode))
 
 ;; Default to using the dos coding system (ASCII character set and
 ;; CRLF line endings) for file names with a .kix extension.
