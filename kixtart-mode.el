@@ -1512,9 +1512,8 @@ which will be expanded to the template."
 ;;;; Mode
 
 ;;;###autoload
-(define-derived-mode kixtart-mode prog-mode "KiXtart Mode"
+(define-derived-mode kixtart-mode prog-mode "KiXtart"
   "Major mode for editing KiXtart scripts."
-  (setq mode-name "KiXtart")
   (setq-local comment-start ";")
   (setq-local font-lock-defaults '((kixtart-font-lock-keywords
                                     kixtart-font-lock-keywords-1
