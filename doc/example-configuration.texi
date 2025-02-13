@@ -21,6 +21,15 @@ to configure some basic settings, and enable some optional features:
   ;; table when outside of comments and strings.
   (setq kixtart-abbrev-table-enabled t)
 
+  ;; Use case-insensitive symbol completion.
+  (setq kixtart-completion-case-fold t)
+
+  ;; Add symbols from the current loaded TAGS file to the list of
+  ;; completion candidate.
+  (add-to-list 'kixtart-completion-list-hook
+               #'kixtart-completion-include-tags
+               t)
+
   ;; Enable `electric-layout-mode' by default.
   (add-hook 'kixtart-mode-hook #'electric-layout-local-mode))
 
