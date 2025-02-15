@@ -19,9 +19,14 @@ git clone https://git.sr.ht/~mew/kixtart-mode
 The value of @code{load-path} can be modified in the Emacs
 configuration, although such a change will need to placed before any
 actions which attempt to load the package.  The following example
-assumes that the repository has been cloned within a directory named
-"manual-packages" within the user's ".emacs.d" directory:
+shows how to load package, assuming that the repository has been
+cloned within a directory named "manual-packages" within the user's
+".emacs.d" directory:
 
 @example lisp
+;; Add the package directory to the load path.
 (add-to-list 'load-path "~/.emacs.d/manual-packages/kixtart-mode")
+
+;; Load the package.
+(require 'kixtart-mode)
 @end example
