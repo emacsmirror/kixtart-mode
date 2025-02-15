@@ -409,7 +409,6 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
   (token-string nil :type string)
   (position nil :type (natnum 0 *)))
 
-
 (defun kixtart--parse-block ()
   "Scan backwards and return the current block state."
   (save-excursion
