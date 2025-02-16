@@ -469,8 +469,8 @@ ElDoc provides functions and a minor mode which can display
 information for language symbols, either in the echo area or within a
 dedicated buffer.  KiXtart Mode implements ElDoc mode support by
 attempting to lookup documentation based on the context at point, and
-will be activated automatically (as part of mode initialization) after
-documentation has loaded.  By default, since the original KiXtart
+will be activated automatically (as part of mode initialization) if
+documentation has been loaded.  By default, since the original KiXtart
 documentation is copyrighted and attempts to contact the author
 failed, no documentation is automatically loaded by inclusion within
 the definition of KiXtart Mode.  Basic documentation which just
