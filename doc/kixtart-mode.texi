@@ -575,10 +575,15 @@ context).
 The final documentation string to be displayed will be determined by
 converting each of the returned structures to a string (by calling the
 generic method @code{kixtart-doc-string}), and concatenating them
-together, separated by a single new-line character.  The requirement
-for handling multiple matches is to ensure that all matches for
-ambiguous KiXtart commands such as @code{FOR} and @code{NEXT} are
-given a chance to be displayed.
+together, separated by the string value @code{kixtart-doc-separator}.
+The requirement for handling multiple matches is to ensure that all
+matches for ambiguous KiXtart commands such as @code{FOR} and
+@code{NEXT} are given a chance to be displayed.
+
+@defopt kixtart-doc-separator
+Specifies the string separator which will be used when concatenating
+multiple documentation search results into a single result.
+@end defopt
 
 
 @node Customizing documentation

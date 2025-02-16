@@ -887,6 +887,13 @@ structures compatible with the generic method
 `kixtart-doc-string'."
   :type 'hook)
 
+(defcustom kixtart-doc-separator "\n"
+  "Specifies the separator for display of documentation matches.
+
+Where a documentation search returns multiple matches, the
+results will be displayed using this string as the separator."
+  :type 'string)
+
 (defcustom kixtart-eldoc-echo-truncate t
   "Specifies how `eldoc-mode' will use the echo area.
 
@@ -1111,7 +1118,9 @@ documentation structures."
   "Call CALLBACK with a docstring relevant for point."
   (pcase (kixtart-doc-search)
     (`(,thing . ,docs)
-     (let ((docstring (mapconcat #'kixtart-doc-string docs "\n")))
+     (let ((docstring (mapconcat #'kixtart-doc-string
+                                 docs
+                                 kixtart-doc-separator)))
        (funcall callback docstring
                 :thing (symbol-name thing)
                 :face (kixtart-doc-face (car docs))
