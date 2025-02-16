@@ -422,8 +422,7 @@ Prefer existing parser state PPSS over calling `syntax-ppss'."
           block-start
           token-string)
       (condition-case nil
-          (while (and (not (bobp))
-                      (null block-start))
+          (while (not (or block-start (bobp)))
             (forward-sexp -1)
             (cond ((looking-at (kixtart-rx script-block-open))
                    (pcase (cons (kixtart--match-string-as-token)
