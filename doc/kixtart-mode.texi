@@ -1124,11 +1124,11 @@ preserving the final newline when templates are inserted at the end of
 the buffer.
 
 @defopt kixtart-template-insert-newline
-Specifies whether a final newline be inserted following the content of
-an inserted Tempo template.  A non-@code{nil} value will cause a
-newline to be inserted.  When the value is a function (as determined
-by @code{functionp}) it is called, and a new-line is inserted if the
-return value is non-@code{nil}.
+Specifies whether a final newline will be inserted following the
+content of an inserted Tempo template.  A non-@code{nil} value will
+cause a newline to be inserted.  When the value is a function (as
+determined by @code{functionp}) it is called, and a new-line is
+inserted if the return value is non-@code{nil}.
 @end defopt
 
 @menu
