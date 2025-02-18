@@ -718,6 +718,13 @@ interpreter process is started."
   "Specifies the name of the KiXtart executable."
   :type 'string)
 
+(define-derived-mode kixtart-eval-mode special-mode "KiXtart-Eval"
+  "Major mode used for KiXtart interpreter output."
+  ;; Configure the mode line to show the process state.
+  (setq mode-line-process '(":%s"))
+  ;; Move `window-point' forwards when inserting at its position.
+  (setq-local window-point-insertion-type t))
+
 (defun kixtart-eval (string)
   "Evaluate STRING in the KiXtart interpreter."
   (interactive "sKiXtart: ")
@@ -726,18 +733,19 @@ interpreter process is started."
         (buffer (or (get-buffer kixtart-eval-buffer-name)
                     (with-current-buffer (generate-new-buffer
                                           kixtart-eval-buffer-name)
-                      (special-mode)
+                      (kixtart-eval-mode)
                       (current-buffer)))))
     (with-current-buffer buffer
       (let ((inhibit-read-only t))
         (run-hooks 'kixtart-eval-hook)))
     (display-buffer
      (process-buffer
-      (apply #'start-process `(,(file-name-base kixtart-program)
-                               ,buffer
-                               ,kixtart-program
+      (make-process :name (file-name-base kixtart-program)
+                    :buffer buffer
+                    :command `(,kixtart-program
                                ,@kixtart-eval-extra-args
-                               ,script-file))))))
+                               ,script-file)
+                    :sentinel #'ignore)))))
 
 (defun kixtart-eval-region-or-buffer ()
   "Evaluate a portion of the buffer in the KiXtart interpreter.

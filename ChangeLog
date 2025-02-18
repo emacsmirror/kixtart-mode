@@ -4,6 +4,12 @@ Added the customization variable `kixtart-doc-separator', which
 determines the string separator used when joining multiple
 documentation search results into a single result.
 
+The buffer used for output from the KiXtart interpreter now uses the
+newly added major mode `kixtart-eval-mode'.  The default process
+sentinel function, which prints additional output to indicate that a
+process has ended, has now been removed because the buffer's process
+state will now be indicated in the mode line.
+
 * Version 1.4.1 (2025-02-08)
 
 A custom Makefile replaces the use of GNU Autotools, to allow the
