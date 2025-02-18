@@ -999,6 +999,17 @@ modifying which hook functions are present in
 (add-hook 'kixtart-eval-hook #'erase-buffer)
 @end example
 
+Reusing the same output buffer also means that multiple interpreter
+processes are potentially writing their output to the same buffer.  To
+ensure that a new output buffer will be created for each interpreter
+process, @code{kixtart-eval-hook} can also be used to rename the
+buffer:
+
+@example
+;; Use a unique buffer name for each interpreter process.
+(add-to-list 'kixtart-eval-hook #'rename-uniquely)
+@end example
+
 
 @node Current function name
 @chapter Current function name
