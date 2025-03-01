@@ -75,9 +75,9 @@ to configure some basic settings, and enable some optional features:
 
        ;; Add symbols from the current loaded TAGS file to the list of
        ;; completion candidate.
-       (add-to-list 'kixtart-completion-list-hook
-                    #'kixtart-completion-include-tags
-                    t)
+       (add-hook 'kixtart-completion-list-hook
+                 #'kixtart-completion-include-tags
+                 90)
 
        ;; Enable `electric-layout-mode' by default.
        (add-hook 'kixtart-mode-hook #'electric-layout-local-mode))

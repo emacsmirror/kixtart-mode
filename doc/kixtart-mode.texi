@@ -899,13 +899,14 @@ completion list.
 @end defun
 
 To avoid unnecessary processing of the additional completion
-candidates, it is recommended to add this function to the end of the
-hook list to ensure that it is the last hook function to be called:
+candidates, it is recommended to add
+@code{kixtart-completion-include-tags} near the end of the hook list
+so that other hook functions will have already been run:
 
 @example lisp
-(add-to-list 'kixtart-completion-list-hook
-             #'kixtart-completion-include-tags
-             t)
+(add-hook 'kixtart-completion-list-hook
+          #'kixtart-completion-include-tags
+          90)
 @end example
 
 @quotation Note
@@ -1007,7 +1008,7 @@ buffer:
 
 @example
 ;; Use a unique buffer name for each interpreter process.
-(add-to-list 'kixtart-eval-hook #'rename-uniquely)
+(add-hook 'kixtart-eval-hook #'rename-uniquely)
 @end example
 
 
