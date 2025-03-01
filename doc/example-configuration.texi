@@ -25,7 +25,7 @@ to configure some basic settings, and enable some optional features:
   (setq kixtart-completion-case-fold t)
 
   ;; Add symbols from the currently loaded TAGS file to the list of
-  ;; completion candidate.
+  ;; completion candidates.
   (add-hook 'kixtart-completion-list-hook
             #'kixtart-completion-include-tags
             90)
