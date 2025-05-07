@@ -63,7 +63,7 @@ doc/version.texi: kixtart-mode.el
 
 kixtart-docstrings.elc: kixtart-mode.elc
 
-kixtart-mode-tests.elc: kixtart-mode.elc kixtart-mode-tests.el
+kixtart-mode-tests.elc: kixtart-mode.elc
 
 kixtart-mode.html: $(manual_deps)
 	$(TEXI2ANY) $(TEXI2ANY_HTMLFLAGS) \
