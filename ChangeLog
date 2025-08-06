@@ -1,3 +1,9 @@
+* Version 1.4.3 (????-??-??)
+
+Edited the docstring data for SETOPTION to indicate that the second
+argument is optional.  Omitting the second argument returns the
+current option value without modifying it.
+
 * Version 1.4.2 (2025-03-10)
 
 Added the customization variable `kixtart-doc-separator', which

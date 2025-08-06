@@ -142,7 +142,7 @@ USE [\"device\"] \"resource\" [/USER:\"user\"] [/PASSWORD:\"password\"] [/PERSIS
   (SETDEFAULTPRINTER :syntax "SETDEFAULTPRINTER (\"printer name\")")
   (SETFILEATTR :syntax "SETFILEATTR (\"filename\", attributes)")
   (SETFOCUS :syntax "SETFOCUS (\"title\")")
-  (SETOPTION :syntax "SETOPTION (\"option\", \"value\")")
+  (SETOPTION :syntax "SETOPTION (\"option\"[, \"value\"])")
   (SETSYSTEMSTATE :syntax "SETSYSTEMSTATE (mode, force)")
   (SETTITLE :syntax "SETTITLE (\"title\")")
   (SETWALLPAPER :syntax "SETWALLPAPER (\"wallpaper name\", mode)")
