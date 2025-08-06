@@ -56,7 +56,7 @@
   (SLEEP :syntax "SLEEP seconds")
   (SMALL :syntax "SMALL" :final t)
   (USE :syntax "USE <* | \"device\" | \"resource\"> /DELETE [/PERSISTENT]
-USE [\"device\"] <\"resource\"> [/USER:\"user\"] [/PASSWORD:\"password\"] [/PERSISTENT]")
+USE [\"device\"] \"resource\" [/USER:\"user\"] [/PASSWORD:\"password\"] [/PERSISTENT]")
   ((WHILE LOOP) :syntax "WHILE expression ... LOOP" :final 'last))
 
 (kixtart-doc-register kixtart-make-doc-function
@@ -105,7 +105,7 @@ USE [\"device\"] <\"resource\"> [/USER:\"user\"] [/PASSWORD:\"password\"] [/PERS
   (GETFILEVERSION :syntax "GETFILEVERSION (\"filename\",\"version field\")")
   (GETOBJECT :syntax "GETOBJECT (\"object name\" )")
   (IIF :syntax "IIF (expression, value1, value2)")
-  (INGROUP :syntax "INGROUP (\"group name\" [<,> \"group name 2\"], mode)")
+  (INGROUP :syntax "INGROUP (\"group name\" [, \"group name 2\"], mode)")
   (INSTR :syntax "INSTR (\"string1\", \"string2\")")
   (INSTRREV :syntax "INSTRREV (\"string1\", \"string2\")")
   (INT :syntax "INT (expression)")
