@@ -66,7 +66,7 @@ USE [\"device\"] \"resource\" [/USER:\"user\"] [/PASSWORD:\"password\"] [/PERSIS
   (ADDPROGRAMITEM :syntax "ADDPROGRAMITEM (\"command line\", \"name\", \"icon path\", icon index, \"default directory\", minimize, replace, run in own space)")
   (ADDPROGRAMGROUP :syntax "ADDPROGRAMGROUP (\"group name\", groupflag)")
   (ASC :syntax "ASC (character)")
-  (ASCAN :syntax "ASCAN (array, expression, start, length, flags)")
+  (ASCAN :syntax "ASCAN (array, expression[, start[, length[, flags]]])")
   (AT :syntax "AT (row, column)")
   (BACKUPEVENTLOG :syntax "BACKUPEVENTLOG (\"eventlog\", \"backupfile\")")
   (BOX :syntax "BOX (top left row, top left column, bottom right row, bottom right column, \"line style\")")
