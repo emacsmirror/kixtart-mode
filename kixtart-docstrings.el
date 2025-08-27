@@ -129,7 +129,7 @@ USE [\"device\"] \"resource\" [/USER:\"user\"] [/PASSWORD:\"password\"] [/PERSIS
   (READTYPE :syntax "READTYPE (\"subkey\", \"entry\")")
   (READVALUE :syntax "READVALUE (\"subkey\", \"entry\")")
   (REDIRECTOUTPUT :syntax "REDIRECTOUTPUT (\"filename\", overwrite)")
-  (REPLACE :syntax "REPLACE (\"string\", \"find\", \"replace with\", offset, count)")
+  (REPLACE :syntax "REPLACE (\"string\", \"find\", \"replace with\"[, offset[, count]])")
   (RIGHT :syntax "RIGHT (\"string\", length)")
   (RND :syntax "RND (range)")
   (ROUND :syntax "ROUND (expression, decimal places)")
