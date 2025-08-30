@@ -1582,8 +1582,6 @@ which will be expanded to the template."
   (add-hook 'which-func-functions #'kixtart-which-function nil t)
   (add-to-list 'font-lock-extend-region-functions
                #'kixtart--font-lock-extend-region-function-def t)
-  (add-to-list 'syntax-propertize-extend-region-functions
-               #'syntax-propertize-wholelines)
   (when (boundp 'electric-layout-allow-in-comment-or-string)
     (setq-local electric-layout-allow-in-comment-or-string t)
     (setq-local electric-layout-rules `((?\\
