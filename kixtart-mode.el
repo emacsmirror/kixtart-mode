@@ -32,6 +32,7 @@
 ;;; Code:
 
 (require 'align)
+(require 'compile)
 (require 'etags)
 (require 'imenu)
 (require 'tempo)
@@ -772,6 +773,36 @@ evaluate the entire buffer."
                       (select-window window)
                       (goto-char (point-max))))
                   nil t)))
+
+;;;; Compilation
+
+(defvar kixtart-complilation-error
+  (rx bol
+      "Script" (0+ ? ) ?: (0+ ? ) (group (1+ not-newline))
+      "\n"
+      "Line" (0+ ? ) ?: (0+ ? ) (group (char (?1 . ?9)) (0+ digit))
+      eol)
+  "The regexp pattern to match a KiXtart script error.")
+
+(defvar kixtart-complilation-error-tokenized
+  (rx bol
+      "Script" (0+ ? ) ?: (0+ ? ) (group (+? not-newline))
+      ?. (or ?K ?k) (or ?X ?x)
+      "\n"
+      "Line" (0+ ? ) ?: (0+ ? ) (group (char (?1 . ?9)) (0+ digit))
+      eol)
+  "The regexp pattern to match a tokenized KiXtart script error.")
+
+;; Match the entire filename and use it directly.
+(add-to-list 'compilation-error-regexp-alist-alist
+             (list 'kixtart kixtart-complilation-error 1 2))
+(add-to-list 'compilation-error-regexp-alist 'kixtart)
+;; Match a .KX filename with the file extension removed and try to guess what
+;; the original source file extension was.
+(add-to-list 'compilation-error-regexp-alist-alist
+             (list 'kixtart-tokenized kixtart-complilation-error-tokenized
+                   '(1 "%s.kix" "%s.KIX" "%s.Kix") 2))
+(add-to-list 'compilation-error-regexp-alist 'kixtart-tokenized)
 
 ;;;; Block closing
 
