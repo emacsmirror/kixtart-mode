@@ -1518,6 +1518,43 @@ which will be expanded to the template."
     (define-key map (kbd "C-c C-u") #'kixtart-up-script-block)
     map))
 
+;;;; Menu
+
+(easy-menu-define kixtart-mode-menu kixtart-mode-map
+  "Menu for KiXtart Mode."
+  `("KiXtart"
+    ["Start of function" beginning-of-defun
+     :help "Go to the start of the function around point"]
+    ["End of function" end-of-defun
+     :help "Go to the end of the function around point"]
+    ["Mark function" mark-defun
+     :help "Mark the function definition around point"]
+    "---"
+    ["Close command block" kixtart-close-command-block
+     :help "Close the command block open around point"]
+    ["Jump to place" imenu
+     :help "Jump to a place of significance in the buffer"]
+    ["Jump to block opening" kixtart-up-script-block
+     :help "Jump to the opening of the current script block"]
+    "---"
+    ,(cons
+      "Templates"
+      (cl-loop for (tempo-tag . tempo-function) in kixtart-tempo-tags
+               collect (vector
+                        (concat "Insert " tempo-tag)
+                        tempo-function
+                        ':help
+                        (format "Insert the template for Tempo tag \"%s\""
+                                tempo-tag))))
+    "---"
+    ["Eval buffer" kixtart-eval-buffer
+     :help "Evaluate the buffer contents using the KiXtart interpreter"]
+    ["Eval region" kixtart-eval-region
+     :active (use-region-p)
+     :help "Evaluate the current region using the KiXtart interpreter"]
+    ["Eval string" kixtart-eval
+     :help "Evaluate a string using the KiXtart interpreter"]))
+
 ;;;; Syntax table
 
 (defconst kixtart-mode-syntax-table
