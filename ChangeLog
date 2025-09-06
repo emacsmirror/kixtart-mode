@@ -24,6 +24,10 @@ When testing for an active region in `kixtart-eval-region' and
 
 Added menu for `menu-bar-mode'.
 
+The command `kixtart-close-command-block' now signals a user error
+when there is no open command block at point instead of displaying a
+message.
+
 * Version 1.4.2 (2025-03-10)
 
 Added the customization variable `kixtart-doc-separator', which

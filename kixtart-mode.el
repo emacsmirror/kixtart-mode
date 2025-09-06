@@ -848,7 +848,7 @@ evaluate the entire buffer."
                  (mapcar func close-list))
                 (_ close-list))))
       (unless kixtart--close-command-strings
-        (message "No open command block to close.")))
+        (user-error "No open command block to close")))
     (when-let* ((close-command (car kixtart--close-command-strings)))
       (insert close-command))
     (unless (eq tick (buffer-chars-modified-tick))
