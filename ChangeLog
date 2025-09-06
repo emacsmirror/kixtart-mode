@@ -28,6 +28,10 @@ The command `kixtart-close-command-block' now signals a user error
 when there is no open command block at point instead of displaying a
 message.
 
+Input strings entered interactively for `kixtart-eval' are now stored
+in the new variable `kixtart-eval-history' instead of the default
+minibuffer history.
+
 * Version 1.4.2 (2025-03-10)
 
 Added the customization variable `kixtart-doc-separator', which

@@ -726,9 +726,13 @@ interpreter process is started."
   ;; Move `window-point' forwards when inserting at its position.
   (setq-local window-point-insertion-type t))
 
+(defvar kixtart-eval-history nil
+  "History of minibuffer input for `kixtart-eval'.")
+
 (defun kixtart-eval (string)
   "Evaluate STRING using the KiXtart interpreter."
-  (interactive "sKiXtart: ")
+  (interactive
+   (list (read-from-minibuffer "KiXtart: " nil nil nil 'kixtart-eval-history)))
   (let ((script-file (make-temp-file "kixtart-mode" nil ".kix"
                                      (concat kixtart-eval-header string)))
         (buffer (or (get-buffer kixtart-eval-buffer-name)
