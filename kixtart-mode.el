@@ -757,7 +757,7 @@ interpreter process is started."
 (defun kixtart-eval-region ()
   "Evaluate the active region using the KiXtart interpreter."
   (interactive)
-  (cond ((region-active-p)
+  (cond ((use-region-p)
          (kixtart-eval
           (buffer-substring-no-properties (region-beginning) (region-end)))
          (message "Evaluated the region in the %s buffer" (buffer-name)))
@@ -770,7 +770,7 @@ interpreter process is started."
 When a region is active, evaluation that region, otherwise
 evaluate the entire buffer."
   (interactive)
-  (if (region-active-p)
+  (if (use-region-p)
       (kixtart-eval-region)
     (kixtart-eval-buffer)))
 

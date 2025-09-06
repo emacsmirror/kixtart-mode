@@ -18,6 +18,10 @@ attempt to find a corresponding untokenized source file.
 
 Added the commands `kixtart-eval-buffer' and `kixtart-eval-region'.
 
+When testing for an active region in `kixtart-eval-region' and
+`kixtart-eval-region-or-buffer', call `use-region-p' in place of
+`region-active-p' to honor the value of `use-empty-active-region'.
+
 * Version 1.4.2 (2025-03-10)
 
 Added the customization variable `kixtart-doc-separator', which
