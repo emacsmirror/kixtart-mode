@@ -16,6 +16,8 @@ relevant line number in the source file.  Where the script's file
 extension indicates that the script was tokenized the jump will
 attempt to find a corresponding untokenized source file.
 
+Added the commands `kixtart-eval-buffer' and `kixtart-eval-region'.
+
 * Version 1.4.2 (2025-03-10)
 
 Added the customization variable `kixtart-doc-separator', which

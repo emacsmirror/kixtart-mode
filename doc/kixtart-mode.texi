@@ -923,9 +923,17 @@ for visiting or updating a @dfn{TAGS} file.
 @kindex C-c C-e
 KiXtart Mode includes limited support for code evaluation.  If a
 KiXtart interpreter is available it can be used to evaluate code in
-the current buffer by calling the function
-@code{kixtart-eval-region-or-buffer}, which is bound to @kbd{C-c C-e}
-by default.
+the current buffer using the commands @code{kixtart-eval-buffer},
+@code{kixtart-eval-region}, and @code{kixtart-eval-region-or-buffer},
+the latter of which is bound to @kbd{C-c C-e} by default.
+
+@defun kixtart-eval-buffer
+Evaluate the buffer contents as a KiXtart script.
+@end defun
+
+@defun kixtart-eval-region
+Evaluate the text in the active region as a KiXtart script.
+@end defun
 
 @defun kixtart-eval-region-or-buffer
 Evaluate the text in the active region as a KiXtart script.  If there

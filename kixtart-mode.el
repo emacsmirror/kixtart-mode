@@ -727,7 +727,7 @@ interpreter process is started."
   (setq-local window-point-insertion-type t))
 
 (defun kixtart-eval (string)
-  "Evaluate STRING in the KiXtart interpreter."
+  "Evaluate STRING using the KiXtart interpreter."
   (interactive "sKiXtart: ")
   (let ((script-file (make-temp-file "kixtart-mode" nil ".kix"
                                      (concat kixtart-eval-header string)))
@@ -748,22 +748,31 @@ interpreter process is started."
                                ,script-file)
                     :sentinel #'ignore)))))
 
+(defun kixtart-eval-buffer ()
+  "Evaluate the buffer using the KiXtart interpreter."
+  (interactive)
+  (kixtart-eval (buffer-substring-no-properties (point-min) (point-max)))
+  (message "Evaluated the %s buffer" (buffer-name)))
+
+(defun kixtart-eval-region ()
+  "Evaluate the active region using the KiXtart interpreter."
+  (interactive)
+  (cond ((region-active-p)
+         (kixtart-eval
+          (buffer-substring-no-properties (region-beginning) (region-end)))
+         (message "Evaluated the region in the %s buffer" (buffer-name)))
+        (t
+         (user-error "No active region"))))
+
 (defun kixtart-eval-region-or-buffer ()
-  "Evaluate a portion of the buffer in the KiXtart interpreter.
+  "Evaluate a portion of the buffer using the KiXtart interpreter.
 
 When a region is active, evaluation that region, otherwise
 evaluate the entire buffer."
   (interactive)
-  (let (beg end region-message)
-    (if (region-active-p)
-        (setq beg (region-beginning)
-              end (region-end)
-              region-message "region in the ")
-      (setq beg (point-min)
-            end (point-max)
-            region-message ""))
-    (kixtart-eval (buffer-substring-no-properties beg end))
-    (message "Evaluated the %s%s buffer" region-message (buffer-name))))
+  (if (region-active-p)
+      (kixtart-eval-region)
+    (kixtart-eval-buffer)))
 
 (defun kixtart-scroll-buffer-windows ()
   "Scroll all windows which are displaying the current buffer."
