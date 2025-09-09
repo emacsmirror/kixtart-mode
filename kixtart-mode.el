@@ -1073,14 +1073,12 @@ CONSTRUCTOR as keyword argument `:symbols'.  All other elements
 in SPECS are passed as additional arguments to CONSTRUCTOR."
   (declare (indent 1))
   `(progn
-     ,@(mapcar (pcase-lambda (`(,symbols . ,rest))
-                 (pcase-exhaustive symbols
-                   ((pred listp))
-                   ((pred symbolp)
-                    (setq symbols (list symbols))))
-                 `(push (funcall #',constructor :symbols ',symbols ,@rest)
-                        kixtart-doc-list))
-               specs)))
+     ,@(mapcar
+        (pcase-lambda (`(,symbols . ,rest))
+          `(push
+            (funcall #',constructor :symbols ',(ensure-list symbols) ,@rest)
+            kixtart-doc-list))
+        specs)))
 
 (defvar kixtart-doc-list nil
   "The list of documentation structures available to search.")
