@@ -32,6 +32,12 @@ Input strings entered interactively for `kixtart-eval' are now stored
 in the new variable `kixtart-eval-history' instead of the default
 minibuffer history.
 
+Docstrings added using `kixtart-doc-register' will no longer be
+duplicated if the documentation structure is already present in the
+documentation list.  This avoids duplicate entries being displayed if
+a configuration gets reapplied when the corresponding feature is
+reloaded.
+
 * Version 1.4.2 (2025-03-10)
 
 Added the customization variable `kixtart-doc-separator', which

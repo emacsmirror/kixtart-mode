@@ -1075,9 +1075,10 @@ in SPECS are passed as additional arguments to CONSTRUCTOR."
   `(progn
      ,@(mapcar
         (pcase-lambda (`(,symbols . ,rest))
-          `(push
+          `(cl-pushnew
             (funcall #',constructor :symbols ',(ensure-list symbols) ,@rest)
-            kixtart-doc-list))
+            kixtart-doc-list
+            :test 'equal))
         specs)))
 
 (defvar kixtart-doc-list nil
