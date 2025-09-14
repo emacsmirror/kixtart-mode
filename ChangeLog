@@ -38,6 +38,9 @@ documentation list.  This avoids duplicate entries being displayed if
 a configuration gets reapplied when the corresponding feature is
 reloaded.
 
+Added support for Hideshow to allow KiXtart script-blocks to be hidden
+and shown.
+
 * Version 1.4.2 (2025-03-10)
 
 Added the customization variable `kixtart-doc-separator', which

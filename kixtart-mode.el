@@ -1254,6 +1254,65 @@ updating the TAGS file."
                  (not kixtart-completion-case-fold))
                 :annotation-function kixtart-completion-annotation-function)))))
 
+;;;; Hideshow
+
+(defun kixtart--hs-forward-sexp (&optional arg)
+  "Move forwards across a balanced expression ARG times.
+
+Command defined blocks are considered to be balanced expressions.
+Using a negative argument to move backwards is not supported."
+  (if arg
+      (when (cl-minusp arg)
+        (error "Negative argument is not supported"))
+    (setq arg 1))
+  (while (cl-plusp arg)
+    (if (let ((case-fold-search t))
+          (forward-comment (point-max))
+          (looking-at (kixtart-rx script-block-open)))
+        (let ((case-fold-search t)
+              (parse-sexp-ignore-comments t)
+              (block-start (list (kixtart--match-string-as-token)))
+              close-pos)
+          (save-excursion
+            (while (not (or close-pos
+                            (progn
+                              ;; Check that there is something beyond the
+                              ;; current symbol.
+                              (forward-sexp 1)
+                              (forward-comment (point-max))
+                              (eobp))))
+              (forward-sexp 1)   ; Move forwards beyond the next symbol.
+              (forward-sexp -1)  ; Move backwards to the start of the symbol.
+              (cond ((looking-at (kixtart-rx script-block-close))
+                     (pcase (cons (car block-start)
+                                  (kixtart--match-string-as-token))
+                       ((or '(kixtart-do-t       . kixtart-until-t)
+                            '(kixtart-for-t      . kixtart-next-t)
+                            '(kixtart-function-t . kixtart-endfunction-t)
+                            `(,(or 'kixtart-if-t 'kixtart-else-t)
+                              . kixtart-endif-t)
+                            '(kixtart-select-t   . kixtart-endselect-t)
+                            `(kixtart-case-t
+                              . ,(or 'kixtart-case-t 'kixtart-endselect-t))
+                            '(kixtart-while-t    . kixtart-loop-t))
+                        (pop block-start)
+                        (unless block-start
+                          (forward-sexp)  ; Move to the end of the symbol.
+                          (setq close-pos (point))))))
+                    ((looking-at (kixtart-rx script-block-open))
+                     (push (kixtart--match-string-as-token) block-start)))))
+          (if close-pos
+              (goto-char close-pos)
+            (user-error "No next sexp")))
+      (forward-sexp 1))
+    (cl-decf arg)))
+
+(add-to-list 'hs-special-modes-alist
+             `(kixtart-mode ,(kixtart-rx (or ?\( ?\[ script-block-open))
+                            ,(kixtart-rx (or ?\) ?\] script-block-close))
+                            ,(rx (or ?\; "/*"))
+                            kixtart--hs-forward-sexp))
+
 ;;;; Imenu
 
 (defcustom kixtart-imenu-submenu-prefix "/"

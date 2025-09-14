@@ -56,6 +56,7 @@ Version @value{VERSION}.
 * Symbol completion::
 * Code evaluation::
 * Current function name::
+* Hideshow Mode support::
 * Outline Mode support::
 * Templates::
 * Closing open blocks::
@@ -1052,6 +1053,52 @@ value should either be the string to be used, or @code{nil}, which
 allows the default string provided by @code{which-function-mode} to be
 used.
 @end defopt
+
+
+@node Hideshow Mode support
+@chapter Hideshow Mode support
+@cindex Hideshow Mode
+@cindex hideshow
+
+Hideshow Minor Mode allows blocks of code to be selectively displayed
+by using commands and key-bindings made available by the command
+@code{hs-minor-mode}.
+
+KiXtart Mode defines Hideshow blocks to match KiXtart script-blocks,
+meaning that the portion of the buffer which can be hidden and shown
+is delineated by parentheses, square brackets, and associated pairs of
+KiXtart commands such as @code{IF} and @code{ENDIF}.
+
+For commands such as @code{IF} and @code{SELECT} which open new
+script-blocks, the corresponding Hideshow block will end at the
+command which fully terminates the script-block.
+
+@example kixtart
+SELECT     ; Hideshow block open
+CASE $x = 1
+    "One"
+CASE $x = 2
+    "Two"
+CASE 1
+    "Default"
+ENDSELECT  ; Hideshow block close
+@end example
+
+For commands such as @code{ELSE} and @code{CASE} which effectively
+close and re-open an existing script-block, the corresponding Hideshow
+block will end at the next command which closes the current
+script-block.
+
+@example kixtart
+SELECT
+CASE $x = 1
+    "One"
+CASE $x = 2  ; Hideshow block open
+    "Two"
+CASE 1       ; Hideshow block close
+    "Default"
+ENDSELECT
+@end example
 
 
 @node Outline Mode support

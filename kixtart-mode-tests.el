@@ -660,6 +660,230 @@ EndFunction"
     ;; (should (looking-at-p "^Function Function1$"))
     ))
 
+;;;; Hideshow forward-sexp
+
+(ert-deftest kixtart-hs-forward-sexp-do ()
+  "Move across a do block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; Do loop.
+Do
+    $var1 = 1
+    $var2 = 2
+Until $maybe"
+    (goto-char (point-min))
+    (forward-line)
+    (should (looking-at-p "^Do"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^Until"))))
+
+(ert-deftest kixtart-hs-forward-sexp-for ()
+  "Move across a for block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; For loop.
+For $i = 0 to 10
+    $var1 = $i
+    $var2 = $i
+Next"
+    (goto-char (point-min))
+    (forward-line)
+    (should (looking-at-p "^For"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^Next"))))
+
+(ert-deftest kixtart-hs-forward-sexp-foreach ()
+  "Move across a foreach block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; For Each loop.
+For Each $value in $array
+    $var1 = $value
+    $var2 = $value
+Next"
+    (goto-char (point-min))
+    (forward-line)
+    (should (looking-at-p "^For"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^Next"))))
+
+(ert-deftest kixtart-hs-forward-sexp-function ()
+  "Move across a function block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; Function definition.
+Function MyFunction($x, $y)
+    $var1 = $x
+    $var2 = $y
+EndFunction"
+    (goto-char (point-min))
+    (forward-line)
+    (should (looking-at-p "^Function"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^EndFunction"))))
+
+(ert-deftest kixtart-hs-forward-sexp-if ()
+  "Move across an if block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; If statement.
+If $maybe
+    $var1 = 1
+    $var2 = 2
+EndIf"
+    (goto-char (point-min))
+    (forward-line)
+    (should (looking-at-p "^If"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^EndIf"))))
+
+(ert-deftest kixtart-hs-forward-sexp-ifelse ()
+  "Move across an ifelse block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; If Else statement.
+If $maybe
+    $var1 = 1
+    $var2 = 2
+Else
+    $var3 = 3
+    $var4 = 4
+EndIf"
+    (goto-char (point-min))
+    (forward-line)
+    (should (looking-at-p "^If"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^EndIf"))))
+
+(ert-deftest kixtart-hs-forward-sexp-else ()
+  "Move across an else block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; If Else statement.
+If $maybe
+    $var1 = 1
+    $var2 = 2
+Else
+    $var3 = 3
+    $var4 = 4
+EndIf"
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (looking-at-p "^Else"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^EndIf"))))
+
+(ert-deftest kixtart-hs-forward-sexp-select ()
+  "Move across a select block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; Select statement.
+Select
+;; Case statements.
+Case $maybe
+    $var1 = 1
+    $var2 = 2
+Case $sometimes
+    $var3 = 3
+    $var4 = 4
+EndSelect"
+    (goto-char (point-min))
+    (forward-line)
+    (should (looking-at-p "^Select"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^EndSelect"))))
+
+(ert-deftest kixtart-hs-forward-sexp-case-case ()
+  "Move across a case block which ends at a case block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; Select statement.
+Select
+;; Case statements.
+Case $maybe
+    $var1 = 1
+    $var2 = 2
+Case $sometimes
+    $var3 = 3
+    $var4 = 4
+EndSelect"
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (looking-at-p "^Case"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^Case \\$sometimes"))))
+
+(ert-deftest kixtart-hs-forward-sexp-case-endselect ()
+  "Move across a case block which ends at endselect."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; Select statement.
+Select
+;; Case statements.
+Case $maybe
+    $var1 = 1
+    $var2 = 2
+Case $sometimes
+    $var3 = 3
+    $var4 = 4
+EndSelect"
+    (goto-char (point-min))
+    (forward-line 6)
+    (should (looking-at-p "^Case"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^EndSelect"))))
+
+(ert-deftest kixtart-hs-forward-sexp-while ()
+  "Move across a while block."
+  (kixtart-mode-tests--with-temp-buffer
+      ";; While loop.
+While $maybe
+    $var1 = 1
+    $var2 = 2
+Loop"
+    (goto-char (point-min))
+    (forward-line)
+    (should (looking-at-p "^While"))
+    (kixtart--hs-forward-sexp)
+    (forward-sexp -1)
+    (should (looking-at-p "^Loop"))))
+
+(ert-deftest kixtart-hs-forward-sexp-brackets ()
+  "Move across square brackets."
+  (kixtart-mode-tests--with-temp-buffer
+      "a[b]c"
+    (goto-char (1+ (point-min)))
+    (should (eq ?\[ (char-after)))
+    (kixtart--hs-forward-sexp)
+    (should (looking-at-p "c$"))))
+
+(ert-deftest kixtart-hs-forward-sexp-parens ()
+  "Move across parens."
+  (kixtart-mode-tests--with-temp-buffer
+      "a(b)c"
+    (goto-char (1+ (point-min)))
+    (should (eq ?\( (char-after)))
+    (kixtart--hs-forward-sexp)
+    (should (looking-at-p "c$"))))
+
+(ert-deftest kixtart-hs-forward-sexp-mixed ()
+  "Move across command and non-command blocks."
+  (kixtart-mode-tests--with-temp-buffer
+      "aaa
+
+Do
+    $var1 = 1
+    $var2 = 2
+Until $maybe
+
+bbb
+ccc ddd
+eee"
+    (goto-char (point-min))
+    (kixtart--hs-forward-sexp 6)
+    (forward-sexp -1)
+    (should (looking-at-p "ddd"))))
+
 ;;;; Closing open command blocks
 
 (ert-deftest kixtart-close-block-case ()
