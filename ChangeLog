@@ -1,4 +1,4 @@
-* Version 1.4.3 (????-??-??)
+* Version 1.4.3 (2025-10-11)
 
 Edited the docstring data for SETOPTION to indicate that the second
 argument is optional.  Omitting the second argument returns the
