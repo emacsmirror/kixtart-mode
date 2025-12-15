@@ -653,12 +653,13 @@ new indentation column."
 
 (defcustom kixtart-align-rules-list
   `((kixtart-assignment
-     (regexp   . ,(kixtart-rx (seq variable
-                                   (group (0+ whitespace))
-                                   "="
-                                   (group (0+ whitespace)))))
-     (group    . (1 2))
-     (tab-stop . nil)))
+     (regexp     . ,(kixtart-rx (seq variable
+                                     (group (0+ whitespace))
+                                     "="
+                                     (group (0+ whitespace)))))
+     (group     . (1 2))
+     (case-fold . t)
+     (tab-stop  . nil)))
   "Specifies the list of available alignment rules.
 
 See the variable `align-rules-list' for details on the list
