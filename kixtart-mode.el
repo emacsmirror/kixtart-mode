@@ -1602,9 +1602,8 @@ which will be expanded to the template."
                collect (vector
                         (concat "Insert " tempo-tag)
                         tempo-function
-                        ':help
-                        (format "Insert the template for Tempo tag \"%s\""
-                                tempo-tag))))
+                        :help (format "Insert the template for Tempo tag \"%s\""
+                                      tempo-tag))))
     "---"
     ["Eval buffer" kixtart-eval-buffer
      :help "Evaluate the buffer contents using the KiXtart interpreter"]
