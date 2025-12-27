@@ -1436,8 +1436,8 @@ be used as part of abbrev expansion."
 
 The template is only returned if the data lookup for NAME does
 not return the empty string."
-  (unless (string= "" (tempo-lookup-named name))
-    (cons 'l template)))
+  (and (not (string= "" (tempo-lookup-named name)))
+       (cons 'l template)))
 
 (defvar kixtart-tempo-tags nil
   "Tempo tags for KiXtart Mode.")
