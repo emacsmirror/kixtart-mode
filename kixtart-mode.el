@@ -1435,12 +1435,9 @@ be used as part of abbrev expansion."
   "Optionally insert prompt data for NAME using TEMPLATE.
 
 The template is only returned if the data lookup for NAME does
-not return the empty string.  TEMPLATE will have its `p' symbols
-removed when template insertion is interactive."
+not return the empty string."
   (unless (string= "" (tempo-lookup-named name))
-    (cons 'l (if tempo-interactive
-                 (remove 'p template)
-               template))))
+    (cons 'l template)))
 
 (defvar kixtart-tempo-tags nil
   "Tempo tags for KiXtart Mode.")
@@ -1505,7 +1502,7 @@ which will be expanded to the template."
     "function"
     "Insert a KiXtart Function definition."
   ("Function " (p "name: " name) (p "arguments: " args 'noinsert)
-   (kixtart--tempo-insert-lookup 'args '("(" (s args) p ")" )) > n
+   (kixtart--tempo-insert-lookup 'args '("(" (s args) ")" )) > n
    > r> n o
    "EndFunction" > (kixtart--tempo-newline-eob)))
 
@@ -1524,7 +1521,7 @@ which will be expanded to the template."
    " = "
    (p "start-expression: " start) " To " (p "end-expression: " end)
    (p "step-size: " step 'noinsert)
-   (kixtart--tempo-insert-lookup 'step '(" Step " (s step) p)) > n
+   (kixtart--tempo-insert-lookup 'step '(" Step " (s step))) > n
    > r> n o
    "Next" > (kixtart--tempo-newline-eob)))
 
