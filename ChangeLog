@@ -2,6 +2,18 @@
 
 Fixed align rules not working when `case-fold-search' is set to nil.
 
+To allow their values to be more easily set as file and directory
+local variables, the following customization variables now have their
+`safe-local-variable' property configured:
+
+  `kixtart-block-motion-push-mark'
+  `kixtart-completion-case-fold'
+  `kixtart-doc-separator'
+  `kixtart-eldoc-echo-truncate'
+  `kixtart-imenu-submenu-prefix'
+  `kixtart-indent-offset'
+  `kixtart-which-function-default-name'
+
 * Version 1.4.3 (2025-10-11)
 
 Edited the docstring data for SETOPTION to indicate that the second

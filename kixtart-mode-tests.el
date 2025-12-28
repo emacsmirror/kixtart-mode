@@ -77,7 +77,8 @@ BUFFER-CONTENTS is equal to ALIST."
   `(kixtart-mode-tests--with-temp-buffer
        ,buffer-contents
      (should (equal ,@alist
-                    (let (imenu-use-markers kixtart-imenu-submenu-prefix)
+                    (let ((kixtart-imenu-submenu-prefix "")
+                          imenu-use-markers)
                       (kixtart--create-imenu-index))))))
 
 ;;;; Indentation for individual command blocks

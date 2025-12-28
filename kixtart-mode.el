@@ -495,7 +495,8 @@ declares variables."
 A non-nil value indicates that block motion commands are
 permitted to push the previous location to the `mark-ring' when
 the value of point changes."
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 (defun kixtart-beginning-of-defun (&optional arg)
   "Move backwards to the beginning of a function definition.
@@ -567,7 +568,8 @@ of point is modified."
 
 Lines determined to be within script-blocks are indented by this
 number of columns per script-block level."
-  :type 'integer)
+  :type 'integer
+  :safe #'integerp)
 
 (defun kixtart--new-indent ()
   "Return the calculated indentation level for the current line."
@@ -911,7 +913,8 @@ function name when point is outside of a function.  When the
 value is set to nil, the name used when point is outside of a
 function will only be determined by `which-function-mode'."
   :type '(choice (string :tag "Default function name")
-                 (const :tag "Let `which-function-mode' decide" nil)))
+                 (const :tag "Let `which-function-mode' decide" nil))
+  :safe (lambda (x) (or (null x) (stringp x))))
 
 (defun kixtart-which-function ()
   "Return the function name which surrounds point.
@@ -941,7 +944,8 @@ structures compatible with the generic method
 
 Where a documentation search returns multiple matches, the
 results will be displayed using this string as the separator."
-  :type 'string)
+  :type 'string
+  :safe #'stringp)
 
 (defcustom kixtart-eldoc-echo-truncate t
   "Specifies how `eldoc-mode' will use the echo area.
@@ -954,7 +958,8 @@ Note that ElDoc version 1.14.0 or newer is required for this
 option to work correctly."
   :type '(choice (const :tag "Never" nil)
                  (natnum :tag "After number of characters")
-                 (const :tag "At end of paragraph" t)))
+                 (const :tag "At end of paragraph" t))
+  :safe (lambda (x) (or (booleanp x) (natnump x))))
 
 (cl-defstruct (kixtart-doc-symbol
                (:constructor nil)
@@ -1186,7 +1191,8 @@ documentation structures."
 
 (defcustom kixtart-completion-case-fold nil
   "Specifies that KiXtart completion should be case-insensitive."
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom kixtart-completion-list-hook
   (list #'kixtart-completion-upcase-macros
@@ -1318,7 +1324,8 @@ Using a negative argument to move backwards is not supported."
 
 (defcustom kixtart-imenu-submenu-prefix "/"
   "Specifies the string prefix used for Imenu submenu names."
-  :type 'string)
+  :type 'string
+  :safe #'stringp)
 
 (defun kixtart--convert-imenu-item-to-markers (item)
   "Modify ITEM to use markers instead of buffer positions."
