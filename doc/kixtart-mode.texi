@@ -317,7 +317,7 @@ adjusted; the following example allows the alignment preceding the
 (setf (alist-get 'tab-stop
                  (alist-get 'kixtart-assignment
                             kixtart-align-rules-list))
-      '(t nil))
+      t)
 @end example
 
 @quotation Note
