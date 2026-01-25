@@ -30,7 +30,7 @@ named "kixtart-mode".
 Alternatively, the development repository can be cloned to a location
 which is present in the Emacs 'load-path' and made available to use.
 
-To clone the repository to a local subdirectory:
+To clone the repository to a local sub-directory:
 
      git clone https://git.sr.ht/~mew/kixtart-mode
 
@@ -50,7 +50,7 @@ Example configuration
 =====================
 
 Assuming that the KiXtart Mode package has been installed by a package
-manager and will be autoloaded, the following example demonstrates how
+manager and will be auto-loaded, the following example demonstrates how
 to configure some basic settings, and enable some optional features:
 
      (with-eval-after-load 'kixtart-mode

@@ -1,6 +1,7 @@
 Assuming that the KiXtart Mode package has been installed by a package
-manager and will be autoloaded, the following example demonstrates how
-to configure some basic settings, and enable some optional features:
+manager and will be auto-loaded, the following example demonstrates
+how to configure some basic settings, and enable some optional
+features:
 
 @example lisp
 (with-eval-after-load 'kixtart-mode

@@ -10,7 +10,7 @@ Alternatively, the development repository can be cloned to a location
 which is present in the Emacs @code{load-path} and made available to
 use.
 
-To clone the repository to a local subdirectory:
+To clone the repository to a local sub-directory:
 
 @example sh
 git clone https://git.sr.ht/~mew/kixtart-mode
