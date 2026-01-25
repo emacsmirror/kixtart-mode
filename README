@@ -10,8 +10,8 @@ script files.  The following features are implemented:
    * Code evaluation (requires KiXtart interpreter).
    * Current function name for which-function-mode and add-log
      functions.
-   * Hideshow Mode support.
-   * Outline Mode support.
+   * Hideshow support.
+   * Outline support.
    * Predefined Tempo templates with optional abbrev expansion.
 
 See the manual for full details.

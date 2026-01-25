@@ -19,9 +19,9 @@ Code evaluation (requires KiXtart interpreter).
 @item
 Current function name for which-function-mode and add-log functions.
 @item
-Hideshow Mode support.
+Hideshow support.
 @item
-Outline Mode support.
+Outline support.
 @item
 Predefined Tempo templates with optional abbrev expansion.
 @end itemize

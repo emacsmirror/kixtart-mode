@@ -56,8 +56,8 @@ Version @value{VERSION}.
 * Symbol completion::
 * Code evaluation::
 * Current function name::
-* Hideshow Mode support::
-* Outline Mode support::
+* Hideshow support::
+* Outline support::
 * Templates::
 * Closing open blocks::
 
@@ -367,7 +367,7 @@ into comments and is enabled in the current buffer.
 @cindex function @subentry selection
 @cindex motion
 @cindex navigation
-@cindex navigation @subentry function @seealso{Outline Mode support}
+@cindex navigation @subentry function @seealso{Outline support}
 @cindex selection
 
 KiXtart Mode permits navigation around and selection of function
@@ -428,7 +428,7 @@ permitted to push the previous location to the mark-ring when the
 value of point changes.
 @end defopt
 
-See also: @ref{Imenu support} and @ref{Outline Mode support}.
+See also: @ref{Imenu support} and @ref{Outline support}.
 
 
 @node Imenu support
@@ -1055,12 +1055,12 @@ used.
 @end defopt
 
 
-@node Hideshow Mode support
-@chapter Hideshow Mode support
-@cindex Hideshow Mode
-@cindex hideshow
+@node Hideshow support
+@chapter Hideshow support
+@cindex Hideshow
+@cindex code-folding
 
-Hideshow Minor Mode allows blocks of code to be selectively displayed
+Hideshow minor mode allows blocks of code to be selectively displayed
 by using commands and key-bindings made available by the command
 @code{hs-minor-mode}.
 
@@ -1101,9 +1101,9 @@ ENDSELECT
 @end example
 
 
-@node Outline Mode support
-@chapter Outline Mode support
-@cindex Outline Mode
+@node Outline support
+@chapter Outline support
+@cindex Outline
 @cindex outline
 
 Outline Mode is major mode intended to edit outline-format documents
@@ -1111,9 +1111,9 @@ with selective display.  The same functionality is also available
 through alternate key-bindings using the minor mode version, enabled
 by invoking @code{outline-minor-mode}.
 
-KiXtart Mode defines Outline Mode settings by borrowing some
-conventions for headings and their associated depth from the built-in
-Lisp mode.  Two types of headings are defined:
+KiXtart Mode defines Outline settings by borrowing some conventions
+for headings and their associated depth from the built-in Lisp mode.
+Two types of headings are defined:
 
 @itemize @bullet
 @item
@@ -1126,8 +1126,8 @@ of a line, followed by at least one white-space character.
 
 The @emph{depth} of comment-based headings is determined by
 subtracting two from the number of @samp{;} characters which were
-used.  For example, the following comments define Outline Mode
-headings for the first three levels:
+used.  For example, the following comments define Outline headings for
+the first three levels:
 
 @example kixtart
 ;;; Level 1 heading
