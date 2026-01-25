@@ -14,6 +14,8 @@ local variables, the following customization variables now have their
   `kixtart-indent-offset'
   `kixtart-which-function-default-name'
 
+Customization groups are now auto-loaded.
+
 * Version 1.4.3 (2025-10-11)
 
 Edited the docstring data for SETOPTION to indicate that the second

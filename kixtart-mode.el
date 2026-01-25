@@ -44,6 +44,7 @@
 
 ;;;; Faces
 
+;;;###autoload
 (defgroup kixtart-faces nil
   "Faces used by KiXtart Mode."
   :group 'kixtart
@@ -107,6 +108,7 @@
 
 ;;;; Customization
 
+;;;###autoload
 (defgroup kixtart nil
   "Major mode for editing KiXtart scripts."
   :tag "KiXtart"
