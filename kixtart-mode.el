@@ -302,12 +302,16 @@ Highlights all internal KiXtart commands, functions, and macros.")
       ;; Anchored match for function name.
       (,(kixtart-rx function-name)
        (unless (kixtart--in-comment-or-string-p)
-         (forward-comment (point-max))
-         (if (looking-at (kixtart-rx function-name))
-             (match-end 0)
-           ;; Skip highlighting anything else on this line by leaving point at
-           ;; the end of the line.
-           (end-of-line)))
+         (let ((start-pos (- (point) 8)))
+           (forward-comment (point-max))
+           (cond ((looking-at (kixtart-rx function-name))
+                  (put-text-property
+                   start-pos (match-end 0) 'font-lock-multiline t)
+                  (match-end 0))
+                 (t
+                  ;; Skip highlighting anything else on this line by leaving
+                  ;; point at the end of the line.
+                  (end-of-line)))))
        nil
        (0 kixtart-function-name-face))))
    kixtart-font-lock-keywords-2)
