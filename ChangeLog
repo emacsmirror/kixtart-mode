@@ -16,6 +16,10 @@ local variables, the following customization variables now have their
 
 Customization groups are now auto-loaded.
 
+Face symbols are now used directly and variables used to define
+font-lock specifications have been removed.  This aligns with changes
+in Emacs to make font-lock face variables obsolete.
+
 * Version 1.4.3 (2025-10-11)
 
 Edited the docstring data for SETOPTION to indicate that the second

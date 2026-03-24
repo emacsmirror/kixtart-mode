@@ -53,58 +53,34 @@
 (defface kixtart-command-face
   '((default :inherit font-lock-keyword-face))
   "Face to highlight a KiXtart command.")
-(defvar kixtart-command-face
-  'kixtart-command-face
-  "Face specification to highlight a KiXtart command.")
 
 (defface kixtart-function-face
   '((default :inherit font-lock-builtin-face))
   "Face to highlight a KiXtart function name.")
-(defvar kixtart-function-face
-  'kixtart-function-face
-  "Face specification to highlight a KiXtart function name.")
 
 (defface kixtart-function-name-face
   '((default :inherit font-lock-function-name-face))
   "Face to highlight a KiXtart function definition.")
-(defvar kixtart-function-name-face
-  'kixtart-function-name-face
-  "Face specification to highlight a KiXtart function definition.")
 
 (defface kixtart-label-face
   '((default :inherit font-lock-constant-face))
   "Face to highlight a KiXtart label name.")
-(defvar kixtart-label-face
-  'kixtart-label-face
-  "Face specification to highlight a KiXtart label name.")
 
 (defface kixtart-macro-face
   '((default :inherit font-lock-preprocessor-face))
   "Face to highlight a KiXtart macro.")
-(defvar kixtart-macro-face
-  'kixtart-macro-face
-  "Face specification to highlight a KiXtart macro.")
 
 (defface kixtart-property-face
   '((default :inherit font-lock-type-face))
   "Face to highlight a KiXtart property name.")
-(defvar kixtart-property-face
-  'kixtart-property-face
-  "Face specification to highlight a KiXtart property name.")
 
 (defface kixtart-variable-face
   '((default :inherit font-lock-variable-name-face))
   "Face to highlight a KiXtart variable.")
-(defvar kixtart-variable-face
-  'kixtart-variable-face
-  "Face specification to highlight a KiXtart variable.")
 
 (defface kixtart-warning-face
   '((default :inherit font-lock-warning-face))
   "Face to highlight a KiXtart syntax warning.")
-(defvar kixtart-warning-face
-  'kixtart-warning-face
-  "Face specification to highlight a KiXtart syntax warning.")
 
 ;;;; Customization
 
@@ -274,31 +250,31 @@ function."
   `((,(rx symbol-start
           (or "call" "endfunction" "function" "include")
           symbol-end)
-     . kixtart-command-face))
+     . 'kixtart-command-face))
   "Font lock keywords for level 1 highlighting in KiXtart mode.
 
 Highlights the KiXtart commands used for function declarations
 and for calling or including other scripts.")
 
 (defconst kixtart-font-lock-keywords-2
-  `((,(kixtart-rx command)      . kixtart-command-face)
-    (,(kixtart-rx function)     . kixtart-function-face)
+  `((,(kixtart-rx command)      . 'kixtart-command-face)
+    (,(kixtart-rx function)     . 'kixtart-function-face)
     (,(kixtart-rx (group macro) (group (0+ user-chars)))
      ;; The real parser seems to silently discard the trailing part of a macro
      ;; name if the leading part matches an actual macro name.
-     (1 kixtart-macro-face) (2 kixtart-warning-face))
+     (1 'kixtart-macro-face) (2 'kixtart-warning-face))
     ;; Unknown macros will always evaluate to 0.
-    (,(kixtart-rx macro-format) . kixtart-warning-face))
+    (,(kixtart-rx macro-format) . 'kixtart-warning-face))
   "Font lock keywords for level 2 highlighting in KiXtart mode.
 
 Highlights all internal KiXtart commands, functions, and macros.")
 
 (defconst kixtart-font-lock-keywords-3
   (append
-   `((,(kixtart-rx dot-property) . kixtart-property-face)
-     (,(kixtart-rx label)        . kixtart-label-face)
-     (,(kixtart-rx variable)     . kixtart-variable-face)
-     (,(kixtart-rx command-function) (0 kixtart-command-face)
+   `((,(kixtart-rx dot-property) . 'kixtart-property-face)
+     (,(kixtart-rx label)        . 'kixtart-label-face)
+     (,(kixtart-rx variable)     . 'kixtart-variable-face)
+     (,(kixtart-rx command-function) (0 'kixtart-command-face)
       ;; Anchored match for function name.
       (,(kixtart-rx function-name)
        (unless (kixtart--in-comment-or-string-p)
@@ -313,7 +289,7 @@ Highlights all internal KiXtart commands, functions, and macros.")
                   ;; point at the end of the line.
                   (end-of-line)))))
        nil
-       (0 kixtart-function-name-face))))
+       (0 'kixtart-function-name-face))))
    kixtart-font-lock-keywords-2)
   "Font lock keywords for level 3 highlighting in KiXtart mode.
 
