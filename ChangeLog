@@ -1,4 +1,4 @@
-* Version 1.4.4 (????-??-??)
+* Version 1.4.4 (2026-08-23)
 
 Fixed align rules not working when `case-fold-search' is set to nil.
 
